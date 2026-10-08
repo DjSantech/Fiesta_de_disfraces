@@ -87,7 +87,7 @@ function UserForm({ user, isSelf, onClose, onSaved }) {
           onChange={(e) => set('password', e.target.value)}
           error={errors.password}
           hint="Mínimo 8 caracteres. Compártela por privado."
-          trailing={<button type="button" className="h-9 rounded-lg px-2 text-xs font-semibold text-blood-light hover:bg-white/5" onClick={() => set('password', randomPassword())}>Generar</button>}
+          trailing={<button type="button" className="h-9 rounded-lg px-2 text-xs font-semibold text-pumpkin-light hover:bg-white/5" onClick={() => set('password', randomPassword())}>Generar</button>}
         />
         {!isSelf && (
           <div className="flex flex-col gap-1.5">

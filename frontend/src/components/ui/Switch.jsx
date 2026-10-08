@@ -22,7 +22,7 @@ export default function Switch({ checked, onChange, label, description, disabled
         onClick={() => onChange?.(!checked)}
         className={clsx(
           'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition',
-          checked ? 'border-blood bg-blood' : 'border-white/15 bg-tomb',
+          checked ? 'border-pumpkin bg-pumpkin' : 'border-white/15 bg-tomb',
           'disabled:cursor-not-allowed disabled:opacity-50',
         )}
       >

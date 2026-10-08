@@ -26,7 +26,7 @@ function ProductTile({ product, inCart, onAdd }) {
           <span
             className={clsx(
               'rounded-full px-2 text-xs font-bold leading-5',
-              remaining <= 0 ? 'bg-blood/20 text-blood-light' : remaining <= LOW_STOCK ? 'bg-gold/15 text-gold' : 'bg-white/[0.06] text-fog',
+              remaining <= 0 ? 'bg-danger/20 text-danger-light' : remaining <= LOW_STOCK ? 'bg-gold/15 text-gold' : 'bg-white/[0.06] text-fog',
             )}
           >
             {remaining <= 0 ? 'Agotado' : remaining <= LOW_STOCK ? `Quedan ${remaining}` : `Stock ${remaining}`}
@@ -34,7 +34,7 @@ function ProductTile({ product, inCart, onAdd }) {
         )}
       </span>
       {inCart > 0 && (
-        <span className="absolute right-2 top-2 min-w-8 rounded-full bg-blood px-2 text-center text-sm font-extrabold leading-7 text-white">×{inCart}</span>
+        <span className="absolute right-2 top-2 min-w-8 rounded-full bg-pumpkin px-2 text-center text-sm font-extrabold leading-7 text-white">×{inCart}</span>
       )}
     </button>
   );
@@ -54,7 +54,7 @@ function CartPanel({ lines, total, setQty, clear, method, setMethod, note, setNo
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-fog">{count} productos</p>
-        <button type="button" onClick={clear} className="flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-blood-light hover:bg-blood/10">
+        <button type="button" onClick={clear} className="flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-danger-light hover:bg-danger/10">
           <Trash2 className="h-4 w-4" /> Vaciar
         </button>
       </div>
@@ -68,7 +68,7 @@ function CartPanel({ lines, total, setQty, clear, method, setMethod, note, setNo
               </p>
             </div>
             <button type="button" aria-label="Quitar uno" onClick={() => setQty(l.productId, l.qty - 1)} className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-tomb text-bone">
-              {l.qty === 1 ? <Trash2 className="h-5 w-5 text-blood-light" /> : <Minus className="h-5 w-5" />}
+              {l.qty === 1 ? <Trash2 className="h-5 w-5 text-danger-light" /> : <Minus className="h-5 w-5" />}
             </button>
             <span className="w-8 text-center text-lg font-extrabold tabular-nums">{l.qty}</span>
             <button type="button" aria-label="Agregar uno" onClick={() => setQty(l.productId, l.qty + 1)} className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-tomb text-bone">
@@ -83,14 +83,14 @@ function CartPanel({ lines, total, setQty, clear, method, setMethod, note, setNo
           <p className="text-sm font-medium text-bone/90">Calcular cambio (opcional)</p>
           <div className="flex flex-wrap gap-2">
             {bills.map((b) => (
-              <button key={b} type="button" onClick={() => setReceived(String(b))} className={clsx('h-11 rounded-xl border px-3 text-sm font-bold', rec === b ? 'border-blood bg-blood/15 text-bone' : 'border-white/10 text-fog')}>
+              <button key={b} type="button" onClick={() => setReceived(String(b))} className={clsx('h-11 rounded-xl border px-3 text-sm font-bold', rec === b ? 'border-pumpkin bg-pumpkin/15 text-bone' : 'border-white/10 text-fog')}>
                 {formatCOP(b)}
               </button>
             ))}
           </div>
           <MoneyInput aria-label="Recibido" placeholder="Recibido" value={received} onChange={setReceived} inputClassName="h-12 text-lg" />
           {rec > 0 && (
-            <p className={clsx('text-xl font-extrabold tabular-nums', rec >= due ? 'text-toxic' : 'text-blood-light')}>
+            <p className={clsx('text-xl font-extrabold tabular-nums', rec >= due ? 'text-toxic' : 'text-danger-light')}>
               {rec >= due ? `Cambio ${formatCOP(rec - due)}` : `Faltan ${formatCOP(due - rec)}`}
             </p>
           )}
@@ -224,7 +224,7 @@ export default function PosTab({ products, cart, setCart, onSold }) {
 
       {count > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-night/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur md:hidden">
-          <button type="button" onClick={() => setSheet(true)} className="flex h-16 w-full items-center gap-3 rounded-2xl bg-blood px-4 text-white shadow-[0_0_28px_-8px_rgb(225_29_46/0.85)]">
+          <button type="button" onClick={() => setSheet(true)} className="flex h-16 w-full items-center gap-3 rounded-2xl bg-pumpkin px-4 text-white shadow-[0_0_28px_-8px_rgb(255_106_0/0.85)]">
             <span className="flex h-9 min-w-9 items-center justify-center rounded-full bg-white/20 px-2 text-base font-extrabold">{count}</span>
             <span className="text-2xl font-extrabold tabular-nums">{formatCOP(total)}</span>
             <span className="ml-auto text-lg font-extrabold">Cobrar →</span>

@@ -10,10 +10,13 @@
   --color-bone: #f2ede4;
   --color-fog: #a3a0ad;
   --color-smoke: #6e6b78;
-  --color-blood: #e11d2e;
-  --color-blood-dark: #9f1020;
-  --color-blood-light: #ff4d5e;
-  --color-ember: #ff7a1a;
+  --color-pumpkin: #ff6a00;
+  --color-pumpkin-dark: #c24a00;
+  --color-pumpkin-light: #ff8a3d;
+  --color-ember: #ffb340;
+  --color-danger: #e5484d;
+  --color-danger-light: #ff6b70;
+  --color-danger-dark: #a82a2f;
   --color-ultra: #8b5cf6;
   --color-toxic: #22e584;
   --color-gold: #f5c04a;
@@ -29,7 +32,7 @@
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 
   @keyframes flicker {
-    0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; text-shadow: 0 0 18px rgb(225 29 46 / 0.55), 0 0 42px rgb(225 29 46 / 0.25); }
+    0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; text-shadow: 0 0 18px rgb(255 106 0 / 0.55), 0 0 42px rgb(255 106 0 / 0.25); }
     20%, 24%, 55% { opacity: 0.55; text-shadow: none; }
   }
   @keyframes fog-drift {
@@ -41,8 +44,8 @@
     50% { transform: translateY(-10px); }
   }
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgb(225 29 46 / 0.55), 0 0 28px -6px rgb(225 29 46 / 0.7); }
-    50% { box-shadow: 0 0 0 10px rgb(225 29 46 / 0), 0 0 44px -4px rgb(225 29 46 / 0.9); }
+    0%, 100% { box-shadow: 0 0 0 0 rgb(255 106 0 / 0.55), 0 0 28px -6px rgb(255 106 0 / 0.7); }
+    50% { box-shadow: 0 0 0 10px rgb(255 106 0 / 0), 0 0 44px -4px rgb(255 106 0 / 0.9); }
   }
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(18px); }
@@ -68,11 +71,11 @@
     text-rendering: optimizeLegibility;
   }
   ::selection {
-    background: rgb(225 29 46 / 0.6);
+    background: rgb(255 106 0 / 0.6);
     color: #fff;
   }
   :focus-visible {
-    outline: 2px solid var(--color-blood-light);
+    outline: 2px solid var(--color-pumpkin-light);
     outline-offset: 2px;
   }
   input, select, textarea, button {
@@ -119,16 +122,16 @@
     background:
       radial-gradient(40% 30% at 20% 70%, rgb(242 237 228 / 0.07), transparent 70%),
       radial-gradient(35% 25% at 75% 60%, rgb(139 92 246 / 0.08), transparent 70%),
-      radial-gradient(45% 35% at 50% 90%, rgb(225 29 46 / 0.09), transparent 70%);
+      radial-gradient(45% 35% at 50% 90%, rgb(255 106 0 / 0.09), transparent 70%);
     filter: blur(24px);
     animation: var(--animate-fog);
   }
 
   .text-glow {
-    text-shadow: 0 0 18px rgb(225 29 46 / 0.55), 0 0 42px rgb(225 29 46 / 0.25);
+    text-shadow: 0 0 18px rgb(255 106 0 / 0.55), 0 0 42px rgb(255 106 0 / 0.25);
   }
   .text-glow-ember {
-    text-shadow: 0 0 18px rgb(255 122 26 / 0.5), 0 0 40px rgb(255 122 26 / 0.22);
+    text-shadow: 0 0 18px rgb(255 179 64 / 0.5), 0 0 40px rgb(255 179 64 / 0.22);
   }
 
   /* Panel tipo vidrio ahumado */
@@ -150,7 +153,7 @@
     inset: 0;
     padding: 1px;
     border-radius: inherit;
-    background: linear-gradient(135deg, rgb(225 29 46 / 0.9), rgb(139 92 246 / 0.6) 50%, rgb(255 122 26 / 0.8));
+    background: linear-gradient(135deg, rgb(255 106 0 / 0.9), rgb(139 92 246 / 0.6) 50%, rgb(255 179 64 / 0.8));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;

@@ -12,8 +12,8 @@ export function DoorStatsBar({ stats, config }) {
   const inside = stats?.inside ?? 0;
   const capacity = stats?.capacity ?? config?.capacity ?? 100;
   const pct = capacity ? (inside / capacity) * 100 : 0;
-  const tone = pct >= 100 ? 'bg-blood' : pct >= 90 ? 'bg-gold' : 'bg-toxic';
-  const text = pct >= 100 ? 'text-blood-light' : pct >= 90 ? 'text-gold' : 'text-bone';
+  const tone = pct >= 100 ? 'bg-danger' : pct >= 90 ? 'bg-gold' : 'bg-toxic';
+  const text = pct >= 100 ? 'text-danger-light' : pct >= 90 ? 'text-gold' : 'text-bone';
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-crypt px-4 py-2.5" aria-live="polite">
       <div className="flex items-center justify-between gap-3">
@@ -22,7 +22,7 @@ export function DoorStatsBar({ stats, config }) {
           <span className="text-xs font-semibold uppercase tracking-wider text-smoke">Adentro</span>
           <span className={clsx('text-2xl font-extrabold tabular-nums leading-none', text)}>{stats ? inside : '—'}</span>
           <span className="text-sm font-semibold text-fog">/{capacity}</span>
-          {pct >= 100 && <span className="text-xs font-bold uppercase text-blood-light">Lleno</span>}
+          {pct >= 100 && <span className="text-xs font-bold uppercase text-danger-light">Lleno</span>}
         </p>
         <p className="flex items-baseline gap-1.5">
           <BedDouble className="h-4 w-4 self-center text-fog" aria-hidden="true" />
@@ -47,7 +47,7 @@ function Row({ label, value, strong, share }) {
       </div>
       {share !== undefined && (
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-          <div className="h-full rounded-full bg-blood/80" style={{ width: `${Math.round(share * 100)}%` }} />
+          <div className="h-full rounded-full bg-danger/80" style={{ width: `${Math.round(share * 100)}%` }} />
         </div>
       )}
     </div>

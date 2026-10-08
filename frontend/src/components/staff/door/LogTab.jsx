@@ -53,7 +53,7 @@ export function EntryCard({ entry, onEdit, onVoid, onReturnHelmet, returning }) 
           )}
         </div>
       )}
-      {e.voided && e.voidReason && <p className="mt-2 text-sm text-blood-light">Motivo: {e.voidReason}</p>}
+      {e.voided && e.voidReason && <p className="mt-2 text-sm text-danger-light">Motivo: {e.voidReason}</p>}
       {!e.voided && (onEdit || onVoid || onReturnHelmet) && (
         <div className="mt-3 grid grid-cols-2 gap-2">
           {helmetPending && onReturnHelmet && (

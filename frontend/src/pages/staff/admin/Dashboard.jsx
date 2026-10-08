@@ -152,7 +152,7 @@ function CapacityCard({ t }) {
           <p className="mb-2 text-xs font-medium text-fog">Mujeres vs. hombres</p>
           <StackedBar
             segments={[
-              { key: 'mujer', label: 'Mujeres', value: t.byGender?.mujer || 0, color: 'bg-blood-light' },
+              { key: 'mujer', label: 'Mujeres', value: t.byGender?.mujer || 0, color: 'bg-pumpkin-light' },
               { key: 'hombre', label: 'Hombres', value: t.byGender?.hombre || 0, color: 'bg-ultra' },
             ]}
           />
@@ -268,7 +268,7 @@ function DoorCard({ door, income }) {
 function IncomeCard({ income }) {
   const door = income.door || {};
   const sources = [
-    { key: 'tickets', label: 'Entradas (web y manuales)', value: income.tickets, color: 'bg-blood' },
+    { key: 'tickets', label: 'Entradas (web y manuales)', value: income.tickets, color: 'bg-pumpkin' },
     { key: 'rooms', label: 'Habitaciones', value: income.rooms, color: 'bg-ultra' },
     {
       key: 'door',

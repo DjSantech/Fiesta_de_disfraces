@@ -53,7 +53,7 @@ export function ConnectionBanner({ error, onRetry, className }) {
       role="alert"
       className={clsx(
         'flex items-center gap-3 rounded-2xl border px-4 py-2',
-        offline ? 'border-gold/50 bg-gold/15 text-gold' : 'border-blood/40 bg-blood/15 text-blood-light',
+        offline ? 'border-gold/50 bg-gold/15 text-gold' : 'border-danger/40 bg-danger/15 text-danger-light',
         className,
       )}
     >
@@ -209,7 +209,7 @@ export function ReasonModal({ open, onClose, title, description, confirmLabel = 
                 onClick={() => setReason(r)}
                 className={clsx(
                   'min-h-11 rounded-xl border px-3 text-sm font-medium transition',
-                  reason === r ? 'border-blood bg-blood/15 text-bone' : 'border-white/10 bg-tomb/60 text-fog hover:text-bone',
+                  reason === r ? 'border-pumpkin bg-pumpkin/15 text-bone' : 'border-white/10 bg-tomb/60 text-fog hover:text-bone',
                 )}
               >
                 {r}

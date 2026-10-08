@@ -24,7 +24,7 @@ import { errorMessage, isConnectionError } from './shared/errors';
 
 const TONES = {
   green: 'bg-toxic text-ink',
-  red: 'bg-blood text-white',
+  red: 'bg-danger text-white',
   amber: 'bg-gold text-ink',
 };
 
@@ -321,7 +321,7 @@ export default function ResultScreen({ result, config, initialExtras, initialMet
       )}
 
       <div className="mt-auto pt-8">
-        <Button size="xl" block onClick={() => close()} className="h-[4.5rem] bg-white text-xl font-extrabold text-blood-dark hover:bg-white/90">
+        <Button size="xl" block onClick={() => close()} className="h-[4.5rem] bg-white text-xl font-extrabold text-danger-dark hover:bg-white/90">
           VOLVER A ESCANEAR
         </Button>
       </div>

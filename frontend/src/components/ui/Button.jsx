@@ -4,10 +4,10 @@ import Spinner from './Spinner';
 
 const VARIANTS = {
   primary:
-    'bg-blood text-white hover:bg-blood-light active:bg-blood-dark shadow-[0_0_28px_-8px_rgb(225_29_46/0.85)] disabled:shadow-none',
+    'bg-pumpkin text-white hover:bg-pumpkin-light active:bg-pumpkin-dark shadow-[0_0_28px_-8px_rgb(255_106_0/0.85)] disabled:shadow-none',
   secondary: 'border border-ash bg-white/[0.03] text-bone hover:border-bone/40 hover:bg-white/[0.07]',
   ghost: 'text-fog hover:bg-white/[0.06] hover:text-bone',
-  danger: 'border border-blood/40 bg-blood/10 text-blood-light hover:bg-blood/20',
+  danger: 'border border-danger/40 bg-danger/10 text-danger-light hover:bg-danger/20',
   success: 'bg-toxic text-ink hover:brightness-110',
   ember: 'bg-ember text-ink hover:brightness-110',
 };

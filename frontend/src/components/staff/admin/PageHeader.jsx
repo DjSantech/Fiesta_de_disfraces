@@ -5,7 +5,7 @@ export default function PageHeader({ title, description, actions, overline = 'Pa
   return (
     <header className={clsx('mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between', className)}>
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blood-light/80">{overline}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-pumpkin-light/80">{overline}</p>
         <h1 className="mt-1.5 font-display text-[2rem] uppercase leading-none tracking-wide text-bone sm:text-4xl">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fog">{description}</p>}
       </div>

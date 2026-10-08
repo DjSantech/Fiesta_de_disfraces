@@ -195,8 +195,8 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
             </div>
           )}
           {!match.valid && match.used && (
-            <div className="rounded-2xl border-2 border-blood bg-blood/10 p-4 text-bone">
-              <p className="flex items-center gap-2 font-display text-2xl uppercase text-blood-light">
+            <div className="rounded-2xl border-2 border-danger bg-danger/10 p-4 text-bone">
+              <p className="flex items-center gap-2 font-display text-2xl uppercase text-danger-light">
                 <ShieldX className="h-6 w-6" /> Ya ingresó con QR
               </p>
               <p>
@@ -229,7 +229,7 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
                 { value: 'invitado', label: 'Invitado', hint: `−${pct}%` },
               ]}
             />
-            {errors.category && <p className="text-xs font-medium text-blood-light">{errors.category}</p>}
+            {errors.category && <p className="text-xs font-medium text-danger-light">{errors.category}</p>}
             {form.category === 'invitado' && (
               <>
                 <p className="text-sm font-medium text-bone/90">Género del invitado</p>
@@ -244,7 +244,7 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
                     { value: 'hombre', label: 'Hombre', hint: priceHint('invitado', 'hombre') },
                   ]}
                 />
-                {errors.gender && <p className="text-xs font-medium text-blood-light">{errors.gender}</p>}
+                {errors.gender && <p className="text-xs font-medium text-danger-light">{errors.gender}</p>}
                 <p className="text-xs text-fog">
                   Descuento {pct}% {match.guest ? `(lista: ${match.guest.name})` : '(descuento general de invitado)'}
                 </p>

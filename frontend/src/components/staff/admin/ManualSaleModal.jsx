@@ -65,7 +65,7 @@ function RoomChoice({ rooms, value, onChange, error }) {
               className={clsx(
                 'flex min-h-14 items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition sm:flex-col sm:items-start sm:justify-center sm:gap-1',
                 active
-                  ? 'border-blood bg-blood/15 shadow-[inset_0_0_0_1px_rgb(225_29_46/0.6)]'
+                  ? 'border-pumpkin bg-pumpkin/15 shadow-[inset_0_0_0_1px_rgb(255_106_0/0.6)]'
                   : 'border-white/10 bg-tomb/60 hover:border-white/25',
                 'disabled:cursor-not-allowed disabled:opacity-45',
               )}
@@ -82,7 +82,7 @@ function RoomChoice({ rooms, value, onChange, error }) {
         })}
       </div>
       {error && (
-        <p className="text-xs font-medium text-blood-light" role="alert">
+        <p className="text-xs font-medium text-danger-light" role="alert">
           {error}
         </p>
       )}
@@ -333,7 +333,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
             <button
               type="button"
               onClick={() => set({ amountEdited: false })}
-              className="-mt-3 self-start text-xs font-medium text-blood-light underline-offset-2 hover:underline"
+              className="-mt-3 self-start text-xs font-medium text-pumpkin-light underline-offset-2 hover:underline"
             >
               Usar el precio sugerido ({formatCOP(suggestion.amount)})
             </button>

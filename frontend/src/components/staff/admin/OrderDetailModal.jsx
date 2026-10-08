@@ -59,7 +59,7 @@ const BANNER_TONE = {
   violet: 'border-ultra/30 bg-ultra/10 [&_svg]:text-violet-300',
   amber: 'border-gold/25 bg-gold/[0.07] [&_svg]:text-gold',
   green: 'border-toxic/25 bg-toxic/[0.07] [&_svg]:text-toxic',
-  red: 'border-blood/30 bg-blood/10 [&_svg]:text-blood-light',
+  red: 'border-danger/30 bg-danger/10 [&_svg]:text-danger-light',
   orange: 'border-ember/30 bg-ember/10 [&_svg]:text-ember',
   neutral: 'border-white/10 bg-white/[0.04] [&_svg]:text-fog',
 };

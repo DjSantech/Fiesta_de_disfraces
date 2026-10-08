@@ -19,7 +19,7 @@ export default function Card({ as: Comp = 'div', padding = 'md', className, chil
 }
 
 const ACCENTS = {
-  red: 'text-blood-light',
+  red: 'text-danger-light',
   green: 'text-toxic',
   amber: 'text-gold',
   violet: 'text-violet-300',

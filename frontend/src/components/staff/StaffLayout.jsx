@@ -54,7 +54,7 @@ export default function StaffLayout() {
       <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-ink/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4">
           <Link to="/staff" className="flex items-center gap-2">
-            <span className="font-display text-xl tracking-wide text-blood">FD</span>
+            <span className="font-display text-xl tracking-wide text-pumpkin">FD</span>
             <span className="text-sm font-semibold text-bone">Staff</span>
           </Link>
           <div className="flex min-w-0 items-center gap-3">
@@ -83,7 +83,7 @@ export default function StaffLayout() {
                     className={({ isActive }) =>
                       clsx(
                         'flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition',
-                        isActive ? 'bg-blood/15 text-bone ring-1 ring-blood/50' : 'text-fog hover:bg-white/5 hover:text-bone',
+                        isActive ? 'bg-pumpkin/15 text-bone ring-1 ring-pumpkin/50' : 'text-fog hover:bg-white/5 hover:text-bone',
                       )
                     }
                   >

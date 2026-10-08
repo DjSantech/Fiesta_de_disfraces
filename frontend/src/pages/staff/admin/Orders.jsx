@@ -316,7 +316,7 @@ export default function Orders() {
                   setSearch('');
                   updateParams({ q: '', tipo: '', metodo: '' });
                 }}
-                className="h-9 rounded-lg px-2 text-sm font-medium text-blood-light hover:bg-white/5"
+                className="h-9 rounded-lg px-2 text-sm font-medium text-pumpkin-light hover:bg-white/5"
               >
                 Limpiar filtros
               </button>

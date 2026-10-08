@@ -7,7 +7,7 @@ import { formatNumber } from '../../../lib/format';
 /** Acento de color por categoría de producto. */
 export const CATEGORY_COLOR = {
   cocteles: '#8b5cf6',
-  licores: '#ff7a1a',
+  licores: '#ffb340',
   cervezas: '#f5c04a',
   gatorade: '#22e584',
   electrolit: '#2dd4bf',

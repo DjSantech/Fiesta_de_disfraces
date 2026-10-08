@@ -209,7 +209,7 @@ export default function Expenses() {
                           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-fog">
                             <Badge>{EXPENSE_CATEGORY_LABEL[x.category] || x.category}</Badge>
                             {x.responsible && <span>{x.responsible}</span>}
-                            {due && <span className={overdue ? 'font-semibold text-blood-light' : ''}>{overdue ? 'Venció' : 'Vence'} {formatDate(x.dueDate)}</span>}
+                            {due && <span className={overdue ? 'font-semibold text-danger-light' : ''}>{overdue ? 'Venció' : 'Vence'} {formatDate(x.dueDate)}</span>}
                           </div>
                           {x.notes && <p className="mt-1.5 line-clamp-2 text-xs text-smoke">{x.notes}</p>}
                         </button>

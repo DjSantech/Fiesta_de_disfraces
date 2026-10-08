@@ -13,7 +13,7 @@ export default function Spinner({ className, label = 'Cargando' }) {
 export function PageSpinner({ label = 'Cargando…', className }) {
   return (
     <div className={clsx('flex min-h-[40vh] flex-col items-center justify-center gap-3 text-fog', className)}>
-      <Spinner className="h-7 w-7 text-blood" />
+      <Spinner className="h-7 w-7 text-pumpkin" />
       <p className="text-sm">{label}</p>
     </div>
   );

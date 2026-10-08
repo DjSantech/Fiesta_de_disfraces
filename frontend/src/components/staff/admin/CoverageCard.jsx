@@ -17,7 +17,7 @@ export default function CoverageCard({ income = 0, expenses = 0, coveredPercent,
     <section
       className={clsx(
         'relative overflow-hidden rounded-2xl border p-5 sm:p-6',
-        covered ? 'border-toxic/30 bg-crypt/90' : 'border-blood/25 bg-crypt/90',
+        covered ? 'border-toxic/30 bg-crypt/90' : 'border-danger/25 bg-crypt/90',
         className,
       )}
       aria-label="Gastos librados"
@@ -27,7 +27,7 @@ export default function CoverageCard({ income = 0, expenses = 0, coveredPercent,
         style={{
           background: covered
             ? 'radial-gradient(70% 90% at 100% 0%, rgb(34 229 132 / 0.10), transparent 65%)'
-            : 'radial-gradient(70% 90% at 100% 0%, rgb(225 29 46 / 0.12), transparent 65%)',
+            : 'radial-gradient(70% 90% at 100% 0%, rgb(229 72 77 / 0.12), transparent 65%)',
         }}
         aria-hidden="true"
       />
@@ -41,7 +41,7 @@ export default function CoverageCard({ income = 0, expenses = 0, coveredPercent,
           <p
             className={clsx(
               'font-display text-6xl leading-none tabular-nums tracking-wide sm:text-7xl',
-              covered ? 'text-toxic' : 'text-blood-light',
+              covered ? 'text-toxic' : 'text-danger-light',
             )}
           >
             {formatPercent(percent)}
@@ -63,9 +63,9 @@ export default function CoverageCard({ income = 0, expenses = 0, coveredPercent,
             </>
           ) : (
             <>
-              <TrendingDown className="mt-0.5 h-5 w-5 shrink-0 text-blood-light" strokeWidth={1.75} />
+              <TrendingDown className="mt-0.5 h-5 w-5 shrink-0 text-danger-light" strokeWidth={1.75} />
               <span>
-                Faltan <span className="tabular-nums text-blood-light">{formatCOP(missing)}</span> para librar los gastos
+                Faltan <span className="tabular-nums text-danger-light">{formatCOP(missing)}</span> para librar los gastos
               </span>
             </>
           )}
@@ -86,7 +86,7 @@ export default function CoverageCard({ income = 0, expenses = 0, coveredPercent,
             <dd
               className={clsx(
                 'mt-0.5 truncate text-sm font-semibold tabular-nums sm:text-base',
-                balance >= 0 ? 'text-toxic' : 'text-blood-light',
+                balance >= 0 ? 'text-toxic' : 'text-danger-light',
               )}
             >
               {balance > 0 ? '+' : ''}

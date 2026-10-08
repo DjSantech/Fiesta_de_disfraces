@@ -42,14 +42,14 @@ export default function Login() {
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-ink px-4 py-10">
       <div
         className="pointer-events-none absolute inset-0 opacity-60"
-        style={{ background: 'radial-gradient(60% 45% at 50% 0%, rgb(225 29 46 / 0.18), transparent 70%)' }}
+        style={{ background: 'radial-gradient(60% 45% at 50% 0%, rgb(255 106 0 / 0.18), transparent 70%)' }}
         aria-hidden="true"
       />
       <div className="relative w-full max-w-sm">
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-smoke">Acceso staff</p>
           <h1 className="mt-2 font-display text-4xl uppercase tracking-wide text-bone">
-            Fiesta de <span className="text-blood">Disfraces</span>
+            Fiesta de <span className="text-pumpkin">Disfraces</span>
           </h1>
         </div>
         <Card padding="lg" className="bg-crypt/90">
@@ -85,7 +85,7 @@ export default function Login() {
               }
             />
             {error && (
-              <p className="rounded-xl border border-blood/30 bg-blood/10 px-3 py-2 text-sm text-blood-light" role="alert">
+              <p className="rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger-light" role="alert">
                 {error}
               </p>
             )}

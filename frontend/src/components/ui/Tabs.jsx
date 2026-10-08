@@ -26,7 +26,7 @@ export default function Tabs({ tabs, value, onChange, className, ariaLabel }) {
             onClick={() => onChange?.(t.value)}
             className={clsx(
               'flex h-11 min-w-fit flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3 text-sm font-semibold transition',
-              active ? 'bg-blood text-white shadow-[0_0_20px_-8px_rgb(225_29_46/0.9)]' : 'text-fog hover:bg-white/5 hover:text-bone',
+              active ? 'bg-pumpkin text-white shadow-[0_0_20px_-8px_rgb(255_106_0/0.9)]' : 'text-fog hover:bg-white/5 hover:text-bone',
             )}
           >
             {Icon && <Icon className="h-4 w-4" strokeWidth={1.75} />}
@@ -35,7 +35,7 @@ export default function Tabs({ tabs, value, onChange, className, ariaLabel }) {
               <span
                 className={clsx(
                   'min-w-5 rounded-full px-1.5 text-xs leading-5',
-                  active ? 'bg-white/25 text-white' : 'bg-blood/20 text-blood-light',
+                  active ? 'bg-white/25 text-white' : 'bg-pumpkin/20 text-pumpkin-light',
                 )}
               >
                 {t.badge}

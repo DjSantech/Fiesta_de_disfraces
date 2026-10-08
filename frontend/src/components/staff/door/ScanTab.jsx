@@ -52,7 +52,7 @@ export function LookupSheet({ open, onClose, onCheckin, onSell }) {
           autoComplete="off"
           trailing={state.loading ? <Spinner /> : null}
         />
-        {state.error && <p className="text-sm text-blood-light">{errorMessage(state.error)}</p>}
+        {state.error && <p className="text-sm text-danger-light">{errorMessage(state.error)}</p>}
         {d?.tickets.map((t) => (
           <Card key={t.id} padding="sm" className="flex flex-col gap-2">
             <div className="flex items-start justify-between gap-3">

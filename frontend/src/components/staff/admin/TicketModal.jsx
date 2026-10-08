@@ -134,8 +134,8 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
               </div>
             )}
             {ticket.status === 'void' && (
-              <div className="flex items-start gap-3 rounded-2xl border border-blood/30 bg-blood/10 p-3.5">
-                <Ban className="mt-0.5 h-5 w-5 shrink-0 text-blood-light" strokeWidth={1.75} />
+              <div className="flex items-start gap-3 rounded-2xl border border-danger/30 bg-danger/10 p-3.5">
+                <Ban className="mt-0.5 h-5 w-5 shrink-0 text-danger-light" strokeWidth={1.75} />
                 <p className="text-sm text-fog">
                   <span className="font-semibold text-bone">Anulada</span>
                   {ticket.voidReason ? ` · ${ticket.voidReason}` : ''}. Su QR no funciona en la puerta.
@@ -224,7 +224,7 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
             <div
               className={clsx(
                 'flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between',
-                ticket.status === 'valid' ? 'border-blood/20 bg-blood/[0.04]' : 'border-white/[0.08] bg-white/[0.02]',
+                ticket.status === 'valid' ? 'border-pumpkin/20 bg-pumpkin/[0.04]' : 'border-white/[0.08] bg-white/[0.02]',
               )}
             >
               <p className="text-sm text-fog">

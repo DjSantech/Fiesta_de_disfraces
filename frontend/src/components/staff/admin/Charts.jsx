@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { formatCOP } from '../../../lib/format';
 
 const FILL = {
-  red: 'bg-linear-to-r from-blood-dark via-blood to-blood-light',
+  red: 'bg-linear-to-r from-danger-dark via-danger to-danger-light',
   green: 'bg-linear-to-r from-toxic/80 to-toxic',
   amber: 'bg-gold',
   violet: 'bg-ultra',
@@ -11,7 +11,7 @@ const FILL = {
 };
 
 const TRACK_GLOW = {
-  red: 'shadow-[0_0_26px_-8px_rgb(225_29_46/0.85)]',
+  red: 'shadow-[0_0_26px_-8px_rgb(229_72_77/0.85)]',
   green: 'shadow-[0_0_30px_-6px_rgb(34_229_132/0.75)]',
 };
 
@@ -68,7 +68,7 @@ export function BarList({ items, format = formatCOP, scale = 'max', className, e
             </div>
             <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/[0.06]">
               <div
-                className={clsx('h-full rounded-full transition-[width] duration-700', item.color || 'bg-blood')}
+                className={clsx('h-full rounded-full transition-[width] duration-700', item.color || 'bg-pumpkin')}
                 style={{ width: `${pct}%`, minWidth: value > 0 ? '0.375rem' : 0 }}
               />
             </div>

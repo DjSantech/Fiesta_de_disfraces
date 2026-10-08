@@ -142,12 +142,12 @@ function BulkModal({ onClose, onDone }) {
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="rounded-xl border border-toxic/25 bg-toxic/5 p-3"><p className="text-2xl font-bold text-toxic">{result.created}</p><p className="text-xs text-fog">creados</p></div>
             <div className="rounded-xl border border-white/10 bg-white/4 p-3"><p className="text-2xl font-bold text-bone">{result.skipped}</p><p className="text-xs text-fog">omitidos (ya estaban)</p></div>
-            <div className="rounded-xl border border-blood/25 bg-blood/5 p-3"><p className="text-2xl font-bold text-blood-light">{result.errors?.length || 0}</p><p className="text-xs text-fog">con error</p></div>
+            <div className="rounded-xl border border-danger/25 bg-danger/5 p-3"><p className="text-2xl font-bold text-danger-light">{result.errors?.length || 0}</p><p className="text-xs text-fog">con error</p></div>
           </div>
           {result.errors?.length > 0 && (
             <ul className="flex flex-col gap-1.5 text-sm">
               {result.errors.map((e) => (
-                <li key={e.line} className="text-fog"><span className="font-semibold text-blood-light">Línea {e.line}:</span> {e.message}</li>
+                <li key={e.line} className="text-fog"><span className="font-semibold text-danger-light">Línea {e.line}:</span> {e.message}</li>
               ))}
             </ul>
           )}

@@ -2,7 +2,7 @@ import clsx from 'clsx';
 
 const TONES = {
   neutral: 'border-white/10 bg-white/[0.06] text-fog',
-  red: 'border-blood/30 bg-blood/15 text-blood-light',
+  red: 'border-danger/30 bg-danger/15 text-danger-light',
   green: 'border-toxic/30 bg-toxic/10 text-toxic',
   amber: 'border-gold/30 bg-gold/10 text-gold',
   violet: 'border-ultra/35 bg-ultra/15 text-violet-300',

@@ -9,12 +9,12 @@ export function Field({ label, hint, error, htmlFor, required, className, childr
       {label && (
         <label htmlFor={htmlFor} className="text-sm font-medium text-bone/90">
           {label}
-          {required && <span className="text-blood-light"> *</span>}
+          {required && <span className="text-danger-light"> *</span>}
         </label>
       )}
       {children}
       {error ? (
-        <p className="text-xs font-medium text-blood-light" role="alert">
+        <p className="text-xs font-medium text-danger-light" role="alert">
           {error}
         </p>
       ) : hint ? (
@@ -28,8 +28,8 @@ const controlBase =
   'w-full rounded-xl border bg-tomb/70 text-bone placeholder:text-smoke transition focus:outline-none focus:ring-2 disabled:opacity-50';
 const controlState = (error) =>
   error
-    ? 'border-blood/70 focus:border-blood focus:ring-blood/30'
-    : 'border-white/10 hover:border-white/20 focus:border-blood-light/70 focus:ring-blood/25';
+    ? 'border-danger/70 focus:border-danger focus:ring-danger/30'
+    : 'border-white/10 hover:border-white/20 focus:border-pumpkin-light/70 focus:ring-pumpkin/25';
 
 /**
  * <Input label="Cédula" error={msg} hint="Sin puntos" leading="@" trailing={<Icon/>} {...inputProps} />
@@ -137,7 +137,7 @@ export const Checkbox = forwardRef(function Checkbox({ label, error, id, classNa
             type="checkbox"
             checked={checked}
             aria-invalid={error ? true : undefined}
-            className="peer absolute inset-0 h-5 w-5 cursor-pointer appearance-none rounded-md border border-white/25 bg-tomb transition checked:border-blood checked:bg-blood focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blood-light"
+            className="peer absolute inset-0 h-5 w-5 cursor-pointer appearance-none rounded-md border border-white/25 bg-tomb transition checked:border-pumpkin checked:bg-pumpkin focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pumpkin-light"
             {...props}
           />
           <Check className="pointer-events-none relative h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100" strokeWidth={3} />
@@ -145,7 +145,7 @@ export const Checkbox = forwardRef(function Checkbox({ label, error, id, classNa
         <span className="group-hover:text-bone/90">{label}</span>
       </label>
       {error && (
-        <p className="pl-8 text-xs font-medium text-blood-light" role="alert">
+        <p className="pl-8 text-xs font-medium text-danger-light" role="alert">
           {error}
         </p>
       )}

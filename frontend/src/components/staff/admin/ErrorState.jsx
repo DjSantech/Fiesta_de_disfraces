@@ -8,11 +8,11 @@ export default function ErrorState({ error, onRetry, title = 'No pudimos cargar 
     <div
       role="alert"
       className={clsx(
-        'flex flex-col items-center gap-3 rounded-2xl border border-blood/25 bg-blood/[0.06] px-6 py-10 text-center',
+        'flex flex-col items-center gap-3 rounded-2xl border border-danger/25 bg-danger/[0.06] px-6 py-10 text-center',
         className,
       )}
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blood/10 text-blood-light">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-danger/10 text-danger-light">
         <CircleAlert className="h-6 w-6" strokeWidth={1.75} />
       </span>
       <p className="font-semibold text-bone">{title}</p>

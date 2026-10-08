@@ -159,7 +159,7 @@ Login con usuario/contraseña → JWT (12 h) en `localStorage` (`fd_staff_token`
 - `font-serif` → **Cormorant Garamond** itálica: acentos emocionales ("la noche más *terrorífica* del año").
 - `font-sans` → **Inter**: texto y UI.
 
-**Colores** (tokens Tailwind v4 en `src/index.css`, usar como `bg-ink`, `text-bone`, `border-blood/40`, etc.):
+**Colores** (tokens Tailwind v4 en `src/index.css`, usar como `bg-ink`, `text-bone`, `border-pumpkin/40`, etc.):
 
 | Token | Hex | Uso |
 |---|---|---|
@@ -171,17 +171,19 @@ Login con usuario/contraseña → JWT (12 h) en `localStorage` (`fd_staff_token`
 | `bone` | #f2ede4 | texto principal |
 | `fog` | #a3a0ad | texto secundario |
 | `smoke` | #6e6b78 | texto terciario, placeholders |
-| `blood` | #e11d2e | acento principal, CTA |
-| `blood-dark` | #9f1020 | estados activos |
-| `blood-light` | #ff4d5e | hover, foco |
-| `ember` | #ff7a1a | acento cálido (Halloween), destacados |
+| `pumpkin` | #ff6a00 | acento principal de marca, CTA, glows (naranja calabaza) |
+| `pumpkin-dark` | #c24a00 | estados activos |
+| `pumpkin-light` | #ff8a3d | hover, foco |
+| `danger` | #e5484d | semántico: errores, anulado, inválido, "YA INGRESÓ", rechazos (rojo) |
+| `danger-light` / `danger-dark` | #ff6b70 / #a82a2f | texto y estados activos del rojo semántico |
+| `ember` | #ffb340 | ámbar/dorado cálido, destacados secundarios |
 | `ultra` | #8b5cf6 | luces de club, detalles |
 | `toxic` | #22e584 | éxito / QR válido |
 | `gold` | #f5c04a | advertencias, VIP |
 
-**Efectos disponibles** (clases en `index.css`): `grain-overlay` (grano de película fijo), `vignette`, `fog-layer`, `text-glow`, `text-glow-ember`, `animate-flicker`, `animate-fog`, `animate-float`, `glass`, `noise-border`. Respetar `prefers-reduced-motion` (ya hay regla global).
+**Efectos disponibles** (clases en `index.css`): `grain-overlay` (grano de película fijo), `vignette`, `fog-layer`, `text-glow`, `text-glow-ember`, `animate-flicker`, `fd-neon` (neón dañado, `<Neon>` en `components/public/decor.jsx`, que también exporta Cobweb/Skull/Pumpkin/Bat/Candelabra/SectionBreak), `animate-fog`, `animate-float`, `glass`, `noise-border`. Respetar `prefers-reduced-motion` (ya hay regla global).
 
-**Web pública:** mobile-first (390 px de referencia), CTA principal en `blood` con brillo, mucho aire, secciones con títulos enormes, efectos atmosféricos sutiles, rendimiento alto (sin imágenes pesadas: SVG/CSS).
+**Web pública:** mobile-first (390 px de referencia), CTA principal en `pumpkin` con brillo, mucho aire, secciones con títulos enormes, efectos atmosféricos sutiles, rendimiento alto (sin imágenes pesadas: SVG/CSS).
 
 **Paneles de staff:** mismos tokens pero pragmáticos: sin grano ni niebla, alto contraste, objetivos táctiles ≥ 48 px, legibles de noche y con una mano. Portería: resultados de escaneo a pantalla completa (verde = válido, rojo = usado/inválido), visibles a distancia.
 

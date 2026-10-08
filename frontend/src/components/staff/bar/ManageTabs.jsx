@@ -252,7 +252,7 @@ export function SalesTab({ active, onChanged }) {
                   <Button variant="danger" size="md" className="ml-auto h-12" onClick={() => setVoiding(s)}><Ban className="h-4 w-4" /> Anular</Button>
                 )}
               </div>
-              {s.voided && s.voidReason && <p className="text-sm text-blood-light">Motivo: {s.voidReason}</p>}
+              {s.voided && s.voidReason && <p className="text-sm text-danger-light">Motivo: {s.voidReason}</p>}
             </Card>
           ))}
         </div>
@@ -280,7 +280,7 @@ function Bar({ label, value, sub, share, color }) {
       </div>
       {sub && <p className="text-xs text-fog">{sub}</p>}
       <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-        <div className="h-full rounded-full" style={{ width: `${Math.round((share || 0) * 100)}%`, background: color || '#e11d2e' }} />
+        <div className="h-full rounded-full" style={{ width: `${Math.round((share || 0) * 100)}%`, background: color || '#ff6a00' }} />
       </div>
     </div>
   );

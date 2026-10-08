@@ -29,7 +29,7 @@ export default function Segmented({ options, value, onChange, size = 'md', colum
               size === 'md' && 'min-h-12 text-sm',
               size === 'sm' && 'min-h-9 text-xs',
               active
-                ? 'border-blood bg-blood/15 text-bone shadow-[inset_0_0_0_1px_rgb(225_29_46/0.6)]'
+                ? 'border-pumpkin bg-pumpkin/15 text-bone shadow-[inset_0_0_0_1px_rgb(255_106_0/0.6)]'
                 : 'border-white/10 bg-tomb/60 text-fog hover:border-white/25 hover:text-bone',
               'disabled:cursor-not-allowed disabled:opacity-40',
             )}

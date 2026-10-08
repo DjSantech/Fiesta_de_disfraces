@@ -214,7 +214,7 @@ export default function Tickets() {
           <div className="flex items-center gap-3">
             {list.loading && list.data && <Spinner className="h-4 w-4 text-fog" label="Actualizando" />}
             {hasFilters && (
-              <button type="button" onClick={clearFilters} className="h-9 rounded-lg px-2 text-sm font-medium text-blood-light hover:bg-white/5">
+              <button type="button" onClick={clearFilters} className="h-9 rounded-lg px-2 text-sm font-medium text-pumpkin-light hover:bg-white/5">
                 Limpiar filtros
               </button>
             )}

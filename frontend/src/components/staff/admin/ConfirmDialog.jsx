@@ -5,9 +5,9 @@ import { useEscapeCapture } from './hooks';
 
 const CONFIRM_VARIANT = { danger: 'primary', success: 'success', primary: 'primary', ember: 'ember' };
 const ICON_TONE = {
-  danger: 'bg-blood/12 text-blood-light ring-blood/30',
+  danger: 'bg-danger/12 text-danger-light ring-danger/30',
   success: 'bg-toxic/10 text-toxic ring-toxic/30',
-  primary: 'bg-blood/12 text-blood-light ring-blood/30',
+  primary: 'bg-pumpkin/12 text-pumpkin-light ring-pumpkin/30',
   ember: 'bg-ember/12 text-ember ring-ember/30',
 };
 
@@ -117,7 +117,7 @@ export default function ConfirmDialog({
                     className={clsx(
                       'min-h-10 rounded-full border px-3.5 text-xs font-medium transition',
                       text === s
-                        ? 'border-blood/60 bg-blood/15 text-bone'
+                        ? 'border-pumpkin/60 bg-pumpkin/15 text-bone'
                         : 'border-white/10 bg-white/[0.03] text-fog hover:border-white/25 hover:text-bone',
                     )}
                   >

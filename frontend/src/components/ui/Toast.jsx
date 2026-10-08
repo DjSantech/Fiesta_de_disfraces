@@ -6,7 +6,7 @@ const ToastContext = createContext(null);
 
 const STYLES = {
   success: { icon: CircleCheck, className: 'border-toxic/30 text-toxic' },
-  error: { icon: CircleAlert, className: 'border-blood/40 text-blood-light' },
+  error: { icon: CircleAlert, className: 'border-danger/40 text-danger-light' },
   info: { icon: Info, className: 'border-white/15 text-bone' },
 };
 
