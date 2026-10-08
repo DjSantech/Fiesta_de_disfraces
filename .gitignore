@@ -29,3 +29,6 @@ media/
 *.pem
 *.key
 *.crt
+
+# Notas privadas (usuarios/contraseñas)
+CREDENCIALES*.txt
