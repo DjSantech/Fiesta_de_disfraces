@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowRight, Menu, X } from 'lucide-react';
+import { ArrowRight, Menu, Ticket, X } from 'lucide-react';
 import { Wordmark } from './ui';
 import { roomsAvailable, salesState, usePublicConfig } from './usePublicConfig';
 
@@ -112,6 +112,14 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
 
           <div className="flex items-center gap-2">
             {right}
+            <Link
+              to="/recuperar"
+              aria-label="Ver mi entrada"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 text-sm font-semibold text-bone transition hover:border-pumpkin/60 hover:bg-white/[0.08] sm:px-4"
+            >
+              <Ticket className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
+              <span className="hidden sm:inline">Ver mi entrada</span>
+            </Link>
             {!hideCta && cta && (
               <Link
                 to={cta.to}
@@ -177,7 +185,7 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
               onClick={() => setOpen(false)}
               className="flex h-12 items-center justify-center rounded-xl border border-white/12 text-sm font-semibold text-bone"
             >
-              Recuperar mi entrada
+              Ver mi entrada
             </Link>
             {cta && (
               <Link
