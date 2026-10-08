@@ -82,7 +82,7 @@ export const PILLARS = [
   {
     icon: 'djs',
     title: 'DJs toda la noche',
-    text: 'Diferentes DJs se turnan la cabina para que la pista no se apague hasta el final.',
+    text: 'Fiesta crossover: diferentes DJs, de todo un poco, hasta que el cuerpo aguante.',
   },
   {
     icon: 'luces',
@@ -137,7 +137,7 @@ export const MAP_ZONES = {
   },
   parqueadero: {
     name: 'Parqueadero',
-    description: 'Justo al entrar. Se paga al llegar, en la portería.',
+    description: 'Justo al entrar. Se paga al llegar, en la portería. Cupos limitados: llega temprano.',
   },
   salon: {
     name: 'Salón',
@@ -189,7 +189,7 @@ export const MAP_ZONES = {
   },
 };
 
-export const PARKING_NOTE = 'Se paga al llegar, en la portería.';
+export const PARKING_NOTE = 'Se paga al llegar, en la portería. Los parqueaderos son limitados: por favor llega temprano.';
 
 /** Info importante (texto oficial + detalle práctico). `icon`: hidratacion | edad | admision */
 export const IMPORTANT_INFO = [
