@@ -55,6 +55,7 @@ export function createLimiters(enabled) {
     verify: make(60_000, 20),
     read: make(60_000, 120),
     webhook: make(60_000, 300),
+    guestCheck: [make(60_000, 8), make(3_600_000, 40)],
   };
 }
 

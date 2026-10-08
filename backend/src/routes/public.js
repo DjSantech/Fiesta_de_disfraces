@@ -13,6 +13,7 @@ import {
   mockPay, processPaymentNotification,
 } from '../services/orders.js';
 import { verifyWebhookSignature } from '../services/mercadopago.js';
+import { guestCheck } from '../services/guestcheck.js';
 import { ticketPublic } from '../services/serializers.js';
 
 const crossChecks = (v, ctx) => {
@@ -161,6 +162,15 @@ export function publicRouter(ctx, limits) {
     const orders = await Order.find({ 'buyer.cedula': c, 'buyer.phone': p, status: { $in: ['paid', 'in_review', 'pending_payment'] } })
       .sort({ createdAt: -1 }).limit(20).select('token kind status createdAt').lean();
     res.json({ orders: orders.map((o) => ({ token: o.token, kind: o.kind, status: o.status, createdAt: iso(o.createdAt) })) });
+  });
+
+  r.post('/guest-check', limits.guestCheck, validate({
+    body: z.object({
+      query: z.string({ error: 'Escribe tu @Instagram, cédula, celular o nombre.' }).trim()
+        .min(2, 'Escribe al menos 2 caracteres.').max(80, 'Máximo 80 caracteres.'),
+    }),
+  }), async (req, res) => {
+    res.json(await guestCheck(req.valid.body.query));
   });
 
   return r;

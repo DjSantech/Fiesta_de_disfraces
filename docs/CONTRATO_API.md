@@ -229,6 +229,15 @@ Recuperar entradas. Rate limit 5/15min/IP.
 ```
 `200 { "orders": [ { "token": "...", "kind": "ticket", "status": "paid", "createdAt": "..." } ] }` — solo órdenes donde coinciden **ambos** (cédula y celular) y estado ∈ `paid`, `in_review`, `pending_payment`. Lista vacía si nada coincide (misma forma de respuesta).
 
+### `POST /api/public/guest-check`
+Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora por IP (`429 RATE_LIMITED`).
+```json
+{ "query": "@juan.perez" }
+```
+`query`: 2–80 caracteres. Detección: una palabra con/sin `@` (regex de Instagram, no solo dígitos) → coincidencia exacta por Instagram; solo dígitos (se limpian espacios/puntos/guiones y prefijo 57) → exacta por cédula o celular; otro caso es un nombre (mín. 2 palabras y 5 caracteres; todas las palabras escritas deben ser palabras del nombre del invitado, sin tildes ni mayúsculas).
+
+`200` siempre con la misma forma: `{ "found": true, "ambiguous": false, "kind": "cortesia"|"descuento"|null, "discountPercent": 30, "redeemed": false, "firstName": "Juan" }`. `kind="cortesia"` si el porcentaje efectivo es 100 (`guest.discountPercent ?? guestDiscountPercent`). Si varios invitados coinciden por nombre: `found:false, ambiguous:true`. Sin coincidencia: `found:false`, resto `null`/`false`. Nunca devuelve cédula, celular, Instagram ni apellidos. `400 VALIDATION_ERROR` si `query` es inválido.
+
 ---
 
 ## 2. Auth de staff
