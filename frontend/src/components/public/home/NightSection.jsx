@@ -11,7 +11,7 @@ function Description() {
   return (
     <>
       {before}
-      <span className="text-blood-light">terrorífica</span>
+      <span className="text-pumpkin-light">terrorífica</span>
       {after}
     </>
   );
@@ -29,7 +29,7 @@ export default function NightSection() {
               “<Description />”
             </p>
             <p className="mt-5 flex items-center gap-3 text-sm text-fog">
-              <span className="h-px w-8 bg-blood/70" aria-hidden="true" />
+              <span className="h-px w-8 bg-pumpkin/70" aria-hidden="true" />
               {EVENT.music}
             </p>
           </Reveal>
@@ -43,14 +43,14 @@ export default function NightSection() {
                 as="li"
                 key={p.title}
                 delay={i * 0.08}
-                className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-crypt/70 p-6 transition-colors duration-300 hover:border-blood/35"
+                className="group relative overflow-hidden rounded-3xl border border-white/[0.08] bg-crypt/70 p-6 transition-colors duration-300 hover:border-pumpkin/35"
               >
                 <div
-                  className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blood/10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+                  className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-pumpkin/10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
                   aria-hidden="true"
                 />
                 <div className="flex items-start justify-between">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-blood/30 bg-blood/10 text-blood-light shadow-[0_0_30px_-10px_rgb(225_29_46/0.9)]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-pumpkin/30 bg-pumpkin/10 text-pumpkin-light shadow-[0_0_30px_-10px_rgb(255_106_0/0.9)]">
                     <Icon className="h-6 w-6" strokeWidth={1.5} />
                   </span>
                   <span className="font-display text-sm text-bone/30">0{i + 1}</span>

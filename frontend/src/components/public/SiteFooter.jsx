@@ -4,6 +4,7 @@ import { ArrowUpRight, KeyRound, TicketCheck } from 'lucide-react';
 import { EVENT } from '../../config/event';
 import { whatsappLink } from '../../lib/format';
 import { InstagramIcon, WhatsAppIcon } from './icons';
+import { Candelabra, Cobweb, Pumpkin } from './decor';
 import { usePublicConfig } from './usePublicConfig';
 
 function prettyWhatsapp(n) {
@@ -22,12 +23,20 @@ export default function SiteFooter({ compact = false }) {
   return (
     <footer className={clsx('relative overflow-hidden border-t border-white/[0.07] bg-night', compact ? 'pt-10' : 'pt-16 sm:pt-24')}>
       {!compact && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(60%_100%_at_50%_0%,rgb(225_29_46/0.14),transparent_70%)]" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(60%_100%_at_50%_0%,rgb(255_106_0/0.14),transparent_70%)]" aria-hidden="true" />
+      )}
+      <Cobweb corner="tl" className="absolute left-0 top-0 h-28 w-28 sm:h-44 sm:w-44" opacity={0.25} />
+      <Cobweb corner="tr" className="absolute right-0 top-0 h-28 w-28 sm:h-44 sm:w-44" opacity={0.25} />
+      {!compact && (
+        <>
+          <Candelabra className="absolute bottom-6 right-4 h-24 w-20 opacity-60 sm:right-[8%] sm:h-36 sm:w-28" />
+          <Pumpkin className="absolute bottom-3 right-24 hidden h-16 w-[4.5rem] opacity-80 sm:block" />
+        </>
       )}
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {!compact && (
           <div aria-hidden="true" className="select-none">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blood-light">{EVENT.presenter}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-pumpkin-light">{EVENT.presenter}</p>
             <p className="mt-3 font-display text-[length:clamp(3.4rem,17vw,12rem)] uppercase leading-[0.84] text-bone">
               Fiesta de
               <br />
@@ -60,7 +69,7 @@ export default function SiteFooter({ compact = false }) {
                   rel="noopener noreferrer"
                   className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-sm font-semibold text-bone transition hover:border-white/25 hover:bg-white/[0.08]"
                 >
-                  <InstagramIcon className="h-5 w-5 text-blood-light" />@{ig}
+                  <InstagramIcon className="h-5 w-5 text-pumpkin-light" />@{ig}
                 </a>
               )}
             </div>
@@ -70,14 +79,14 @@ export default function SiteFooter({ compact = false }) {
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.3em] text-fog">Tu entrada</h2>
             <ul className="mt-3 flex flex-col gap-1 text-sm">
               <li>
-                <Link to="/comprar" className="inline-flex items-center gap-2 py-1.5 text-bone transition hover:text-blood-light">
-                  <TicketCheck className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+                <Link to="/comprar" className="inline-flex items-center gap-2 py-1.5 text-bone transition hover:text-pumpkin-light">
+                  <TicketCheck className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
                   Comprar entrada
                 </Link>
               </li>
               <li>
-                <Link to="/recuperar" className="inline-flex items-center gap-2 py-1.5 text-bone transition hover:text-blood-light">
-                  <KeyRound className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+                <Link to="/recuperar" className="inline-flex items-center gap-2 py-1.5 text-bone transition hover:text-pumpkin-light">
+                  <KeyRound className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
                   Recuperar mi entrada
                 </Link>
               </li>

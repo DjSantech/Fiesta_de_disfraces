@@ -30,10 +30,10 @@ export default function LastOrderNotice() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="glass flex w-full max-w-md animate-fade-up items-center gap-3 rounded-2xl p-2 pl-4 shadow-2xl shadow-black/60">
-        <span className="h-2 w-2 shrink-0 rounded-full bg-blood shadow-[0_0_10px_rgb(225_29_46)]" aria-hidden="true" />
+        <span className="h-2 w-2 shrink-0 rounded-full bg-pumpkin shadow-[0_0_10px_rgb(255_106_0)]" aria-hidden="true" />
         <Link to={`/orden/${order.token}`} className="flex flex-1 items-center justify-between gap-2 py-2 text-sm font-semibold text-bone">
           {TEXT[order.status]}
-          <span className="flex items-center gap-1 text-blood-light">
+          <span className="flex items-center gap-1 text-pumpkin-light">
             Ver <ArrowRight className="h-4 w-4" />
           </span>
         </Link>

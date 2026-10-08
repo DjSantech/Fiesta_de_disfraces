@@ -33,7 +33,7 @@ const W = 400;
 const H = 480;
 
 const BONE = '#f2ede4';
-const RED = '#ff4d5e';
+const RED = '#ff8a3d';
 
 /** Zonas tocables. `room` enlaza con config.rooms[].number. */
 const ZONES = [
@@ -118,7 +118,7 @@ export default function FincaMap({ config, known = true, className }) {
   return (
     <div className={clsx('grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-start lg:gap-8', className)}>
       <div className="fd-blueprint noise-border relative overflow-hidden rounded-[28px] p-2 sm:p-4">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_0%,rgb(225_29_46/0.12),transparent_70%)]" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_0%,rgb(255_106_0/0.12),transparent_70%)]" aria-hidden="true" />
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="relative block h-auto w-full select-none"
@@ -233,7 +233,7 @@ export default function FincaMap({ config, known = true, className }) {
             if (z.water) fill = `url(#water-${uid})`;
             if (z.blocked) fill = `url(#hatch-${uid})`;
             if (room && known) fill = `${statusColor(room, known)}14`;
-            if (isSel) fill = 'rgb(225 29 46 / 0.2)';
+            if (isSel) fill = 'rgb(255 106 0 / 0.2)';
 
             const baseStroke = z.hit
               ? 'transparent'
@@ -297,7 +297,7 @@ export default function FincaMap({ config, known = true, className }) {
                     <text x={81} y={96} textAnchor="middle" className="fd-zone-label" fontSize="15" fontFamily="Anton, Impact, sans-serif" letterSpacing="1.5" fill={isSel ? '#fff' : BONE}>
                       SALÓN
                     </text>
-                    <text x={81} y={110} textAnchor="middle" fontSize="7.5" fontFamily="Inter, sans-serif" fontWeight="600" letterSpacing="1.2" fill="rgb(255 122 26 / 0.85)">
+                    <text x={81} y={110} textAnchor="middle" fontSize="7.5" fontFamily="Inter, sans-serif" fontWeight="600" letterSpacing="1.2" fill="rgb(255 179 64 / 0.85)">
                       DJS · PISTA
                     </text>
                     {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -308,7 +308,7 @@ export default function FincaMap({ config, known = true, className }) {
                         width={3.4}
                         height={14}
                         rx={1}
-                        fill={i % 3 === 0 ? RED : i % 3 === 1 ? '#ff7a1a' : '#8b5cf6'}
+                        fill={i % 3 === 0 ? RED : i % 3 === 1 ? '#ffb340' : '#8b5cf6'}
                         fillOpacity="0.75"
                         className="fd-eq-bar"
                         style={{ animationDelay: `${(i * 137) % 900}ms`, animationDuration: `${700 + ((i * 211) % 500)}ms` }}
@@ -433,7 +433,7 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
   if (!zone) {
     return (
       <div className="rounded-3xl border border-white/[0.08] bg-crypt/70 p-6" aria-live="polite">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-blood-light">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-pumpkin-light">
           <MousePointerClick className="h-5 w-5" strokeWidth={1.6} />
         </span>
         <h3 className="mt-5 font-display text-3xl uppercase leading-none text-bone">Toca una zona</h3>
@@ -453,9 +453,9 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
   const [viewing, setViewing] = useState(false);
 
   return (
-    <div className="animate-fade-up rounded-3xl border border-blood/30 bg-[linear-gradient(160deg,rgb(225_29_46/0.12),rgb(21_21_28/0.9)_50%)] p-6" aria-live="polite" key={zone.id}>
+    <div className="animate-fade-up rounded-3xl border border-pumpkin/30 bg-[linear-gradient(160deg,rgb(255_106_0/0.12),rgb(21_21_28/0.9)_50%)] p-6" aria-live="polite" key={zone.id}>
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blood/35 bg-blood/12 text-blood-light">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-pumpkin/35 bg-pumpkin/12 text-pumpkin-light">
           <Icon className="h-5 w-5" strokeWidth={1.6} />
         </span>
         {room && <RoomStatusBadge status={room.status} known={known} />}
@@ -522,7 +522,7 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
             {salesOpen && (room.status === 'available' || !known) ? (
               <Link
                 to={`/comprar?tipo=habitacion&hab=${room.number}`}
-                className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-blood font-semibold text-white shadow-[0_0_30px_-8px_rgb(225_29_46/0.9)] transition hover:bg-blood-light"
+                className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-pumpkin font-semibold text-white shadow-[0_0_30px_-8px_rgb(255_106_0/0.9)] transition hover:bg-pumpkin-light"
               >
                 Reservar {room.name || `Habitación ${room.number}`}
                 <ArrowRight className="h-4 w-4" />

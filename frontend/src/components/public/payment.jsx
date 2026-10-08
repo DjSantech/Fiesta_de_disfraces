@@ -15,7 +15,7 @@ export function PolicyModal({ open, onClose }) {
       <ul className="flex flex-col gap-3">
         {REFUND_POLICY.map((t) => (
           <li key={t} className="flex gap-3 text-sm leading-relaxed text-fog">
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-blood" aria-hidden="true" />
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-pumpkin" aria-hidden="true" />
             {t}
           </li>
         ))}
@@ -138,7 +138,7 @@ export function ReceiptUpload({ token, onUploaded, replacing = false }) {
           <div className="min-w-0 flex-1 text-sm">
             <p className="font-semibold text-bone">Comprobante listo</p>
             <p className="text-fog">{Math.round(file.size / 1024)} KB</p>
-            <button type="button" onClick={() => inputRef.current?.click()} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blood-light">
+            <button type="button" onClick={() => inputRef.current?.click()} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-pumpkin-light">
               <RefreshCw className="h-3.5 w-3.5" /> Cambiar imagen
             </button>
           </div>
@@ -148,9 +148,9 @@ export function ReceiptUpload({ token, onUploaded, replacing = false }) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-blood/40 bg-blood/[0.05] px-4 py-8 text-center transition hover:bg-blood/10"
+          className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-pumpkin/40 bg-pumpkin/[0.05] px-4 py-8 text-center transition hover:bg-pumpkin/10"
         >
-          <ImagePlus className="h-7 w-7 text-blood-light" strokeWidth={1.5} />
+          <ImagePlus className="h-7 w-7 text-pumpkin-light" strokeWidth={1.5} />
           <span className="font-semibold text-bone">{replacing ? 'Subir otro pantallazo' : 'Subir pantallazo del comprobante'}</span>
           <span className="text-xs text-fog">JPG o PNG · lo optimizamos antes de enviarlo</span>
         </button>
@@ -192,7 +192,7 @@ const pretty = (n) => String(n).replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3');
 export function TransferPanel({ order, config, onUploaded }) {
   return (
     <div className="flex flex-col gap-5">
-      <div className="rounded-3xl border border-blood/30 bg-blood/[0.07] p-5 text-center">
+      <div className="rounded-3xl border border-pumpkin/30 bg-pumpkin/[0.07] p-5 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-fog">Valor exacto a transferir</p>
         <p className="mt-2 font-display text-5xl tabular-nums text-bone">{formatCOP(order.amount)}</p>
         <CopyButton value={order.amount} label="Copiar valor" className="mt-3" />
@@ -206,7 +206,7 @@ export function TransferPanel({ order, config, onUploaded }) {
         {(config.paymentAccounts || []).map((a) => (
           <li key={a.label + a.number} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-crypt/70 p-4">
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-blood-light">{a.label}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-pumpkin-light">{a.label}</p>
               <p className="mt-1 font-display text-2xl tabular-nums text-bone">{pretty(a.number)}</p>
               {a.holder && <p className="text-xs text-fog">Titular: {a.holder}</p>}
               <CopyButton value={a.number} label="Copiar número" className="mt-2" />

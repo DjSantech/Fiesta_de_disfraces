@@ -47,7 +47,7 @@ export default function Recover() {
     <PublicLayout>
       <PageAtmosphere intensity="soft" />
       <PageContainer size="sm">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-blood/40 bg-blood/10 text-blood-light">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-pumpkin/40 bg-pumpkin/10 text-pumpkin-light">
           <KeyRound className="h-6 w-6" strokeWidth={1.6} />
         </span>
         <h1 className="mt-6 font-display text-[length:clamp(2.6rem,12vw,4rem)] uppercase leading-[0.9] text-bone">Recupera tu entrada</h1>
@@ -62,12 +62,12 @@ export default function Recover() {
           <ul className="mt-8 flex flex-col gap-2">
             {result.map((o) => (
               <li key={o.token}>
-                <Link to={`/orden/${o.token}`} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-crypt/70 p-4 transition hover:border-blood/40">
+                <Link to={`/orden/${o.token}`} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-crypt/70 p-4 transition hover:border-pumpkin/40">
                   <span>
                     <span className="block font-semibold text-bone">{ORDER_KIND_LABEL[o.kind]} · {ORDER_STATUS_LABEL[o.status]}</span>
                     <span className="text-xs text-fog">{formatDateTime(o.createdAt)}</span>
                   </span>
-                  <ArrowRight className="h-5 w-5 text-blood-light" />
+                  <ArrowRight className="h-5 w-5 text-pumpkin-light" />
                 </Link>
               </li>
             ))}
@@ -76,7 +76,7 @@ export default function Recover() {
         {result && result.length === 0 && (
           <Notice tone="neutral" icon={SearchX} className="mt-8" title="No encontramos compras con esos datos">
             Revisa que sean los mismos que usaste al comprar o{' '}
-            <a className="font-semibold text-blood-light underline" href={whatsappLink(config.contact.whatsapp, 'Hola, no encuentro mi entrada de la Fiesta de Disfraces.')} target="_blank" rel="noopener noreferrer">
+            <a className="font-semibold text-pumpkin-light underline" href={whatsappLink(config.contact.whatsapp, 'Hola, no encuentro mi entrada de la Fiesta de Disfraces.')} target="_blank" rel="noopener noreferrer">
               escríbele a {config.contact.adminName || 'DJ Santech'}
             </a>
             .

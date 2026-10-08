@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowRight, BedDouble, CalendarDays, Clock3, Disc3, MapPin, TicketX } from 'lucide-react';
+import { ArrowRight, BedDouble, CalendarDays, Clock3, Disc3, MapPin, TicketX, Ticket } from 'lucide-react';
 import { EVENT } from '../../../config/event';
 import { formatCOP, formatTime, whatsappLink } from '../../../lib/format';
 import Countdown from '../Countdown';
 import { Embers } from '../ui';
+import { Bat, Cobweb, Neon, Pumpkin, Skull } from '../decor';
 import { roomsAvailable, salesState } from '../usePublicConfig';
 import { dayMonth } from '../utils/dates';
 
@@ -35,7 +36,7 @@ function Counter({ counter }) {
         aria-valuemax={counter.capacity}
         aria-valuenow={counter.sold}
       >
-        <div className="h-full rounded-full bg-linear-to-r from-blood-dark via-blood to-ember" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-linear-to-r from-pumpkin-dark via-pumpkin to-ember" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -52,7 +53,7 @@ export function HeroCta({ config, size = 'hero', className }) {
         <Link
           to="/comprar"
           className={clsx(
-            'fd-shine group relative flex w-full items-center justify-center gap-2.5 rounded-2xl bg-blood font-display uppercase text-white animate-pulse-glow transition hover:bg-blood-light active:scale-[0.99] active:bg-blood-dark',
+            'fd-shine group relative flex w-full items-center justify-center gap-2.5 rounded-2xl bg-pumpkin font-display uppercase text-white animate-pulse-glow transition hover:bg-pumpkin-light active:scale-[0.99] active:bg-pumpkin-dark',
             size === 'hero' ? 'h-[4.25rem] max-w-xl px-5 text-[length:clamp(1.12rem,5.3vw,1.7rem)] tracking-[0.035em]' : 'h-16 max-w-md px-6 text-xl tracking-[0.04em]',
           )}
         >
@@ -60,7 +61,7 @@ export function HeroCta({ config, size = 'hero', className }) {
           <ArrowRight className="relative z-[2] h-6 w-6 shrink-0 transition-transform group-hover:translate-x-1" strokeWidth={2.25} />
         </Link>
         <p className="mt-3 flex items-center gap-2 text-sm text-fog">
-          <Clock3 className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+          <Clock3 className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
           {state === 'preventa' ? (
             <span>
               Preventa hasta el <span className="font-semibold text-bone">{presale}</span>
@@ -81,7 +82,7 @@ export function HeroCta({ config, size = 'hero', className }) {
     <div className={clsx('mx-auto flex w-full max-w-xl flex-col items-center', className)}>
       <div className="w-full rounded-2xl border border-white/12 bg-white/[0.035] px-5 py-5 text-center backdrop-blur-sm">
         <p className="flex items-center justify-center gap-2 font-display text-[1.6rem] uppercase tracking-[0.05em] text-bone">
-          <TicketX className="h-6 w-6 text-blood-light" strokeWidth={1.75} />
+          <TicketX className="h-6 w-6 text-pumpkin-light" strokeWidth={1.75} />
           {state === 'soldout' ? 'Entradas agotadas' : 'Ventas en línea cerradas'}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-fog">
@@ -99,7 +100,7 @@ export function HeroCta({ config, size = 'hero', className }) {
         {state === 'soldout' && rooms && (
           <Link
             to="/comprar?tipo=habitacion"
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blood text-sm font-semibold text-white transition hover:bg-blood-light"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-pumpkin text-sm font-semibold text-white transition hover:bg-pumpkin-light"
           >
             <BedDouble className="h-4 w-4" />
             Aún hay habitaciones
@@ -137,6 +138,12 @@ export default function Hero({ config, ready }) {
           31
         </span>
         <div className="fog-layer" />
+        <Cobweb corner="tl" className="absolute left-0 top-0 h-44 w-44 sm:h-72 sm:w-72" opacity={0.3} />
+        <Cobweb corner="tr" className="absolute right-0 top-0 h-44 w-44 sm:h-72 sm:w-72" opacity={0.3} />
+        <Bat className="fd-bat absolute left-[22%] top-[17%] h-4 w-10 text-bone/20" />
+        <Bat className="fd-bat fd-bat--b absolute right-[18%] top-[24%] h-3 w-8 text-bone/15" />
+        <Pumpkin className="absolute -bottom-3 -left-6 h-24 w-28 opacity-90 sm:bottom-6 sm:left-[6%] sm:h-44 sm:w-48" />
+        <Skull className="absolute -right-3 bottom-24 hidden h-28 w-24 rotate-6 text-bone/25 sm:block" glow />
         <Embers count={18} />
         <div className="vignette absolute inset-0" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-linear-to-b from-transparent to-ink" />
@@ -145,33 +152,38 @@ export default function Hero({ config, ready }) {
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 pb-14 pt-28 text-center sm:px-6 sm:pt-32">
         <p {...enter(ready, 0)}>
           <span className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.34em] text-bone/85 sm:text-xs">
-            <span className="h-px w-7 bg-blood" aria-hidden="true" />
+            <span className="h-px w-7 bg-pumpkin" aria-hidden="true" />
             {EVENT.presenter}
-            <span className="h-px w-7 bg-blood" aria-hidden="true" />
+            <span className="h-px w-7 bg-pumpkin" aria-hidden="true" />
           </span>
         </p>
 
         <h1 id="hero-title" className="mt-5 font-display uppercase leading-[0.84]">
           <span className={clsx('block', enter(ready, 120).className)} style={enter(ready, 120).style}>
-            <span className="fd-title-bone block text-[length:clamp(4rem,19.5vw,10.5rem)]">Fiesta de</span>
+            <span className="fd-title-bone relative block text-[length:clamp(4rem,19.5vw,10.5rem)]">
+              Fiesta de
+              <Cobweb corner="tl" className="absolute -left-1 top-0 h-14 w-14 sm:h-24 sm:w-24" opacity={0.55} />
+            </span>
           </span>
           <span className={clsx('block', enter(ready, 240).className)} style={enter(ready, 240).style}>
-            <span className="fd-title-blood block text-[length:clamp(4rem,19.5vw,10.5rem)]">
+            <span className="fd-title-pumpkin relative block text-[length:clamp(4rem,19.5vw,10.5rem)]">
               Disfra<span className="animate-flicker">c</span>es
+              <Cobweb corner="tr" className="absolute -right-1 top-0 h-14 w-14 sm:h-24 sm:w-24" opacity={0.55} />
+              <Skull className="absolute -top-1 -left-1 -top-3 h-[0.42em] w-[0.38em] -rotate-12 text-bone/70" glow />
             </span>
           </span>
         </h1>
 
         <p {...enter(ready, 380)}>
           <span className="mt-4 block font-serif text-[1.7rem] italic leading-tight text-bone/90 sm:text-[2.6rem]">
-            La noche más <span className="text-blood-light">terrorífica</span> del año
+            La noche más <Neon v="b" delay={1.3} className="text-pumpkin-light">terrorífica</Neon> del año
           </span>
         </p>
 
         <ul className={clsx('mt-7 flex flex-col items-center gap-2.5 text-sm text-fog sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6', enter(ready, 480).className)} style={enter(ready, 480).style}>
           {meta.map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-center gap-2">
-              <Icon className="h-4 w-4 shrink-0 text-blood-light" strokeWidth={1.75} />
+              <Icon className="h-4 w-4 shrink-0 text-pumpkin-light" strokeWidth={1.75} />
               <span>{text}</span>
             </li>
           ))}
@@ -184,6 +196,10 @@ export default function Hero({ config, ready }) {
 
         <div className={clsx('mt-8 w-full', enter(ready, 720).className)} style={enter(ready, 720).style}>
           <HeroCta config={config} />
+          <a href="#lista" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-pumpkin-light underline-offset-4 hover:underline">
+            <Ticket className="h-4 w-4" strokeWidth={1.75} />
+            ¿Estás en la lista de invitados?
+          </a>
         </div>
       </div>
 
@@ -194,7 +210,7 @@ export default function Hero({ config, ready }) {
       >
         Desliza
         <span className="relative block h-10 w-px overflow-hidden bg-white/10" aria-hidden="true">
-          <span className="absolute inset-x-0 top-0 h-4 animate-float bg-blood" />
+          <span className="absolute inset-x-0 top-0 h-4 animate-float bg-pumpkin" />
         </span>
       </a>
     </section>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Cobweb, Skull } from './decor';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import QRCode from 'qrcode';
@@ -20,7 +21,7 @@ export function ticketTypeLabel(t) {
 
 export function ticketStatus(t) {
   if (t.status === 'used') return { label: `Ya ingresó a las ${formatTime(t.checkedInAt)}`, cls: 'border-ultra/40 bg-ultra/15 text-violet-300' };
-  if (t.status === 'void') return { label: 'Anulada', cls: 'border-blood/40 bg-blood/15 text-blood-light' };
+  if (t.status === 'void') return { label: 'Anulada', cls: 'border-pumpkin/40 bg-pumpkin/15 text-pumpkin-light' };
   return { label: 'Válida', cls: 'border-toxic/40 bg-toxic/10 text-toxic' };
 }
 
@@ -43,7 +44,7 @@ export function TicketQR({ token, className, dimmed }) {
       ) : (
         <div className="aspect-square w-full animate-pulse rounded-xl bg-neutral-200" />
       )}
-      {dimmed && <span className="absolute inset-0 flex items-center justify-center font-display text-4xl uppercase text-blood">Anulada</span>}
+      {dimmed && <span className="absolute inset-0 flex items-center justify-center font-display text-4xl uppercase text-pumpkin">Anulada</span>}
     </div>
   );
 }
@@ -52,12 +53,14 @@ export function TicketQR({ token, className, dimmed }) {
 export function TicketCard({ ticket, startsAt, children, compact }) {
   const st = ticketStatus(ticket);
   return (
-    <article className="noise-border relative overflow-hidden rounded-[28px] bg-[linear-gradient(170deg,#1a1016,#121218_40%)] shadow-[0_40px_90px_-40px_rgb(225_29_46/0.6)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(70%_100%_at_50%_0%,rgb(225_29_46/0.3),transparent)]" aria-hidden="true" />
+    <article className="noise-border relative overflow-hidden rounded-[28px] bg-[linear-gradient(170deg,#1a1016,#121218_40%)] shadow-[0_40px_90px_-40px_rgb(255_106_0/0.6)]">
+      <Cobweb corner="tr" className="absolute right-0 top-0 h-24 w-24" opacity={0.22} />
+      <Skull className="absolute bottom-3 right-3 h-12 w-11 text-bone/15" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_106_0/0.3),transparent)]" aria-hidden="true" />
       <header className="relative px-6 pt-6 text-center">
         <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-bone/70">{EVENT.presenter}</p>
         <p className="mt-2 font-display text-[2.4rem] uppercase leading-[0.88] text-bone">
-          Fiesta de <span className="fd-title-blood">Disfraces</span>
+          Fiesta de <span className="fd-title-pumpkin">Disfraces</span>
         </p>
         <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-fog">
           {shortWeekdayDate(startsAt)} · {formatTime(startsAt)} · {EVENT.city}

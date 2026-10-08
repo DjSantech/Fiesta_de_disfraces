@@ -15,7 +15,7 @@ export default function PublicLayout({ header = 'page', headerRight, hideHeaderC
         <div className="relative isolate min-h-dvh overflow-x-clip bg-ink text-bone">
           <a
             href="#contenido"
-            className="sr-only z-[90] rounded-lg bg-blood px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+            className="sr-only z-[90] rounded-lg bg-pumpkin px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
           >
             Saltar al contenido
           </a>

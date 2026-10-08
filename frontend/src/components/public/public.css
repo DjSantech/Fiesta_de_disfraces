@@ -4,9 +4,9 @@
 /* ───────── Hero ───────── */
 .fd-hero-glow {
   background:
-    radial-gradient(60% 45% at 50% 0%, rgb(225 29 46 / 0.42), transparent 70%),
+    radial-gradient(60% 45% at 50% 0%, rgb(255 106 0 / 0.42), transparent 70%),
     radial-gradient(40% 35% at 12% 18%, rgb(139 92 246 / 0.16), transparent 70%),
-    radial-gradient(45% 40% at 92% 30%, rgb(255 122 26 / 0.1), transparent 70%);
+    radial-gradient(45% 40% at 92% 30%, rgb(255 179 64 / 0.1), transparent 70%);
 }
 
 .fd-beam {
@@ -44,11 +44,11 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 28px rgb(225 29 46 / 0.28));
+  filter: drop-shadow(0 0 28px rgb(255 106 0 / 0.28));
 }
-.fd-title-blood {
-  color: #ef2536;
-  text-shadow: 0 0 22px rgb(225 29 46 / 0.6), 0 0 60px rgb(225 29 46 / 0.3);
+.fd-title-pumpkin {
+  color: #ff6a00;
+  text-shadow: 0 0 22px rgb(255 106 0 / 0.6), 0 0 60px rgb(255 106 0 / 0.3);
 }
 .fd-text-stroke {
   color: transparent;
@@ -60,7 +60,7 @@
   position: absolute;
   bottom: -12px;
   border-radius: 9999px;
-  background: radial-gradient(circle, #ffe0bf 0%, #ff7a1a 42%, rgb(225 29 46 / 0) 72%);
+  background: radial-gradient(circle, #ffe0bf 0%, #ffb340 42%, rgb(255 106 0 / 0) 72%);
   opacity: 0;
   pointer-events: none;
   animation: fd-ember-rise var(--dur, 11s) linear var(--delay, 0s) infinite;
@@ -136,9 +136,9 @@
   animation: fd-neon-text 5.5s linear 2.2s infinite;
 }
 @keyframes fd-neon-text {
-  0%, 68% { text-shadow: 0 0 20px rgb(225 29 46 / 0.75), 0 0 64px rgb(225 29 46 / 0.4); }
-  69% { text-shadow: 0 0 6px rgb(225 29 46 / 0.3); }
-  71%, 100% { text-shadow: 0 0 20px rgb(225 29 46 / 0.75), 0 0 64px rgb(225 29 46 / 0.4); }
+  0%, 68% { text-shadow: 0 0 20px rgb(255 106 0 / 0.75), 0 0 64px rgb(255 106 0 / 0.4); }
+  69% { text-shadow: 0 0 6px rgb(255 106 0 / 0.3); }
+  71%, 100% { text-shadow: 0 0 20px rgb(255 106 0 / 0.75), 0 0 64px rgb(255 106 0 / 0.4); }
 }
 
 /* ───────── Celebración ───────── */
@@ -182,7 +182,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(100deg, transparent 30%, rgb(225 29 46 / 0.32) 48%, rgb(255 210 190 / 0.18) 50%, rgb(225 29 46 / 0.32) 52%, transparent 70%);
+  background: linear-gradient(100deg, transparent 30%, rgb(255 106 0 / 0.32) 48%, rgb(255 210 190 / 0.18) 50%, rgb(255 106 0 / 0.32) 52%, transparent 70%);
   transform: translateX(-100%);
   animation: fd-sweep 1.6s cubic-bezier(0.6, 0, 0.2, 1) 0.1s 1 both;
 }
@@ -302,4 +302,32 @@
   .fd-neon-tube {
     opacity: 1;
   }
+}
+
+/* Halloween: decoración y neón dañado (<= 3 destellos/s, WCAG 2.3.1) */
+.fd-title-pumpkin { color: #ff6a00; }
+.fd-neon { display: inline-block; animation: fd-neon-a 7s linear infinite; }
+.fd-neon--b { animation-name: fd-neon-b; animation-duration: 9s; }
+.fd-neon--c { animation-name: fd-neon-c; animation-duration: 5.5s; }
+@keyframes fd-neon-a {
+  0%, 12%, 14%, 40%, 43%, 100% { opacity: 1; text-shadow: 0 0 14px rgb(255 106 0 / 0.65), 0 0 36px rgb(255 106 0 / 0.3); }
+  13%, 41.5% { opacity: 0.4; text-shadow: none; }
+}
+@keyframes fd-neon-b {
+  0%, 30%, 32%, 34%, 70%, 72%, 100% { opacity: 1; text-shadow: 0 0 14px rgb(255 106 0 / 0.65), 0 0 36px rgb(255 106 0 / 0.3); }
+  31%, 33%, 71% { opacity: 0.35; text-shadow: none; }
+}
+@keyframes fd-neon-c {
+  0%, 55%, 58%, 100% { opacity: 1; text-shadow: 0 0 14px rgb(255 106 0 / 0.65), 0 0 36px rgb(255 106 0 / 0.3); }
+  56.5% { opacity: 0.5; text-shadow: none; }
+}
+.fd-pumpkin-face { animation: fd-pk-glow 3.4s ease-in-out infinite; }
+@keyframes fd-pk-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+.fd-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: fd-flame 1.6s ease-in-out infinite; }
+@keyframes fd-flame { 0%, 100% { transform: scaleY(1) rotate(-2deg); } 50% { transform: scaleY(0.88) rotate(2deg); } }
+.fd-bat { animation: fd-bat 6s ease-in-out infinite; }
+.fd-bat--b { animation-duration: 8s; animation-delay: -3s; }
+@keyframes fd-bat { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(10px, -4px); } }
+@media (prefers-reduced-motion: reduce) {
+  .fd-neon, .fd-pumpkin-face, .fd-flame, .fd-bat { animation: none !important; }
 }

@@ -9,14 +9,14 @@ import { WhatsAppIcon } from './icons';
 export const ROOM_STATUS = {
   available: { label: 'Disponible', short: 'Libre', tone: 'toxic', color: '#22e584' },
   held: { label: 'Apartada · pago en curso', short: 'Apartada', tone: 'gold', color: '#f5c04a' },
-  booked: { label: 'Reservada', short: 'Reservada', tone: 'blood', color: '#ff4d5e' },
+  booked: { label: 'Reservada', short: 'Reservada', tone: 'pumpkin', color: '#ff8a3d' },
   blocked: { label: 'No disponible', short: 'No disponible', tone: 'neutral', color: '#6e6b78' },
 };
 
 const TONES = {
   toxic: 'border-toxic/35 bg-toxic/10 text-toxic',
   gold: 'border-gold/35 bg-gold/10 text-gold',
-  blood: 'border-blood/40 bg-blood/12 text-blood-light',
+  pumpkin: 'border-pumpkin/40 bg-pumpkin/12 text-pumpkin-light',
   neutral: 'border-white/12 bg-white/[0.05] text-fog',
 };
 
@@ -67,8 +67,8 @@ export function RoomRowMini({ highlight, className }) {
               width={c.w}
               height={24}
               rx={2}
-              fill={on ? 'rgb(225 29 46 / 0.28)' : 'transparent'}
-              stroke={on ? '#ff4d5e' : 'rgb(242 237 228 / 0.22)'}
+              fill={on ? 'rgb(255 106 0 / 0.28)' : 'transparent'}
+              stroke={on ? '#ff8a3d' : 'rgb(242 237 228 / 0.22)'}
               strokeWidth={on ? 1.4 : 1}
             />
             <text
@@ -129,7 +129,7 @@ export function RoomPerks({ room, className }) {
           const I = PERK_ICONS[p.icon] || Lock;
           return (
             <li key={p.text} className="flex items-start gap-2.5 text-sm text-bone/90">
-              <I className="mt-0.5 h-4 w-4 shrink-0 text-blood-light" strokeWidth={1.75} aria-hidden="true" />
+              <I className="mt-0.5 h-4 w-4 shrink-0 text-pumpkin-light" strokeWidth={1.75} aria-hidden="true" />
               {p.text}
             </li>
           );
@@ -206,7 +206,7 @@ function Gallery({ photos }) {
               onClick={() => setI(n)}
               aria-label={`Ver foto ${n + 1}: ${p.alt}`}
               aria-current={n === i}
-              className={clsx('h-16 w-20 overflow-hidden rounded-xl border-2 transition', n === i ? 'border-blood' : 'border-white/10 opacity-70 hover:opacity-100')}
+              className={clsx('h-16 w-20 overflow-hidden rounded-xl border-2 transition', n === i ? 'border-pumpkin' : 'border-white/10 opacity-70 hover:opacity-100')}
             >
               <img src={p.src} alt="" className="h-full w-full object-cover" />
             </button>
@@ -224,7 +224,7 @@ export function RoomViewModal({ room, phase, contact, open, onClose, buyTo }) {
       <Gallery key={room.number} photos={ROOM_PHOTOS[room.number]} />
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <p className="flex items-center gap-2 text-sm text-fog">
-          <Users className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+          <Users className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
           <span className="font-semibold text-bone">{roomPeopleText(room)}</span>
         </p>
         <RoomPriceLine room={room} phase={phase} size="sm" />
@@ -232,7 +232,7 @@ export function RoomViewModal({ room, phase, contact, open, onClose, buyTo }) {
       <RoomPerks room={room} className="mt-5" />
       <RoomHelpNote contact={contact} room={room} className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4" />
       {buyTo && (
-        <a href={buyTo} className="mt-4 flex h-13 w-full items-center justify-center rounded-2xl bg-blood font-semibold text-white transition hover:bg-blood-light">
+        <a href={buyTo} className="mt-4 flex h-13 w-full items-center justify-center rounded-2xl bg-pumpkin font-semibold text-white transition hover:bg-pumpkin-light">
           Reservar {room.name}
         </a>
       )}

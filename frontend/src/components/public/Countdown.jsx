@@ -18,7 +18,7 @@ export default function Countdown({ target, className }) {
   if (diff <= 0) {
     const live = diff > -10 * 3600 * 1000;
     return (
-      <div className={clsx('rounded-2xl border border-blood/40 bg-blood/10 px-5 py-4 text-center', className)}>
+      <div className={clsx('rounded-2xl border border-pumpkin/40 bg-pumpkin/10 px-5 py-4 text-center', className)}>
         <p className="font-display text-2xl uppercase tracking-[0.06em] text-bone sm:text-3xl">
           {live ? 'La noche ya empezó' : 'Gracias por venir'}
         </p>
@@ -45,11 +45,11 @@ export default function Countdown({ target, className }) {
           key={u.label}
           className="relative overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] px-1 pb-2.5 pt-3 text-center backdrop-blur-sm"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blood/60 to-transparent" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-pumpkin/60 to-transparent" aria-hidden="true" />
           <span
             className={clsx(
               'block font-display text-[2.05rem] leading-none tabular-nums text-bone sm:text-5xl',
-              i === 3 && 'text-blood-light',
+              i === 3 && 'text-pumpkin-light',
             )}
             aria-hidden="true"
           >

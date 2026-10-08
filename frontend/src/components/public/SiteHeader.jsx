@@ -115,7 +115,7 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
             {!hideCta && cta && (
               <Link
                 to={cta.to}
-                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-blood px-4 text-sm font-semibold text-white shadow-[0_0_24px_-6px_rgb(225_29_46/0.9)] transition hover:bg-blood-light active:bg-blood-dark"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-pumpkin px-4 text-sm font-semibold text-white shadow-[0_0_24px_-6px_rgb(255_106_0/0.9)] transition hover:bg-pumpkin-light active:bg-pumpkin-dark"
               >
                 <span className="sm:hidden">{cta.label}</span>
                 <span className="hidden sm:inline">{cta.long}</span>
@@ -162,8 +162,8 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
                     }}
                     className="group flex items-baseline gap-4 rounded-xl py-2.5"
                   >
-                    <span className="font-display text-sm text-blood-light/80">0{i + 1}</span>
-                    <span className="font-display text-[2.6rem] uppercase leading-none text-bone transition group-hover:text-blood-light">
+                    <span className="font-display text-sm text-pumpkin-light/80">0{i + 1}</span>
+                    <span className="font-display text-[2.6rem] uppercase leading-none text-bone transition group-hover:text-pumpkin-light">
                       {l.label}
                     </span>
                   </a>
@@ -183,7 +183,7 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
               <Link
                 to={cta.to}
                 onClick={() => setOpen(false)}
-                className="flex h-14 items-center justify-center gap-2 rounded-xl bg-blood font-display text-lg uppercase tracking-[0.06em] text-white shadow-[0_0_30px_-6px_rgb(225_29_46/0.9)]"
+                className="flex h-14 items-center justify-center gap-2 rounded-xl bg-pumpkin font-display text-lg uppercase tracking-[0.06em] text-white shadow-[0_0_30px_-6px_rgb(255_106_0/0.9)]"
               >
                 {cta.long}
                 <ArrowRight className="h-5 w-5" />

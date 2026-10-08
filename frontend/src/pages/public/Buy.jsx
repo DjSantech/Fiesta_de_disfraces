@@ -34,7 +34,7 @@ function Steps({ step, total }) {
     <ol className="mt-6 grid gap-2" style={{ gridTemplateColumns: `repeat(${total}, minmax(0,1fr))` }} aria-label={`Paso ${step} de ${total}`}>
       {labels.map((l, i) => (
         <li key={l} aria-current={i + 1 === step ? 'step' : undefined}>
-          <span className={clsx('block h-1 rounded-full', i + 1 <= step ? 'bg-blood shadow-[0_0_10px_rgb(225_29_46/0.8)]' : 'bg-white/10')} />
+          <span className={clsx('block h-1 rounded-full', i + 1 <= step ? 'bg-pumpkin shadow-[0_0_10px_rgb(255_106_0/0.8)]' : 'bg-white/10')} />
           <span className={clsx('mt-2 block text-[10px] font-semibold uppercase tracking-[0.18em]', i + 1 === step ? 'text-bone' : 'text-fog/70')}>{l}</span>
         </li>
       ))}
@@ -52,12 +52,12 @@ function OptionCard({ active, disabled, onClick, icon: Icon, title, hint, right 
       onClick={onClick}
       className={clsx(
         'flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition',
-        active ? 'border-blood bg-blood/12 shadow-[inset_0_0_0_1px_rgb(225_29_46/0.6)]' : 'border-white/10 bg-crypt/70 hover:border-white/25',
+        active ? 'border-pumpkin bg-pumpkin/12 shadow-[inset_0_0_0_1px_rgb(255_106_0/0.6)]' : 'border-white/10 bg-crypt/70 hover:border-white/25',
         disabled && 'cursor-not-allowed opacity-45',
       )}
     >
       {Icon && (
-        <span className={clsx('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border', active ? 'border-blood/50 text-blood-light' : 'border-white/10 text-fog')}>
+        <span className={clsx('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border', active ? 'border-pumpkin/50 text-pumpkin-light' : 'border-white/10 text-fog')}>
           <Icon className="h-6 w-6" strokeWidth={1.5} />
         </span>
       )}
@@ -80,7 +80,17 @@ export default function Buy() {
   const [kind, setKind] = useState(params.get('tipo') === 'habitacion' ? 'room' : draft.kind || 'ticket');
   const [gender, setGender] = useState(draft.gender || null);
   const [roomNumber, setRoomNumber] = useState(paramRoom || draft.roomNumber || null);
-  const [buyer, setBuyer] = useState({ ...EMPTY_BUYER, ...(draft.buyer || {}) });
+  const [buyer, setBuyer] = useState(() => {
+    // Prellenado desde "¿Estás en la lista?" (?invitado=1&instagram=… | &cedula=…)
+    const pre = {};
+    if (params.get('invitado') === '1') {
+      const ig = (params.get('instagram') || '').replace(/[^\w.]/g, '').slice(0, 30);
+      const ced = (params.get('cedula') || '').replace(/\D/g, '').slice(0, 12);
+      if (ig) pre.instagram = ig;
+      if (ced) pre.cedula = ced;
+    }
+    return { ...EMPTY_BUYER, ...(draft.buyer || {}), ...pre };
+  });
   const [companions, setCompanions] = useState(draft.companions || []);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptData, setAcceptData] = useState(false);
@@ -205,7 +215,7 @@ export default function Buy() {
       <PageContainer>
         <div ref={topRef} className="scroll-mt-24">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blood-light">Paso {step} de {total}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-pumpkin-light">Paso {step} de {total}</p>
             {step > 1 && step < 4 && (
               <button type="button" onClick={() => go(step - 1)} className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-fog hover:text-bone">
                 <ArrowLeft className="h-4 w-4" /> Atrás
@@ -354,7 +364,7 @@ export default function Buy() {
                   label={
                     <>
                       Soy mayor de edad y acepto la{' '}
-                      <button type="button" className="font-semibold text-blood-light underline" onClick={(e) => { e.preventDefault(); setPolicyOpen(true); }}>
+                      <button type="button" className="font-semibold text-pumpkin-light underline" onClick={(e) => { e.preventDefault(); setPolicyOpen(true); }}>
                         política de devoluciones
                       </button>
                     </>
@@ -385,7 +395,7 @@ export default function Buy() {
               {submitError && (
                 <Notice
                   title={submitError.title}
-                  action={submitError.action && <Link className="font-semibold text-blood-light underline" to={submitError.action.to}>{submitError.action.label}</Link>}
+                  action={submitError.action && <Link className="font-semibold text-pumpkin-light underline" to={submitError.action.to}>{submitError.action.label}</Link>}
                 >
                   {submitError.message}
                 </Notice>

@@ -16,8 +16,8 @@ function background(ctx, w, h) {
   ctx.fillStyle = '#07070a';
   ctx.fillRect(0, 0, w, h);
   const g = ctx.createRadialGradient(w / 2, 0, 0, w / 2, 0, h * 0.75);
-  g.addColorStop(0, 'rgba(225,29,46,0.55)');
-  g.addColorStop(1, 'rgba(225,29,46,0)');
+  g.addColorStop(0, 'rgba(255,106,0,0.55)');
+  g.addColorStop(1, 'rgba(255,106,0,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
   const v = ctx.createRadialGradient(w / 2, h, 0, w / 2, h, h * 0.6);
@@ -63,7 +63,7 @@ export async function downloadTicketPng(ticket, startsAt, url) {
   background(ctx, W, H);
   text(ctx, EVENT.presenter.toUpperCase(), W / 2, 130, '600 30px Inter', 'rgba(242,237,228,0.8)', { spacing: 10 });
   text(ctx, 'FIESTA DE', W / 2, 270, '400 150px Anton', '#f2ede4');
-  text(ctx, 'DISFRACES', W / 2, 420, '400 150px Anton', '#ef2536', { glow: 'rgba(225,29,46,0.8)' });
+  text(ctx, 'DISFRACES', W / 2, 420, '400 150px Anton', '#ff6a00', { glow: 'rgba(255,106,0,0.8)' });
   text(ctx, `${shortWeekdayDate(startsAt)} · ${formatTime(startsAt)} · ${EVENT.city}`.toUpperCase(), W / 2, 495, '600 32px Inter', 'rgba(163,160,173,1)', { spacing: 4 });
   // QR
   const qr = QRCode.create(url, { errorCorrectionLevel: 'M' });
@@ -99,7 +99,7 @@ export async function shareStory() {
   background(ctx, W, H);
   text(ctx, EVENT.presenter.toUpperCase(), W / 2, 420, '600 34px Inter', 'rgba(242,237,228,0.85)', { spacing: 12 });
   text(ctx, 'YA TENGO', W / 2, 660, '400 230px Anton', '#f2ede4');
-  text(ctx, 'MI ENTRADA', W / 2, 900, '400 230px Anton', '#ef2536', { glow: 'rgba(225,29,46,0.9)' });
+  text(ctx, 'MI ENTRADA', W / 2, 900, '400 230px Anton', '#ff6a00', { glow: 'rgba(255,106,0,0.9)' });
   text(ctx, 'FIESTA DE DISFRACES', W / 2, 1080, '400 96px Anton', '#f2ede4', { spacing: 4 });
   text(ctx, `${EVENT.shortDate} · ${EVENT.city.toUpperCase()}`, W / 2, 1190, '400 80px Anton', 'rgba(255,77,94,1)', { spacing: 8 });
   text(ctx, EVENT.tagline, W / 2, 1320, 'italic 500 64px "Cormorant Garamond"', 'rgba(242,237,228,0.85)');

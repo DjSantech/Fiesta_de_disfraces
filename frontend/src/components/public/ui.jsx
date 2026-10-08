@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { m } from 'motion/react';
 import clsx from 'clsx';
 import { Check, Copy } from 'lucide-react';
+import { Cobweb, Neon } from './decor';
 
 /** Aparece al entrar en pantalla (una sola vez). */
 export function Reveal({ as = 'div', delay = 0, y = 26, className, children, ...props }) {
@@ -21,26 +22,43 @@ export function Reveal({ as = 'div', delay = 0, y = 26, className, children, ...
 }
 
 /** Overline: "01 —— LA NOCHE" */
-export function Overline({ index, children, className, tone = 'blood' }) {
+export function Overline({ index, children, className, tone = 'pumpkin' }) {
   return (
     <p
       className={clsx(
         'flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.3em]',
-        tone === 'blood' ? 'text-blood-light' : 'text-fog',
+        tone === 'pumpkin' ? 'text-pumpkin-light' : 'text-fog',
         className,
       )}
     >
       {index && <span className="font-display text-sm tracking-[0.08em] text-bone/45">{index}</span>}
-      <span className={clsx('h-px w-8', tone === 'blood' ? 'bg-blood/70' : 'bg-white/25')} aria-hidden="true" />
+      <span className={clsx('h-px w-8', tone === 'pumpkin' ? 'bg-pumpkin/70' : 'bg-white/25')} aria-hidden="true" />
       <span>{children}</span>
     </p>
   );
 }
 
 /** Encabezado de sección: overline + título enorme + acento en serif itálica. */
+/** Parpadeo de neon en una letra del titulo (posicion/ritmo/retardo derivan del id). */
+function neonTitle(title, id = '') {
+  if (typeof title !== 'string') return title;
+  const seed = [...id].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const letters = [...title];
+  let idx = (seed * 7) % letters.length;
+  for (let n = 0; n < letters.length && letters[idx] === ' '; n++) idx = (idx + 1) % letters.length;
+  return (
+    <>
+      {letters.slice(0, idx).join('')}
+      <Neon v={['a', 'b', 'c'][seed % 3]} delay={(seed % 5) * 0.9}>{letters[idx]}</Neon>
+      {letters.slice(idx + 1).join('')}
+    </>
+  );
+}
+
 export function SectionHeading({ index, overline, title, accent, id, align = 'left', className, titleClassName, children }) {
   return (
-    <Reveal className={clsx(align === 'center' && 'flex flex-col items-center text-center', className)}>
+    <Reveal className={clsx('relative', align === 'center' && 'flex flex-col items-center text-center', className)}>
+      <Cobweb corner="tr" className="absolute -top-7 right-0 h-24 w-24 sm:-top-10 sm:h-36 sm:w-36" opacity={0.28} />
       {overline && <Overline index={index}>{overline}</Overline>}
       <h2
         id={id}
@@ -49,7 +67,7 @@ export function SectionHeading({ index, overline, title, accent, id, align = 'le
           titleClassName,
         )}
       >
-        {title}
+        {neonTitle(title, id)}
       </h2>
       {accent && <p className="mt-4 max-w-2xl font-serif text-[1.65rem] italic leading-tight text-fog sm:text-4xl">{accent}</p>}
       {children}
@@ -70,10 +88,10 @@ export function Wordmark({ className, size = 'md' }) {
       )}
     >
       <span className="relative flex h-2 w-2" aria-hidden="true">
-        <span className="absolute inset-0 rounded-full bg-blood shadow-[0_0_10px_2px_rgb(225_29_46/0.8)]" />
+        <span className="absolute inset-0 rounded-full bg-pumpkin shadow-[0_0_10px_2px_rgb(255_106_0/0.8)]" />
       </span>
       <span className="text-bone">Fiesta de</span>
-      <span className="-ml-0.5 text-blood-light">Disfraces</span>
+      <span className="-ml-0.5 text-pumpkin-light">Disfraces</span>
     </span>
   );
 }
@@ -196,7 +214,7 @@ export function Marquee({ items, className }) {
       {items.map((t, i) => (
         <span key={i} className="flex items-center">
           <span className="px-6 font-display text-xl uppercase tracking-[0.06em] text-bone/85 sm:text-2xl">{t}</span>
-          <span className="h-1.5 w-1.5 rotate-45 bg-blood shadow-[0_0_10px_rgb(225_29_46/0.9)]" />
+          <span className="h-1.5 w-1.5 rotate-45 bg-pumpkin shadow-[0_0_10px_rgb(255_106_0/0.9)]" />
         </span>
       ))}
     </div>
@@ -214,16 +232,16 @@ export function Marquee({ items, className }) {
 }
 
 const STATE_TONES = {
-  blood: 'text-blood-light border-blood/40 bg-blood/10 shadow-[0_0_40px_-10px_rgb(225_29_46/0.9)]',
+  pumpkin: 'text-pumpkin-light border-pumpkin/40 bg-pumpkin/10 shadow-[0_0_40px_-10px_rgb(255_106_0/0.9)]',
   toxic: 'text-toxic border-toxic/40 bg-toxic/10 shadow-[0_0_40px_-10px_rgb(34_229_132/0.7)]',
   ultra: 'text-violet-300 border-ultra/40 bg-ultra/10 shadow-[0_0_40px_-10px_rgb(139_92_246/0.9)]',
   gold: 'text-gold border-gold/40 bg-gold/10 shadow-[0_0_40px_-10px_rgb(245_192_74/0.7)]',
-  ember: 'text-ember border-ember/40 bg-ember/10 shadow-[0_0_40px_-10px_rgb(255_122_26/0.8)]',
+  ember: 'text-ember border-ember/40 bg-ember/10 shadow-[0_0_40px_-10px_rgb(255_179_64/0.8)]',
   neutral: 'text-fog border-white/15 bg-white/[0.04]',
 };
 
 /** Pantalla de estado centrada (resultados, errores, vacíos). */
-export function StateScreen({ icon: Icon, tone = 'blood', overline, title, children, actions, className, iconSlot }) {
+export function StateScreen({ icon: Icon, tone = 'pumpkin', overline, title, children, actions, className, iconSlot }) {
   return (
     <div className={clsx('flex flex-col items-center text-center', className)}>
       {iconSlot ||
@@ -245,17 +263,17 @@ export function StateScreen({ icon: Icon, tone = 'blood', overline, title, child
 }
 
 /** Aviso en línea (error / info / éxito) */
-export function Notice({ tone = 'blood', icon: Icon, title, children, action, className }) {
+export function Notice({ tone = 'pumpkin', icon: Icon, title, children, action, className }) {
   const tones = {
-    blood: 'border-blood/35 bg-blood/[0.08]',
+    pumpkin: 'border-pumpkin/35 bg-pumpkin/[0.08]',
     toxic: 'border-toxic/30 bg-toxic/[0.07]',
     gold: 'border-gold/30 bg-gold/[0.07]',
     ultra: 'border-ultra/35 bg-ultra/[0.08]',
     neutral: 'border-white/10 bg-white/[0.03]',
   };
-  const iconTones = { blood: 'text-blood-light', toxic: 'text-toxic', gold: 'text-gold', ultra: 'text-violet-300', neutral: 'text-fog' };
+  const iconTones = { pumpkin: 'text-pumpkin-light', toxic: 'text-toxic', gold: 'text-gold', ultra: 'text-violet-300', neutral: 'text-fog' };
   return (
-    <div className={clsx('flex gap-3 rounded-2xl border p-4', tones[tone], className)} role={tone === 'blood' ? 'alert' : 'status'}>
+    <div className={clsx('flex gap-3 rounded-2xl border p-4', tones[tone], className)} role={tone === 'pumpkin' ? 'alert' : 'status'}>
       {Icon && <Icon className={clsx('mt-0.5 h-5 w-5 shrink-0', iconTones[tone])} strokeWidth={1.75} />}
       <div className="min-w-0 flex-1 text-sm leading-relaxed text-fog">
         {title && <p className="font-semibold text-bone">{title}</p>}

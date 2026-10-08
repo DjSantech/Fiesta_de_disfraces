@@ -3,6 +3,7 @@ import { m } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { INTRO } from '../../config/event';
 import { Embers } from './ui';
+import { Cobweb, Pumpkin } from './decor';
 import { KEYS, session } from './utils/storage';
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -78,9 +79,12 @@ export default function Intro({ onDone }) {
         transition={{ delay: 0.5, duration: 2.4, ease: 'easeOut' }}
         style={{
           background:
-            'radial-gradient(55% 40% at 50% 46%, rgb(225 29 46 / 0.28), transparent 72%), radial-gradient(80% 60% at 50% 120%, rgb(139 92 246 / 0.14), transparent 70%)',
+            'radial-gradient(55% 40% at 50% 46%, rgb(255 106 0 / 0.28), transparent 72%), radial-gradient(80% 60% at 50% 120%, rgb(139 92 246 / 0.14), transparent 70%)',
         }}
       />
+      <Cobweb corner="tl" className="absolute left-0 top-0 h-40 w-40" opacity={0.22} />
+      <Cobweb corner="tr" className="absolute right-0 top-0 h-40 w-40" opacity={0.22} />
+      <Pumpkin className="absolute bottom-4 left-4 h-20 w-24 opacity-70" />
       <Embers count={10} className="opacity-70" />
       <div className="vignette pointer-events-none absolute inset-0" aria-hidden="true" />
 
@@ -103,7 +107,7 @@ export default function Intro({ onDone }) {
         exit={{ scale: 1.08, filter: 'blur(10px)', transition: { duration: 1, ease: [0.4, 0, 0.2, 1] } }}
       >
         {/* Tubo de neón que intenta prender */}
-        <div className="fd-neon-tube relative mb-8 h-[2px] w-[min(68vw,420px)] rounded-full bg-[#ff3346] shadow-[0_0_12px_2px_rgb(225_29_46/0.85),0_0_44px_8px_rgb(225_29_46/0.45)]" aria-hidden="true" />
+        <div className="fd-neon-tube relative mb-8 h-[2px] w-[min(68vw,420px)] rounded-full bg-[#ff3346] shadow-[0_0_12px_2px_rgb(255_106_0/0.85),0_0_44px_8px_rgb(255_106_0/0.45)]" aria-hidden="true" />
 
         <m.p
           className="text-[11px] font-semibold uppercase text-bone/80 sm:text-xs"
@@ -127,7 +131,7 @@ export default function Intro({ onDone }) {
                   className={
                     i === 0
                       ? 'fd-title-bone block text-[length:clamp(3.9rem,19vw,10.5rem)]'
-                      : 'fd-title-blood fd-neon-glow-text block text-[length:clamp(3.9rem,19vw,10.5rem)]'
+                      : 'fd-title-pumpkin fd-neon-glow-text block text-[length:clamp(3.9rem,19vw,10.5rem)]'
                   }
                 >
                   {line}
@@ -144,17 +148,17 @@ export default function Intro({ onDone }) {
           transition={{ delay: 2.4, duration: 0.8 }}
         >
           <m.span
-            className="h-px w-10 origin-right bg-blood/80 sm:w-16"
+            className="h-px w-10 origin-right bg-pumpkin/80 sm:w-16"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 2.5, duration: 0.9, ease: EASE }}
             aria-hidden="true"
           />
           <p className="font-display text-2xl uppercase tracking-[0.14em] text-bone sm:text-3xl">
-            {INTRO.date} <span className="text-blood-light">·</span> {INTRO.place}
+            {INTRO.date} <span className="text-pumpkin-light">·</span> {INTRO.place}
           </p>
           <m.span
-            className="h-px w-10 origin-left bg-blood/80 sm:w-16"
+            className="h-px w-10 origin-left bg-pumpkin/80 sm:w-16"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 2.5, duration: 0.9, ease: EASE }}
@@ -180,7 +184,7 @@ export default function Intro({ onDone }) {
           <button
             type="button"
             onClick={finish}
-            className="fd-shine group inline-flex h-14 items-center gap-3 rounded-full border border-blood/60 bg-blood/15 px-9 font-display text-lg uppercase tracking-[0.2em] text-bone shadow-[0_0_40px_-8px_rgb(225_29_46/0.9)] transition hover:bg-blood/30"
+            className="fd-shine group inline-flex h-14 items-center gap-3 rounded-full border border-pumpkin/60 bg-pumpkin/15 px-9 font-display text-lg uppercase tracking-[0.2em] text-bone shadow-[0_0_40px_-8px_rgb(255_106_0/0.9)] transition hover:bg-pumpkin/30"
           >
             Entrar
             <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
@@ -191,7 +195,7 @@ export default function Intro({ onDone }) {
       {/* Barra de progreso sutil hasta la salida automática */}
       <m.div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-linear-to-r from-blood-dark via-blood to-ember"
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-linear-to-r from-pumpkin-dark via-pumpkin to-ember"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: AUTO_EXIT_MS / 1000, ease: 'linear' }}

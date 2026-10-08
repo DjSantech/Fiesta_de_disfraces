@@ -8,6 +8,7 @@ import NightSection from '../../components/public/home/NightSection';
 import PricesSection from '../../components/public/home/PricesSection';
 import RoomsSection from '../../components/public/home/RoomsSection';
 import { FaqSection, FinalCta, InfoSection, MapSection, SponsorsSection } from '../../components/public/home/MoreSections';
+import { SectionBreak } from '../../components/public/decor';
 import LastOrderNotice from '../../components/public/LastOrderNotice';
 import { Marquee } from '../../components/public/ui';
 import { usePublicConfig } from '../../components/public/usePublicConfig';
@@ -34,10 +35,13 @@ export default function Home() {
       <Hero config={config} ready={!introOpen} />
       <Marquee items={[phaseText, ...MARQUEE]} />
       <NightSection />
+      <SectionBreak />
       <PricesSection config={config} />
       <RoomsSection config={config} known={known} />
+      <SectionBreak variant="pumpkin" />
       <MapSection config={config} known={known} />
       <InfoSection config={config} />
+      <SectionBreak />
       <FaqSection />
       <SponsorsSection />
       <FinalCta config={config} />

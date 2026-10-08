@@ -7,7 +7,7 @@ export default function NotFound() {
     <PublicLayout>
       <PageAtmosphere />
       <PageContainer className="flex min-h-[80dvh] flex-col items-center justify-center text-center">
-        <p className="fd-text-stroke font-display text-[length:clamp(8rem,45vw,16rem)] leading-none [-webkit-text-stroke:2px_rgb(225_29_46/0.7)]">
+        <p className="fd-text-stroke font-display text-[length:clamp(8rem,45vw,16rem)] leading-none [-webkit-text-stroke:2px_rgb(255_106_0/0.7)]">
           4<span className="animate-flicker">0</span>4
         </p>
         <h1 className="mt-2 font-display text-4xl uppercase text-bone">Te perdiste en la niebla</h1>

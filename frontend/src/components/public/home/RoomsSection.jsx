@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { ArrowRight, Bath, BedDouble, Eye, Map as MapIcon, TicketCheck, Users } from 'lucide-react';
 import { ROOMS_COPY } from '../../../config/event';
 import { ROOM_STATUS, RoomHelpNote, RoomPriceLine, RoomRowMini, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from '../rooms';
+import { Cobweb } from '../decor';
 import { Reveal, SectionHeading } from '../ui';
 
 function RoomCard({ room, known, salesOpen, index, phase, onView }) {
@@ -18,10 +19,11 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
       className={clsx(
         'relative flex flex-col overflow-hidden rounded-[28px] p-6 sm:p-7',
         big
-          ? 'noise-border bg-[linear-gradient(165deg,rgb(255_122_26/0.12),rgb(21_21_28/0.94)_42%)] shadow-[0_30px_80px_-36px_rgb(255_122_26/0.5)]'
+          ? 'noise-border bg-[linear-gradient(165deg,rgb(255_179_64/0.12),rgb(21_21_28/0.94)_42%)] shadow-[0_30px_80px_-36px_rgb(255_179_64/0.5)]'
           : 'border border-white/[0.08] bg-crypt/70',
       )}
     >
+      <Cobweb corner={index % 2 ? 'tl' : 'tr'} className={clsx('absolute top-0 h-20 w-20', index % 2 ? 'left-0' : 'right-0')} opacity={0.2} />
       <div className="-mx-6 -mt-6 mb-5 sm:-mx-7 sm:-mt-7">
         <RoomThumb number={room.number} className="h-40 w-full" />
       </div>
@@ -38,22 +40,22 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
       <ul className="mt-5 flex flex-col gap-2.5 text-sm text-fog">
         {room.beds && (
           <li className="flex items-center gap-2.5">
-            <BedDouble className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+            <BedDouble className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
             <span className="font-semibold text-bone">{room.beds}</span>
           </li>
         )}
         <li className="flex items-center gap-2.5">
-          <Users className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+          <Users className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
           <span className="font-semibold text-bone">{roomPeopleText(room)}</span>
         </li>
         {room.privateBathroom && (
           <li className="flex items-center gap-2.5">
-            <Bath className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+            <Bath className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
             <span className="font-semibold text-bone">Baño privado</span> al lado
           </li>
         )}
         <li className="flex items-center gap-2.5">
-          <TicketCheck className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+          <TicketCheck className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
           Entrada incluida para todo el grupo
         </li>
       </ul>
@@ -68,7 +70,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
           onClick={() => onView(room.number)}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.04] text-sm font-semibold uppercase tracking-[0.1em] text-bone transition hover:bg-white/[0.08]"
         >
-          <Eye className="h-4 w-4 text-blood-light" />
+          <Eye className="h-4 w-4 text-pumpkin-light" />
           Ver habitación
         </button>
         {canBook ? (
@@ -76,7 +78,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
             to={`/comprar?tipo=habitacion&hab=${room.number}`}
             className={clsx(
               'flex h-13 w-full items-center justify-center gap-2 rounded-2xl font-semibold transition',
-              big ? 'bg-blood text-white shadow-[0_0_30px_-8px_rgb(225_29_46/0.9)] hover:bg-blood-light' : 'border border-white/15 bg-white/[0.05] text-bone hover:border-blood/50 hover:bg-blood/15',
+              big ? 'bg-pumpkin text-white shadow-[0_0_30px_-8px_rgb(255_106_0/0.9)] hover:bg-pumpkin-light' : 'border border-white/15 bg-white/[0.05] text-bone hover:border-pumpkin/50 hover:bg-pumpkin/15',
             )}
           >
             Reservar {room.name || `Habitación ${room.number}`}
@@ -136,7 +138,7 @@ export default function RoomsSection({ config, known }) {
               href="#mapa"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 px-4 text-sm font-semibold text-bone transition hover:bg-white/[0.06]"
             >
-              <MapIcon className="h-4 w-4 text-blood-light" />
+              <MapIcon className="h-4 w-4 text-pumpkin-light" />
               Ver en el mapa
             </a>
           </div>

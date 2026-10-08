@@ -52,7 +52,7 @@ export function InfoSection({ config }) {
               const I = icons[i.icon] || Ban;
               return (
                 <li key={i.title} className="flex gap-4 rounded-3xl border border-white/[0.08] bg-crypt/70 p-5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blood/30 bg-blood/10 text-blood-light">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-pumpkin/30 bg-pumpkin/10 text-pumpkin-light">
                     <I className="h-5 w-5" strokeWidth={1.6} />
                   </span>
                   <div>
@@ -66,12 +66,12 @@ export function InfoSection({ config }) {
         </div>
         <Reveal id="politica" className="mt-4 rounded-[28px] border border-white/[0.08] bg-night p-6 sm:p-8">
           <h3 className="flex items-center gap-3 font-display text-2xl uppercase text-bone sm:text-3xl">
-            <ScrollText className="h-6 w-6 text-blood-light" strokeWidth={1.6} /> Política de devoluciones
+            <ScrollText className="h-6 w-6 text-pumpkin-light" strokeWidth={1.6} /> Política de devoluciones
           </h3>
           <ul className="mt-4 flex flex-col gap-3">
             {REFUND_POLICY.map((t) => (
               <li key={t} className="flex gap-3 text-[15px] leading-relaxed text-fog">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-blood" aria-hidden="true" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-pumpkin" aria-hidden="true" />
                 {t}
               </li>
             ))}
@@ -89,15 +89,15 @@ export function FaqSection() {
         <SectionHeading id="faq-title" index="06" overline="Preguntas" title={<>Lo que<br />preguntan</>} />
         <Reveal className="flex flex-col gap-2">
           {FAQ.map((f) => (
-            <details key={f.q} className="fd-faq group rounded-2xl border border-white/[0.08] bg-crypt/70 open:border-blood/30">
+            <details key={f.q} className="fd-faq group rounded-2xl border border-white/[0.08] bg-crypt/70 open:border-pumpkin/30">
               <summary className="flex cursor-pointer items-center justify-between gap-4 p-5 font-semibold text-bone">
                 {f.q}
-                <Plus className="fd-faq-icon h-5 w-5 shrink-0 text-blood-light transition-transform" />
+                <Plus className="fd-faq-icon h-5 w-5 shrink-0 text-pumpkin-light transition-transform" />
               </summary>
               <div className="px-5 pb-5 text-[15px] leading-relaxed text-fog">
                 {f.a}
                 {f.link && (
-                  <Link to={f.link.to} className="mt-3 flex items-center gap-1.5 font-semibold text-blood-light">
+                  <Link to={f.link.to} className="mt-3 flex items-center gap-1.5 font-semibold text-pumpkin-light">
                     {f.link.label} <ArrowRight className="h-4 w-4" />
                   </Link>
                 )}
@@ -122,7 +122,7 @@ export function SponsorsSection() {
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex h-full flex-col items-center justify-center gap-3 rounded-3xl border border-white/[0.08] bg-crypt/60 p-5 text-center transition hover:border-blood/35"
+                className="group flex h-full flex-col items-center justify-center gap-3 rounded-3xl border border-white/[0.08] bg-crypt/60 p-5 text-center transition hover:border-pumpkin/35"
               >
                 {s.logo ? (
                   <img src={s.logo} alt={s.name} loading="lazy" className="h-14 w-auto object-contain" />
@@ -132,7 +132,7 @@ export function SponsorsSection() {
                   </span>
                 )}
                 <span className="text-sm font-semibold text-bone">{s.name}</span>
-                <span className="flex items-center gap-1 text-xs text-fog group-hover:text-blood-light">
+                <span className="flex items-center gap-1 text-xs text-fog group-hover:text-pumpkin-light">
                   {s.url.replace(/^https?:\/\//, '')} <ExternalLink className="h-3 w-3" />
                 </span>
               </a>
@@ -150,7 +150,7 @@ export function FinalCta({ config }) {
       <div className="fd-hero-glow pointer-events-none absolute inset-0 opacity-80" aria-hidden="true" />
       <div className="relative mx-auto max-w-3xl px-4">
         <p className="font-display text-[length:clamp(3.2rem,15vw,8rem)] uppercase leading-[0.86] text-bone">
-          Nos vemos <span className="fd-title-blood">el 31</span>
+          Nos vemos <span className="fd-title-pumpkin">el 31</span>
         </p>
         <p className="mt-4 font-serif text-2xl italic text-fog">Ven disfrazado. El resto lo pone la noche.</p>
         <HeroCta config={config} className="mt-10" />
