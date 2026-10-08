@@ -1,5 +1,5 @@
 # Cabeceras para Cloudflare Pages.
-# CSP: reemplaza https://TU-BACKEND.onrender.com por la URL real de Render (VITE_API_URL).
+# CSP: connect-src permite cualquier backend en *.onrender.com. Si usas otro dominio para la API, agrégalo ahí.
 # Si algo deja de cargar, mira la consola del navegador y agrega el dominio a la directiva que falle.
 /*
   X-Content-Type-Options: nosniff
@@ -7,7 +7,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://TU-BACKEND.onrender.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://*.mercadopago.com.co https://*.mercadopago.com
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.onrender.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://*.mercadopago.com.co https://*.mercadopago.com
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
