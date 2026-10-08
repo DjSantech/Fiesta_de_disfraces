@@ -1,0 +1,7 @@
+Logos de patrocinadores
+=======================
+1. Guarda cada logo aquí (PNG o SVG con fondo transparente, ~400 px de ancho), ej.:
+     powermix.png, ceo-fragancia.png, vapitos-princys.png, panes-y-pan.png
+2. En frontend/src/config/event.js, en SPONSORS, llena `logo` con la ruta pública:
+     { name: 'Powermix Luces y Sonido', url: 'https://powermixlucesysonido.com', logo: '/sponsors/powermix.png' }
+Mientras `logo` sea null se muestra un espacio elegante con las iniciales.

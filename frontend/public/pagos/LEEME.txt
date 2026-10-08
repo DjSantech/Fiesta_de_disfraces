@@ -1,0 +1,9 @@
+QR de pago por transferencia
+============================
+Pon aquí las imágenes de los códigos QR (PNG, cuadradas, fondo blanco):
+
+  qr-nequi.png       → QR de Nequi (3135995612)
+  qr-daviplata.png   → QR de Daviplata (3135995612)
+
+La web las muestra solas en el paso de transferencia (/comprar y /orden/...).
+Si no existen, en producción simplemente no se muestran (en desarrollo sale un aviso).

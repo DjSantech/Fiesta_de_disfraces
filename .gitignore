@@ -1,0 +1,31 @@
+# Dependencias
+node_modules/
+
+# Builds
+frontend/dist/
+.tmp-build*/
+
+# Variables de entorno (secretos). Solo se versiona .env.example
+.env
+.env.*
+!.env.example
+
+# Datos locales
+.mongo-data/
+*.log
+npm-debug.log*
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Videos/medios pesados
+media/
+
+# Certificados / llaves
+*.pem
+*.key
+*.crt

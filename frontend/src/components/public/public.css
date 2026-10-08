@@ -1,0 +1,305 @@
+/* Efectos propios de la web pública (complementan src/index.css).
+   Todas las animaciones usan transform/opacity. Destellos ≤ 3 por segundo y en áreas pequeñas (WCAG 2.3.1). */
+
+/* ───────── Hero ───────── */
+.fd-hero-glow {
+  background:
+    radial-gradient(60% 45% at 50% 0%, rgb(225 29 46 / 0.42), transparent 70%),
+    radial-gradient(40% 35% at 12% 18%, rgb(139 92 246 / 0.16), transparent 70%),
+    radial-gradient(45% 40% at 92% 30%, rgb(255 122 26 / 0.1), transparent 70%);
+}
+
+.fd-beam {
+  position: absolute;
+  top: -12%;
+  width: 70vmax;
+  height: 120vmax;
+  transform-origin: 50% 0%;
+  pointer-events: none;
+  background: conic-gradient(from 180deg at 50% 0%, transparent 0deg, transparent 168deg, rgb(255 77 94 / 0.16) 176deg, rgb(255 255 255 / 0.08) 180deg, rgb(255 77 94 / 0.16) 184deg, transparent 192deg, transparent 360deg);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.fd-beam--left {
+  left: -30vmax;
+  animation: fd-beam-left 13s ease-in-out infinite alternate;
+}
+.fd-beam--right {
+  right: -30vmax;
+  background: conic-gradient(from 180deg at 50% 0%, transparent 0deg, transparent 168deg, rgb(139 92 246 / 0.17) 176deg, rgb(255 255 255 / 0.06) 180deg, rgb(139 92 246 / 0.17) 184deg, transparent 192deg, transparent 360deg);
+  animation: fd-beam-right 15s ease-in-out infinite alternate;
+}
+@keyframes fd-beam-left {
+  from { transform: rotate(-38deg); }
+  to { transform: rotate(-8deg); }
+}
+@keyframes fd-beam-right {
+  from { transform: rotate(36deg); }
+  to { transform: rotate(6deg); }
+}
+
+.fd-title-bone {
+  background: linear-gradient(180deg, #fbf8f2 0%, #e9e2d6 55%, #b9afa3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 28px rgb(225 29 46 / 0.28));
+}
+.fd-title-blood {
+  color: #ef2536;
+  text-shadow: 0 0 22px rgb(225 29 46 / 0.6), 0 0 60px rgb(225 29 46 / 0.3);
+}
+.fd-text-stroke {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(242 237 228 / 0.09);
+}
+
+/* Brasas que suben (hero, intro) */
+.fd-ember {
+  position: absolute;
+  bottom: -12px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #ffe0bf 0%, #ff7a1a 42%, rgb(225 29 46 / 0) 72%);
+  opacity: 0;
+  pointer-events: none;
+  animation: fd-ember-rise var(--dur, 11s) linear var(--delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+@keyframes fd-ember-rise {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
+  8% { opacity: 0.95; }
+  65% { opacity: 0.55; }
+  100% { transform: translate3d(var(--drift, 20px), -88vh, 0) scale(0.35); opacity: 0; }
+}
+
+/* Brillo que cruza el CTA principal */
+.fd-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.fd-shine::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 38%;
+  background: linear-gradient(100deg, transparent 0%, rgb(255 255 255 / 0.32) 50%, transparent 100%);
+  transform: translateX(-160%) skewX(-18deg);
+  animation: fd-shine 4.2s cubic-bezier(0.4, 0, 0.2, 1) 1.2s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes fd-shine {
+  0%, 55% { transform: translateX(-160%) skewX(-18deg); }
+  85%, 100% { transform: translateX(330%) skewX(-18deg); }
+}
+
+/* Cinta tipo flyer */
+.fd-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: fd-marquee 38s linear infinite;
+  will-change: transform;
+}
+@keyframes fd-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* ───────── Intro ───────── */
+.fd-neon-tube {
+  opacity: 0;
+  animation:
+    fd-neon-on 1.9s linear 0.25s forwards,
+    fd-neon-buzz 5.5s linear 2.2s infinite;
+}
+@keyframes fd-neon-on {
+  0% { opacity: 0; }
+  7% { opacity: 0.9; }
+  11% { opacity: 0.12; }
+  30% { opacity: 0.12; }
+  33% { opacity: 1; }
+  40% { opacity: 0.3; }
+  62% { opacity: 0.32; }
+  66%, 100% { opacity: 1; }
+}
+@keyframes fd-neon-buzz {
+  0%, 68% { opacity: 1; }
+  69% { opacity: 0.55; }
+  71% { opacity: 1; }
+  88% { opacity: 1; }
+  89% { opacity: 0.7; }
+  90%, 100% { opacity: 1; }
+}
+.fd-neon-glow-text {
+  animation: fd-neon-text 5.5s linear 2.2s infinite;
+}
+@keyframes fd-neon-text {
+  0%, 68% { text-shadow: 0 0 20px rgb(225 29 46 / 0.75), 0 0 64px rgb(225 29 46 / 0.4); }
+  69% { text-shadow: 0 0 6px rgb(225 29 46 / 0.3); }
+  71%, 100% { text-shadow: 0 0 20px rgb(225 29 46 / 0.75), 0 0 64px rgb(225 29 46 / 0.4); }
+}
+
+/* ───────── Celebración ───────── */
+.fd-glitch {
+  position: relative;
+  display: inline-block;
+}
+.fd-glitch::before,
+.fd-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.fd-glitch::before {
+  color: #ff2d40;
+  animation: fd-glitch-a 1.15s steps(1, end) 0.15s 1 both;
+}
+.fd-glitch::after {
+  color: #8b5cf6;
+  animation: fd-glitch-b 1.15s steps(1, end) 0.15s 1 both;
+}
+@keyframes fd-glitch-a {
+  0% { opacity: 0.85; clip-path: inset(10% 0 62% 0); transform: translate(-6px, 0); }
+  20% { clip-path: inset(58% 0 12% 0); transform: translate(5px, 0); }
+  40% { clip-path: inset(32% 0 40% 0); transform: translate(-3px, 0); }
+  60% { clip-path: inset(74% 0 4% 0); transform: translate(4px, 0); }
+  80% { clip-path: inset(18% 0 70% 0); transform: translate(-2px, 0); }
+  100% { opacity: 0; transform: none; }
+}
+@keyframes fd-glitch-b {
+  0% { opacity: 0.75; clip-path: inset(66% 0 8% 0); transform: translate(6px, 0); }
+  20% { clip-path: inset(12% 0 64% 0); transform: translate(-5px, 0); }
+  40% { clip-path: inset(44% 0 28% 0); transform: translate(3px, 0); }
+  60% { clip-path: inset(6% 0 80% 0); transform: translate(-4px, 0); }
+  80% { clip-path: inset(52% 0 30% 0); transform: translate(2px, 0); }
+  100% { opacity: 0; transform: none; }
+}
+.fd-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgb(225 29 46 / 0.32) 48%, rgb(255 210 190 / 0.18) 50%, rgb(225 29 46 / 0.32) 52%, transparent 70%);
+  transform: translateX(-100%);
+  animation: fd-sweep 1.6s cubic-bezier(0.6, 0, 0.2, 1) 0.1s 1 both;
+}
+@keyframes fd-sweep {
+  from { transform: translateX(-100%); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0.2; }
+}
+
+/* ───────── Estados ───────── */
+.fd-scanline {
+  animation: fd-scan 2.6s ease-in-out infinite alternate;
+}
+@keyframes fd-scan {
+  from { transform: translateY(-8px); }
+  to { transform: translateY(var(--scan-distance, 120px)); }
+}
+
+/* ───────── Mapa de la finca ───────── */
+.fd-blueprint {
+  background-color: #08080d;
+  background-image:
+    linear-gradient(rgb(139 92 246 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(139 92 246 / 0.07) 1px, transparent 1px),
+    linear-gradient(rgb(242 237 228 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(242 237 228 / 0.025) 1px, transparent 1px);
+  background-size: 48px 48px, 48px 48px, 12px 12px, 12px 12px;
+  background-position: -1px -1px;
+}
+.fd-zone {
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.fd-zone .fd-zone-shape {
+  transition: stroke 0.2s ease, fill 0.2s ease, stroke-opacity 0.2s ease;
+}
+.fd-zone .fd-zone-focus {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.fd-zone:focus-visible .fd-zone-focus {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .fd-zone:hover .fd-zone-shape {
+    stroke-opacity: 1;
+  }
+  .fd-zone:hover .fd-zone-label {
+    fill: #ffffff;
+  }
+}
+.fd-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fd-ripple 5.5s ease-out infinite;
+}
+@keyframes fd-ripple {
+  0% { transform: scale(0.45); opacity: 0.55; }
+  100% { transform: scale(1.02); opacity: 0; }
+}
+.fd-eq-bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fd-eq 0.9s ease-in-out infinite alternate;
+}
+@keyframes fd-eq {
+  from { transform: scaleY(0.25); }
+  to { transform: scaleY(1); }
+}
+.fd-pulse-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fd-pulse-dot 2.4s ease-out infinite;
+}
+@keyframes fd-pulse-dot {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.fd-dash-flow {
+  animation: fd-dash 2.8s linear infinite;
+}
+@keyframes fd-dash {
+  to { stroke-dashoffset: -24; }
+}
+
+/* ───────── FAQ (details/summary) ───────── */
+.fd-faq summary {
+  list-style: none;
+}
+.fd-faq summary::-webkit-details-marker {
+  display: none;
+}
+.fd-faq[open] .fd-faq-icon {
+  transform: rotate(45deg);
+}
+
+/* ───────── Boleto ───────── */
+.fd-ticket-notch {
+  position: absolute;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  background: #07070a;
+  transform: translateY(-50%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fd-ember,
+  .fd-beam,
+  .fd-shine::after,
+  .fd-ripple,
+  .fd-pulse-dot {
+    display: none;
+  }
+  .fd-neon-tube {
+    opacity: 1;
+  }
+}
