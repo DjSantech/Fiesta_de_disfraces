@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowLeft, ArrowRight, BadgePercent, BedDouble, CreditCard, Plus, Smartphone, Ticket, Trash2, TicketX } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BadgePercent, BedDouble, CreditCard, Plus, Smartphone, Ticket, Trash2, TicketX, TriangleAlert } from 'lucide-react';
 import { Button, Checkbox, Input, Segmented } from '../../components/ui';
 import { api } from '../../lib/api';
 import { formatCOP } from '../../lib/format';
@@ -304,6 +304,9 @@ export default function Buy() {
                 nextFromDetails();
               }}
             >
+              <Notice tone="gold" icon={TriangleAlert} title="Escribe bien tu cédula y tu celular">
+                Con estos dos datos vas a consultar tu entrada y tu QR. Si tienen un error, no vas a poder verla. Revísalos antes de continuar.
+              </Notice>
               <Input label="Nombre completo" required autoComplete="name" value={buyer.name} onChange={setB('name')} error={err('buyer.name')} maxLength={80} />
               <Input
                 label="Cédula"
