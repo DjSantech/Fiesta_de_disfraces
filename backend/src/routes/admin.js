@@ -277,7 +277,7 @@ export function adminRouter() {
     const status = roomStatus(room);
     const o = room.orderId && ['held', 'booked'].includes(status) ? await Order.findById(room.orderId).lean() : null;
     return {
-      number: room.number, name: room.name, capacity: room.capacity, price: room.price, privateBathroom: !!room.privateBathroom,
+      number: room.number, name: room.name, capacity: room.capacity, minPeople: room.minPeople ?? 1, price: room.price, presalePrice: room.presalePrice ?? room.price, beds: room.beds || '', privateBathroom: !!room.privateBathroom,
       blocked: !!room.blocked, status,
       order: o ? { id: String(o._id), token: o.token, status: o.status, buyerName: o.buyer.name, buyerPhone: o.buyer.phone, holdExpiresAt: o.holdExpiresAt ? o.holdExpiresAt.toISOString() : null } : null,
     };
@@ -288,9 +288,14 @@ export function adminRouter() {
   });
   r.put('/rooms/:number', validate({
     params: z.object({ number: z.coerce.number().int().min(1).max(99) }),
-    body: z.object({ name: text(2, 60).optional(), capacity: z.number().int().min(1).max(20).optional(), price: money.optional(), privateBathroom: z.boolean().optional(), blocked: z.boolean().optional() }),
+    body: z.object({ name: text(2, 60).optional(), capacity: z.number().int().min(1).max(20).optional(), minPeople: z.number().int().min(1).max(20).optional(), price: money.optional(), presalePrice: money.optional(), beds: text(0, 80).optional(), privateBathroom: z.boolean().optional(), blocked: z.boolean().optional() }),
   }), async (req, res) => {
     const set = Object.fromEntries(Object.entries(req.valid.body).filter(([, v]) => v !== undefined));
+    if (set.minPeople !== undefined || set.capacity !== undefined) {
+      const cur = await Room.findOne({ number: req.valid.params.number }).lean();
+      if (!cur) throw notFound('Esa habitación no existe.');
+      if ((set.minPeople ?? cur.minPeople ?? 1) > (set.capacity ?? cur.capacity)) throw fieldError('minPeople', 'El mínimo de personas no puede superar el máximo.');
+    }
     const room = await Room.findOneAndUpdate({ number: req.valid.params.number }, { $set: set }, { returnDocument: 'after' }).lean();
     if (!room) throw notFound('Esa habitación no existe.');
     res.json({ room: await roomAdmin(room) });

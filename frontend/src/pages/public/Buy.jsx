@@ -8,7 +8,7 @@ import { formatCOP } from '../../lib/format';
 import { LEGAL } from '../../config/event';
 import PublicLayout, { PageAtmosphere, PageContainer } from '../../components/public/PublicLayout';
 import { PolicyModal, PriceBreakdown, TransferPanel } from '../../components/public/payment';
-import { RoomStatusBadge } from '../../components/public/rooms';
+import { RoomHelpNote, RoomStatusBadge, roomPeopleText, roomPricing } from '../../components/public/rooms';
 import { Notice } from '../../components/public/ui';
 import { salesState, usePublicConfig, loadPublicConfig } from '../../components/public/usePublicConfig';
 import { describeError } from '../../components/public/utils/errors';
@@ -97,6 +97,10 @@ export default function Buy() {
 
   const state = salesState(config);
   const room = config.rooms.find((r) => r.number === roomNumber) || null;
+  const maxCompanions = room ? room.capacity - 1 : 0;
+  useEffect(() => {
+    if (kind === 'room' && room && companions.length > maxCompanions) setCompanions((l) => l.slice(0, maxCompanions));
+  }, [kind, room, companions.length, maxCompanions]);
   const ticketsOpen = state === 'preventa' || state === 'general';
   const salesOpen = state !== 'closed';
 
@@ -143,7 +147,7 @@ export default function Buy() {
   }, [quoteKey, step, kind, gender, roomNumber]);
 
   const localBreakdown = kind === 'room'
-    ? room && { phase: config.event.phase, base: room.price, isGuest: false, discountPercent: 0, discount: 0, total: room.price }
+    ? room && { phase: config.event.phase, base: roomPricing(room, config.event.phase).current, isGuest: false, discountPercent: 0, discount: 0, total: roomPricing(room, config.event.phase).current }
     : gender && { phase: config.event.phase, base: config.prices.current[gender], isGuest: false, discountPercent: 0, discount: 0, total: config.prices.current[gender] };
   const breakdown = quote?.key === quoteKey ? quote.breakdown : localBreakdown;
 
@@ -264,12 +268,13 @@ export default function Buy() {
                         active={roomNumber === r.number}
                         disabled={!free}
                         onClick={() => setRoomNumber(r.number)}
-                        title={`${r.name} · ${formatCOP(r.price)}`}
-                        hint={`Para ${r.capacity} personas${r.privateBathroom ? ' · baño privado' : ''}`}
+                        title={`${r.name} · ${formatCOP(roomPricing(r, config.event.phase).current)}`}
+                        hint={`${r.beds ? `${r.beds} · ` : ''}${roomPeopleText(r)}${r.privateBathroom ? ' · baño privado' : ''}${roomPricing(r, config.event.phase).isPresale ? ` · preventa, después ${formatCOP(r.price)}` : ''}`}
                         right={<RoomStatusBadge status={r.status} known={live} short />}
                       />
                     );
                   })}
+                  <RoomHelpNote contact={config.contact} room={room} className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4" />
                   {paramRoom && live && !room && <p className="text-sm text-gold">La Habitación {paramRoom} ya no está disponible. Elige otra.</p>}
                 </div>
               )}
@@ -318,7 +323,10 @@ export default function Buy() {
               {kind === 'room' && room && (
                 <div className="rounded-2xl border border-white/10 bg-crypt/60 p-4">
                   <p className="font-semibold text-bone">Acompañantes (opcional)</p>
-                  <p className="mt-0.5 text-xs text-fog">Hasta {room.capacity - 1}. Puedes completarlos después con el admin.</p>
+                  <p className="mt-0.5 text-xs text-fog">Esta habitación es para mínimo {room.minPeople || 1} y máximo {room.capacity} personas (tú cuentas como 1, así que puedes agregar hasta {room.capacity - 1}). Puedes completarlos después con el admin.</p>
+                  {companions.length + 1 < (room.minPeople || 1) && (
+                    <p className="mt-2 text-xs text-gold" role="status">Ojo: la habitación se piensa para mínimo {room.minPeople} personas. Puedes continuar igual.</p>
+                  )}
                   <div className="mt-3 flex flex-col gap-3">
                     {companions.map((c, i) => (
                       <div key={i} className="grid grid-cols-[1fr_auto] gap-2 sm:grid-cols-[1fr_10rem_auto]">

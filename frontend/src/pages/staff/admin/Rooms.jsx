@@ -46,7 +46,13 @@ function RoomCard({ room, now, onEdit, onOpenOrder }) {
             </Badge>
           </div>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fog">
-            <span>{plural(room.capacity, 'persona')}</span>
+            {room.beds && (
+              <>
+                <span>{room.beds}</span>
+                <span aria-hidden="true">·</span>
+              </>
+            )}
+            <span>{room.minPeople && room.minPeople < room.capacity ? `${room.minPeople} a ${room.capacity} personas` : plural(room.capacity, 'persona')}</span>
             <span aria-hidden="true">·</span>
             <span className="inline-flex items-center gap-1">
               <ShowerHead className="h-3.5 w-3.5" />
@@ -57,7 +63,10 @@ function RoomCard({ room, now, onEdit, onOpenOrder }) {
       </div>
 
       <div className="flex items-end justify-between gap-3">
-        <p className="text-3xl font-bold tabular-nums leading-none text-bone">{formatCOP(room.price)}</p>
+        <div>
+          <p className="text-3xl font-bold tabular-nums leading-none text-bone">{formatCOP(room.presalePrice ?? room.price)}</p>
+          <p className="mt-1 text-xs text-fog">Preventa · normal {formatCOP(room.price)}</p>
+        </div>
         <div className="flex flex-wrap justify-end gap-0.5" aria-label={`Capacidad: ${room.capacity} personas`}>
           {Array.from({ length: capacity }, (_, i) => (
             <UserRound
@@ -121,7 +130,10 @@ function RoomEditModal({ room, onClose, onSaved }) {
   const toast = useToast();
   const [form, setForm] = useState({
     name: room.name || '',
+    beds: room.beds || '',
+    minPeople: room.minPeople ?? 1,
     capacity: room.capacity ?? null,
+    presalePrice: room.presalePrice ?? room.price ?? null,
     price: room.price ?? null,
     privateBathroom: Boolean(room.privateBathroom),
     blocked: Boolean(room.blocked),
@@ -141,7 +153,9 @@ function RoomEditModal({ room, onClose, onSaved }) {
     const next = {};
     if (form.name.trim().length < 2) next.name = 'Escribe un nombre.';
     if (!form.capacity || form.capacity < 1 || form.capacity > 20) next.capacity = 'Entre 1 y 20 personas.';
-    if (form.price === null) next.price = 'Escribe el precio.';
+    if (!form.minPeople || form.minPeople < 1 || form.minPeople > form.capacity) next.minPeople = 'Entre 1 y el máximo de personas.';
+    if (form.presalePrice === null) next.presalePrice = 'Escribe el precio de preventa.';
+    if (form.price === null) next.price = 'Escribe el precio normal.';
     if (Object.keys(next).length) {
       setErrors(next);
       return;
@@ -150,6 +164,9 @@ function RoomEditModal({ room, onClose, onSaved }) {
     if (form.name.trim() !== room.name) body.name = form.name.trim();
     if (form.capacity !== room.capacity) body.capacity = form.capacity;
     if (form.price !== room.price) body.price = form.price;
+    if (form.presalePrice !== (room.presalePrice ?? room.price)) body.presalePrice = form.presalePrice;
+    if (form.minPeople !== (room.minPeople ?? 1)) body.minPeople = form.minPeople;
+    if (form.beds.trim() !== (room.beds || '')) body.beds = form.beds.trim();
     if (form.privateBathroom !== Boolean(room.privateBathroom)) body.privateBathroom = form.privateBathroom;
     if (form.blocked !== Boolean(room.blocked)) body.blocked = form.blocked;
     if (!Object.keys(body).length) {
@@ -166,6 +183,8 @@ function RoomEditModal({ room, onClose, onSaved }) {
         name: fieldError(err, 'name'),
         capacity: fieldError(err, 'capacity'),
         price: fieldError(err, 'price'),
+        presalePrice: fieldError(err, 'presalePrice'),
+        minPeople: fieldError(err, 'minPeople'),
       });
       toast.error(err.message);
     } finally {
@@ -192,9 +211,11 @@ function RoomEditModal({ room, onClose, onSaved }) {
     >
       <form id="room-form" onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Input label="Nombre" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} autoComplete="off" />
+        <Input label="Camas" value={form.beds} onChange={(e) => set('beds', e.target.value)} error={errors.beds} maxLength={80} placeholder="1 cama doble + 1 sencilla" autoComplete="off" />
         <div className="grid grid-cols-2 gap-3">
+          <IntegerInput label="Mínimo de personas" suffix="pers." max={20} maxDigits={2} value={form.minPeople} onChange={(n) => set('minPeople', n)} error={errors.minPeople} hint="Informativo" />
           <IntegerInput
-            label="Capacidad"
+            label="Máximo de personas"
             suffix="pers."
             max={20}
             maxDigits={2}
@@ -203,7 +224,8 @@ function RoomEditModal({ room, onClose, onSaved }) {
             error={errors.capacity}
             hint="De 1 a 20"
           />
-          <MoneyInput label="Precio" value={form.price} onChange={(n) => set('price', n)} error={errors.price} />
+          <MoneyInput label="Precio preventa" value={form.presalePrice} onChange={(n) => set('presalePrice', n)} error={errors.presalePrice} />
+          <MoneyInput label="Precio normal" value={form.price} onChange={(n) => set('price', n)} error={errors.price} />
         </div>
         <div className="flex flex-col gap-4 rounded-2xl border border-white/[0.08] bg-tomb/40 p-4">
           <Switch

@@ -9,7 +9,11 @@ export const BCRYPT_ROUNDS = 12;
 export async function ensureBaseData(config, logger) {
   await Promise.all(allModels.map((m) => m.init())); // índices únicos listos antes de atender
   await Settings.updateOne({ _id: SETTINGS_ID }, { $setOnInsert: DEFAULT_SETTINGS }, { upsert: true });
-  for (const r of DEFAULT_ROOMS) await Room.updateOne({ number: r.number }, { $setOnInsert: r }, { upsert: true });
+  for (const r of DEFAULT_ROOMS) {
+    await Room.updateOne({ number: r.number }, { $setOnInsert: r }, { upsert: true });
+    // Migración: habitaciones legacy (sin presalePrice) pasan a los nuevos datos; no toca reserva/apartado.
+    await Room.updateOne({ number: r.number, presalePrice: null }, { $set: r });
+  }
   if ((await User.countDocuments()) > 0) return;
   if (!config.adminPassword) {
     if (config.isProd) throw new Error('No hay usuarios: define ADMIN_PASSWORD para crear el administrador inicial.');

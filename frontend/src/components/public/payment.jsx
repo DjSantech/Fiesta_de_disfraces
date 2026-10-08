@@ -28,7 +28,7 @@ export function PolicyModal({ open, onClose }) {
 export function PriceBreakdown({ kind, gender, room, breakdown, loading, className }) {
   if (!breakdown) return null;
   const item = kind === 'room'
-    ? `${room?.name || 'Habitación'} · ${room?.capacity || ''} personas`
+    ? `${room?.name || 'Habitación'}${room?.capacity ? ` · hasta ${room.capacity} personas` : ''}`
     : `Entrada ${GENDER_LABEL[gender] || ''} · ${PHASE_LABEL[breakdown.phase] || ''}`;
   return (
     <dl className={clsx('flex flex-col gap-2 text-sm', className)}>

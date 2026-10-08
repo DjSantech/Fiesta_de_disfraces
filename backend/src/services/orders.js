@@ -142,7 +142,7 @@ export async function createPublicOrder(ctx, input) {
     order = await insertOrder({
       _id, kind: input.kind, status: 'pending_payment', paymentMethod: input.paymentMethod,
       amount: breakdown.total, breakdown, gender: input.gender ?? null,
-      room: room ? { number: room.number, name: room.name, capacity: room.capacity, privateBathroom: room.privateBathroom } : null,
+      room: room ? { number: room.number, name: room.name, capacity: room.capacity, minPeople: room.minPeople, beds: room.beds, privateBathroom: room.privateBathroom } : null,
       buyer: input.buyer, companions: room ? input.companions : [],
       guestId: guest?._id ?? null, guestName: guest?.name ?? null,
       holdExpiresAt: room ? expiresAt : null, expiresAt,
@@ -393,7 +393,7 @@ export async function createManualOrder(input, admin) {
     await insertOrder({
       _id, kind: input.kind, status: 'paid', paymentMethod: 'manual', manualMethod: input.manualMethod, amount, breakdown,
       gender: input.gender ?? null,
-      room: room ? { number: room.number, name: room.name, capacity: room.capacity, privateBathroom: room.privateBathroom } : null,
+      room: room ? { number: room.number, name: room.name, capacity: room.capacity, minPeople: room.minPeople, beds: room.beds, privateBathroom: room.privateBathroom } : null,
       buyer: input.buyer, companions: room ? input.companions : [], guestId: guest?._id ?? null, guestName: guest?.name ?? null,
       notes: input.notes || '', reviewedBy: admin._id, reviewedByName: admin.name, reviewedAt: now, paidAt: now,
     });

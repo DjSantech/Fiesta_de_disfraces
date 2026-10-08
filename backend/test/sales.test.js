@@ -26,13 +26,19 @@ test('quote: preventa, general y descuento de invitado', async () => {
   await Guest.create({ name: 'Juan', instagram: 'juan' });
   r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre', instagram: '@JUAN' });
   assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 30000, isGuest: true, discountPercent: 25, discount: 7500, total: 22500 });
+  r = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 3 });
+  assert.equal(r.body.breakdown.total, 500000);
+  r = await api.get('/api/public/config');
+  assert.equal(r.body.rooms[0].presalePrice, 250000);
+  assert.equal(r.body.rooms[0].currentPrice, 250000);
+  assert.equal(r.body.rooms[0].minPeople, 3);
   await Settings.updateOne({ _id: 'main' }, { $set: { presaleEndsAt: new Date(Date.now() - 1000) } });
   r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'mujer', instagram: 'juan' });
   assert.equal(r.body.breakdown.phase, 'general');
   assert.equal(r.body.breakdown.base, 25000);
   assert.equal(r.body.breakdown.total, 19000);
   r = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 3 });
-  assert.equal(r.body.breakdown.total, 500000);
+  assert.equal(r.body.breakdown.total, 600000);
   r = await api.post('/api/public/quote').send({ kind: 'ticket' });
   assert.equal(r.status, 400);
   assert.equal(r.body.error.code, 'VALIDATION_ERROR');
@@ -136,7 +142,7 @@ test('habitación: apartado, ROOM_UNAVAILABLE, N tickets, expiración y conflict
   assert.equal(r.body.rooms.find((x) => x.number === 3).status, 'held');
   r = await api.post('/api/public/orders').send(roomOrder());
   assert.equal(r.body.error.code, 'ROOM_UNAVAILABLE');
-  r = await api.post('/api/public/orders').send(roomOrder({ roomNumber: 1, companions: Array(4).fill({ name: 'Pepe' }) }));
+  r = await api.post('/api/public/orders').send(roomOrder({ roomNumber: 1, companions: Array(5).fill({ name: 'Pepe' }) }));
   assert.equal(r.status, 400);
 
   r = await api.post(`/api/public/orders/${tokenA}/mock-pay`).send({ outcome: 'approved' });

@@ -1,4 +1,10 @@
+import { useState } from 'react';
 import clsx from 'clsx';
+import { Bath, BedDouble, ChevronLeft, ChevronRight, Lock, Luggage, Users } from 'lucide-react';
+import { ROOMS_COPY, ROOM_PERKS, ROOM_PHOTOS } from '../../config/event';
+import { formatCOP, whatsappLink } from '../../lib/format';
+import Modal from '../ui/Modal';
+import { WhatsAppIcon } from './icons';
 
 export const ROOM_STATUS = {
   available: { label: 'Disponible', short: 'Libre', tone: 'toxic', color: '#22e584' },
@@ -79,5 +85,157 @@ export function RoomRowMini({ highlight, className }) {
         );
       })}
     </svg>
+  );
+}
+
+/** Precios según fase: preventa muestra presalePrice y el normal; general solo el normal. */
+export function roomPricing(room, phase) {
+  const normal = room.price;
+  const presale = room.presalePrice ?? room.price;
+  const isPresale = phase !== 'general' && presale !== normal;
+  return { normal, presale, isPresale, current: phase === 'general' ? normal : presale };
+}
+
+export const roomPeopleText = (room) =>
+  room.minPeople && room.minPeople < room.capacity ? `De ${room.minPeople} a ${room.capacity} personas` : `Hasta ${room.capacity} personas`;
+
+export function RoomPriceLine({ room, phase, size = 'lg', className }) {
+  const p = roomPricing(room, phase);
+  return (
+    <div className={className}>
+      <p className={clsx('font-display leading-none tabular-nums text-bone', size === 'lg' ? 'text-[2.6rem]' : 'text-2xl')}>{formatCOP(p.current)}</p>
+      <p className="mt-1.5 text-xs text-fog">
+        {p.isPresale ? (
+          <>
+            Preventa · después <s className="text-fog/80">{formatCOP(p.normal)}</s>
+          </>
+        ) : (
+          'Precio normal, con la entrada de todo el grupo'
+        )}
+      </p>
+    </div>
+  );
+}
+
+const PERK_ICONS = { lock: Lock, bag: Luggage, bed: BedDouble, bath: Bath };
+
+export function RoomPerks({ room, className }) {
+  const perks = [...ROOM_PERKS.all, ...(room.privateBathroom ? ROOM_PERKS.big : [])];
+  return (
+    <div className={className}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fog">Qué incluye tu habitación</p>
+      <ul className="mt-2.5 flex flex-col gap-2">
+        {perks.map((p) => {
+          const I = PERK_ICONS[p.icon] || Lock;
+          return (
+            <li key={p.text} className="flex items-start gap-2.5 text-sm text-bone/90">
+              <I className="mt-0.5 h-4 w-4 shrink-0 text-blood-light" strokeWidth={1.75} aria-hidden="true" />
+              {p.text}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** Nota para pedir más personas o ajustar el precio, con botón de WhatsApp. */
+export function RoomHelpNote({ contact = {}, room, className }) {
+  const text = room ? ROOMS_COPY.whatsappTextFor(room.name || `Habitación ${room.number}`) : ROOMS_COPY.whatsappText;
+  return (
+    <div className={clsx('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
+      <p className="text-sm leading-relaxed text-bone/90">{ROOMS_COPY.help}.</p>
+      <a
+        href={whatsappLink(contact.whatsapp, text)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-toxic/12 px-4 text-sm font-semibold text-toxic ring-1 ring-toxic/35 transition hover:bg-toxic/20"
+      >
+        <WhatsAppIcon className="h-5 w-5" />
+        Escribirle a {contact.adminName || 'DJ Santech'}
+      </a>
+    </div>
+  );
+}
+
+/** Miniatura de la primera foto de la habitación. */
+export function RoomThumb({ number, className }) {
+  const photo = ROOM_PHOTOS[number]?.[0];
+  if (!photo) return null;
+  return <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className={clsx('object-cover', className)} />;
+}
+
+/** Galería accesible: flechas, miniaturas y teclado. */
+function Gallery({ photos }) {
+  const [i, setI] = useState(0);
+  if (!photos?.length) return null;
+  const go = (d) => setI((n) => (n + d + photos.length) % photos.length);
+  const cur = photos[i];
+  return (
+    <div
+      role="group"
+      aria-roledescription="galería"
+      aria-label="Fotos de la habitación"
+      onKeyDown={(e) => {
+        if (e.key === 'ArrowLeft') go(-1);
+        if (e.key === 'ArrowRight') go(1);
+      }}
+    >
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black">
+        <img src={cur.src} alt={cur.alt} className="aspect-[4/3] w-full object-cover" />
+        {photos.length > 1 && (
+          <>
+            <button type="button" onClick={() => go(-1)} aria-label="Foto anterior" className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button type="button" onClick={() => go(1)} aria-label="Foto siguiente" className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
+        <span className="absolute bottom-2 left-2 rounded-full bg-black/65 px-2.5 py-1 text-xs text-white" aria-live="polite">
+          {i + 1} / {photos.length}
+        </span>
+      </div>
+      {photos.length > 1 && (
+        <div className="mt-2 flex gap-2">
+          {photos.map((p, n) => (
+            <button
+              key={p.src}
+              type="button"
+              onClick={() => setI(n)}
+              aria-label={`Ver foto ${n + 1}: ${p.alt}`}
+              aria-current={n === i}
+              className={clsx('h-16 w-20 overflow-hidden rounded-xl border-2 transition', n === i ? 'border-blood' : 'border-white/10 opacity-70 hover:opacity-100')}
+            >
+              <img src={p.src} alt="" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function RoomViewModal({ room, phase, contact, open, onClose, buyTo }) {
+  if (!room) return null;
+  return (
+    <Modal open={open} onClose={onClose} title={room.name || `Habitación ${room.number}`} description={room.beds} size="lg">
+      <Gallery key={room.number} photos={ROOM_PHOTOS[room.number]} />
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+        <p className="flex items-center gap-2 text-sm text-fog">
+          <Users className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+          <span className="font-semibold text-bone">{roomPeopleText(room)}</span>
+        </p>
+        <RoomPriceLine room={room} phase={phase} size="sm" />
+      </div>
+      <RoomPerks room={room} className="mt-5" />
+      <RoomHelpNote contact={contact} room={room} className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4" />
+      {buyTo && (
+        <a href={buyTo} className="mt-4 flex h-13 w-full items-center justify-center rounded-2xl bg-blood font-semibold text-white transition hover:bg-blood-light">
+          Reservar {room.name}
+        </a>
+      )}
+    </Modal>
   );
 }

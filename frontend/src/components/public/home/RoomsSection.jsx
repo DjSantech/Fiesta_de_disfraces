@@ -1,21 +1,15 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowRight, Bath, Map as MapIcon, TicketCheck, Users } from 'lucide-react';
+import { ArrowRight, Bath, BedDouble, Eye, Map as MapIcon, TicketCheck, Users } from 'lucide-react';
 import { ROOMS_COPY } from '../../../config/event';
-import { formatCOP, whatsappLink } from '../../../lib/format';
-import { WhatsAppIcon } from '../icons';
-import { ROOM_STATUS, RoomRowMini, RoomStatusBadge } from '../rooms';
+import { ROOM_STATUS, RoomHelpNote, RoomPriceLine, RoomRowMini, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from '../rooms';
 import { Reveal, SectionHeading } from '../ui';
 
-function roundTo(n, step) {
-  return Math.round(n / step) * step;
-}
-
-function RoomCard({ room, known, salesOpen, index }) {
+function RoomCard({ room, known, salesOpen, index, phase, onView }) {
   const available = room.status === 'available';
   const canBook = salesOpen && (available || !known);
-  const big = room.privateBathroom || room.capacity >= 6;
-  const perPerson = roundTo(room.price / room.capacity, 100);
+  const big = !!room.privateBathroom;
 
   return (
     <Reveal
@@ -28,6 +22,9 @@ function RoomCard({ room, known, salesOpen, index }) {
           : 'border border-white/[0.08] bg-crypt/70',
       )}
     >
+      <div className="-mx-6 -mt-6 mb-5 sm:-mx-7 sm:-mt-7">
+        <RoomThumb number={room.number} className="h-40 w-full" />
+      </div>
       <div className="flex items-center justify-between gap-3">
         <RoomRowMini highlight={room.number} />
         <RoomStatusBadge status={room.status} known={known} short />
@@ -39,9 +36,15 @@ function RoomCard({ room, known, salesOpen, index }) {
       {big && <p className="mt-1 font-serif text-xl italic text-ember">La grande</p>}
 
       <ul className="mt-5 flex flex-col gap-2.5 text-sm text-fog">
+        {room.beds && (
+          <li className="flex items-center gap-2.5">
+            <BedDouble className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
+            <span className="font-semibold text-bone">{room.beds}</span>
+          </li>
+        )}
         <li className="flex items-center gap-2.5">
           <Users className="h-4 w-4 text-blood-light" strokeWidth={1.75} />
-          Para <span className="font-semibold text-bone">{room.capacity} personas</span>
+          <span className="font-semibold text-bone">{roomPeopleText(room)}</span>
         </li>
         {room.privateBathroom && (
           <li className="flex items-center gap-2.5">
@@ -56,13 +59,18 @@ function RoomCard({ room, known, salesOpen, index }) {
       </ul>
 
       <div className="mt-6 flex items-end justify-between gap-3 border-t border-white/[0.07] pt-5">
-        <div>
-          <p className="font-display text-[2.6rem] leading-none tabular-nums text-bone">{formatCOP(room.price)}</p>
-          <p className="mt-1.5 text-xs text-fog">≈ {formatCOP(perPerson)} por persona, con entrada</p>
-        </div>
+        <RoomPriceLine room={room} phase={phase} />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => onView(room.number)}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.04] text-sm font-semibold uppercase tracking-[0.1em] text-bone transition hover:bg-white/[0.08]"
+        >
+          <Eye className="h-4 w-4 text-blood-light" />
+          Ver habitación
+        </button>
         {canBook ? (
           <Link
             to={`/comprar?tipo=habitacion&hab=${room.number}`}
@@ -88,6 +96,9 @@ export default function RoomsSection({ config, known }) {
   const rooms = config.rooms || [];
   const [includes, perGroup] = ROOMS_COPY.includes.split(' · ');
   const contact = config.contact || {};
+  const phase = config.event?.phase;
+  const [viewing, setViewing] = useState(null);
+  const viewRoom = rooms.find((r) => r.number === viewing);
 
   return (
     <section id="habitaciones" aria-labelledby="habitaciones-title" className="relative scroll-mt-16 overflow-hidden bg-ink py-24 sm:py-32">
@@ -105,12 +116,21 @@ export default function RoomsSection({ config, known }) {
 
         <ul className="mt-12 grid gap-4 lg:grid-cols-3 lg:gap-5">
           {rooms.map((room, i) => (
-            <RoomCard key={room.number} room={room} known={known} salesOpen={config.event.salesOpen !== false} index={i} />
+            <RoomCard key={room.number} room={room} known={known} salesOpen={config.event.salesOpen !== false} index={i} phase={phase} onView={setViewing} />
           ))}
         </ul>
 
-        <Reveal delay={0.1} className="mt-6 flex flex-col gap-4 rounded-3xl border border-white/[0.08] bg-crypt/50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <p className="text-[15px] leading-relaxed text-bone/90">{ROOMS_COPY.help}.</p>
+        <RoomViewModal
+          room={viewRoom}
+          phase={phase}
+          contact={contact}
+          open={!!viewRoom}
+          onClose={() => setViewing(null)}
+          buyTo={viewRoom && config.event?.salesOpen !== false && viewRoom.status === 'available' ? `/comprar?tipo=habitacion&hab=${viewRoom.number}` : null}
+        />
+
+        <Reveal delay={0.1} className="mt-6 flex flex-col gap-4 rounded-3xl border border-white/[0.08] bg-crypt/50 p-5 sm:p-6">
+          <RoomHelpNote contact={contact} />
           <div className="flex flex-col gap-2 sm:flex-row">
             <a
               href="#mapa"
@@ -118,15 +138,6 @@ export default function RoomsSection({ config, known }) {
             >
               <MapIcon className="h-4 w-4 text-blood-light" />
               Ver en el mapa
-            </a>
-            <a
-              href={whatsappLink(contact.whatsapp, ROOMS_COPY.whatsappText)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-toxic/12 px-4 text-sm font-semibold text-toxic ring-1 ring-toxic/35 transition hover:bg-toxic/20"
-            >
-              <WhatsAppIcon className="h-5 w-5" />
-              Escribirle a {contact.adminName || 'DJ Santech'}
             </a>
           </div>
         </Reveal>

@@ -91,8 +91,9 @@ Ven disfrazado y vive la noche más terrorífica del año: finca, buena música,
 🎟️ VENTA (en puerta)               Mujeres: $25.000   Hombres: $40.000
 
 🛏️ HABITACIONES (incluyen la entrada) — se alquilan por grupo completo, no por cama:
-* Habitación para 4 personas: $250.000
-* Habitación grande para 7 personas con baño privado: $500.000
+* Habitación 1 (1 cama doble + 1 sencilla, de 3 a 5 personas): preventa $250.000 · después $300.000
+* Habitación 2 (2 camas king, de 4 a 6 personas): preventa $350.000 · después $420.000
+* Habitación grande (1 cama doble + 2 sencillas, hasta 7 personas, baño privado): preventa $500.000 · después $600.000
 Si quieres ajustar tu grupo o tienes dudas sobre las habitaciones, escríbele al privado al admin DJ Santech.
 
 🚗 PARQUEADERO   Carro: $10.000   Moto: $5.000   Guardado de casco: $5.000
@@ -116,8 +117,8 @@ Pagos por transferencia: Nequi y Daviplata al **3135995612** + código QR (image
 - Hora de inicio: 9:00 p. m. (`eventStartsAt` = 2026-10-31T21:00:00-05:00).
 - Preventa hasta el sábado 24 de octubre a las 11:59 p. m. (`presaleEndsAt` = 2026-10-24T23:59:59-05:00). Después, la venta en línea sigue con precios de puerta ("venta general").
 - Descuento lista de invitados: 25% (redondeado a múltiplos de $500).
-- Habitaciones: 1 y 2 = 4 personas / $250.000; 3 = grande, 7 personas, baño privado / $500.000 (4 + 4 + 7 = 15 personas).
-- Aforo general: 100 personas (las 15 de habitaciones van aparte).
+- Habitaciones (precio por habitación completa, incluye la entrada de todo el grupo; preventa hasta el 24 oct, luego precio normal): 1 = 1 cama doble + 1 sencilla, 3 a 5 personas, $250.000 / $300.000; 2 = 2 camas king, 4 a 6 personas, $350.000 / $420.000; 3 = grande, 1 cama doble + 2 sencillas, 5 a 7 personas, baño privado, $500.000 / $600.000. Capacidad máxima total = suma real de las habitaciones (5 + 6 + 7 = 18).
+- Aforo general: 100 personas (las personas de habitaciones van aparte).
 - El círculo pequeño junto a la piscina del boceto se rotula "Piscina pequeña".
 - Nombre visible: "Fiesta de Disfraces" con "DJ Santech presenta". Contacto por WhatsApp al 573135995612.
 
@@ -127,8 +128,8 @@ Pagos por transferencia: Nequi y Daviplata al **3135995612** + código QR (image
 2. **Lista de invitados.** Si cédula, celular o Instagram (normalizados) coinciden con un invitado no redimido: descuento = `guest.discountPercent ?? settings.guestDiscountPercent`. `total = redondear_a_500(base × (1 − %/100))`. Solo aplica a entradas (no habitaciones). Se marca redimido cuando la orden queda pagada. En puerta: categoría "invitado" usa el precio de puerta del género con ese descuento.
 3. **Normalización.** Cédula: quitar espacios, puntos y guiones, mayúsculas, `^[A-Z0-9]{5,15}$`. Celular: dígitos; quitar prefijo 57; debe quedar en 10 dígitos que empiezan por 3. Instagram: minúsculas, sin `@`, `^[a-z0-9._]{1,30}$`. Placa: mayúsculas sin espacios ni guiones.
 4. **Una entrada por cédula.** No se crea orden si ya hay un ticket `valid`/`used` con esa cédula o una orden `in_review` con esa cédula (error `ALREADY_HAS_TICKET`). Nunca se devuelve el token de otra orden en ese error. Si hay una orden `pending_payment` previa de esa cédula, se cancela y se crea la nueva.
-5. **Aforo.** `soldOut` cuando (tickets `valid`/`used` de tipo `general`+`cortesia`) + (órdenes `ticket` en `in_review`) ≥ `capacity`. Las habitaciones tienen su propio cupo (15).
-6. **Habitaciones.** Se compran completas. Al crear la orden se "aparta" la habitación 60 min (`holdExpiresAt`). Si suben comprobante, queda apartada hasta que el admin decida. Al pagar → `booked`. Al rechazar/expirar → libre. Estados: `available` · `held` (apartada, pago en curso) · `booked` · `blocked` (bloqueada por admin). Una orden de habitación pagada genera **tantos tickets como capacidad** (4 o 7): el primero a nombre del comprador, luego los acompañantes que dio, y el resto como "Acompañante N · Hab. X" (el admin puede renombrarlos).
+5. **Aforo.** `soldOut` cuando (tickets `valid`/`used` de tipo `general`+`cortesia`) + (órdenes `ticket` en `in_review`) ≥ `capacity`. Las habitaciones tienen su propio cupo (suma de la capacidad de las habitaciones, hoy 18).
+6. **Habitaciones.** Se compran completas. El precio depende de la fase como las entradas: `preventa` → `presalePrice`; `general` → `price` (el `base` del Breakdown es ese precio). Cada habitación tiene `beds`, `minPeople` (informativo, no bloquea) y `capacity` (máximo; companions ≤ capacity − 1). En bootstrap, las habitaciones sin `presalePrice` (legacy) se migran a los valores por defecto sin tocar su estado de apartado/reserva. Al crear la orden se "aparta" la habitación 60 min (`holdExpiresAt`). Si suben comprobante, queda apartada hasta que el admin decida. Al pagar → `booked`. Al rechazar/expirar → libre. Estados: `available` · `held` (apartada, pago en curso) · `booked` · `blocked` (bloqueada por admin). Una orden de habitación pagada genera **tantos tickets como capacidad** (máximo de personas: 5, 6 o 7): el primero a nombre del comprador, luego los acompañantes que dio, y el resto como "Acompañante N · Hab. X" (el admin puede renombrarlos).
 7. **Expiración.** Órdenes `pending_payment`: de habitación 60 min; de entrada 48 h. Si un pago de Mercado Pago llega después de expirar/cancelar, igual se honra (`paid`), salvo que la habitación ya la tenga otra orden → estado `conflict` (el admin resuelve).
 8. **Pago confirmado** (`paid`) → se generan los tickets (idempotente: nunca duplicar).
 9. **Ticket único.** `token` aleatorio de 24 caracteres (base64url, 18 bytes) + `code` legible `FD-XXXX-XXXX` (Crockford base32, sin I/L/O/U). El **QR codifica la URL** `https://<frontend>/entrada/<token>`. En puerta se acepta el contenido del QR o el código tecleado.

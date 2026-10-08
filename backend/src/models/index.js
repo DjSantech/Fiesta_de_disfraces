@@ -33,7 +33,10 @@ export const Room = mongoose.model('Room', new Schema({
   number: { type: Number, required: true, unique: true },
   name: { type: String, required: true },
   capacity: { type: Number, required: true, min: 1 },
-  price: { type: Number, required: true, min: 0 },
+  minPeople: { type: Number, default: 1, min: 1 },
+  price: { type: Number, required: true, min: 0 }, // precio normal (fase general)
+  presalePrice: { type: Number, default: null, min: 0 }, // precio en preventa; null = legacy sin migrar
+  beds: { type: String, default: '' },
   privateBathroom: { type: Boolean, default: false },
   blocked: { type: Boolean, default: false },
   booked: { type: Boolean, default: false },
@@ -51,7 +54,7 @@ const orderSchema = new Schema({
   amount: { type: Number, required: true, min: 0 },
   breakdown: { type: sub({ phase: String, base: Number, isGuest: Boolean, discountPercent: Number, discount: Number, total: Number }), required: true },
   gender: { type: String, enum: GENDERS, default: null },
-  room: { type: sub({ number: Number, name: String, capacity: Number, privateBathroom: Boolean }), default: null },
+  room: { type: sub({ number: Number, name: String, capacity: Number, minPeople: Number, beds: String, privateBathroom: Boolean }), default: null },
   buyer: { type: sub({ name: String, cedula: String, phone: String, instagram: { type: String, default: '' }, email: { type: String, default: '' } }), required: true },
   companions: { type: [sub({ name: String, cedula: { type: String, default: null } })], default: [] },
   guestId: { type: ObjectId, default: null },

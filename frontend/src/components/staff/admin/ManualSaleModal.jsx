@@ -75,7 +75,7 @@ function RoomChoice({ rooms, value, onChange, error }) {
                 {r.privateBathroom && <ShowerHead className="h-3.5 w-3.5 text-fog" aria-label="Baño privado" />}
               </span>
               <span className="text-xs text-fog">
-                {available ? `${r.capacity} personas · ${formatCOP(r.price)}` : ROOM_STATUS_LABEL[r.status] || r.status}
+                {available ? `${r.minPeople ? `${r.minPeople} a ` : ''}${r.capacity} personas · ${formatCOP(r.currentPrice ?? r.price)}` : ROOM_STATUS_LABEL[r.status] || r.status}
               </span>
             </button>
           );
@@ -155,7 +155,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
 
   const suggestion = useMemo(() => {
     if (form.kind === 'room') {
-      return room ? { amount: room.price, text: `Precio de la ${room.name}: ${formatCOP(room.price)}` } : null;
+      return room ? { amount: room.currentPrice ?? room.price, text: `Precio de la ${room.name} (${room.currentPrice != null && room.currentPrice !== room.price ? 'preventa' : 'normal'}): ${formatCOP(room.currentPrice ?? room.price)}` } : null;
     }
     if (!settings) return null;
     const { phase, price } = currentTicketPrice(settings, form.gender);

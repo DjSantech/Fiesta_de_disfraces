@@ -107,7 +107,7 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
   "tickets": []
 }
 ```
-- `room` en órdenes de habitación: `{ "number": 3, "name": "Habitación 3", "capacity": 7, "privateBathroom": true }`.
+- `room` en órdenes de habitación: `{ "number": 3, "name": "Habitación 3", "capacity": 7, "minPeople": 5, "beds": "1 cama doble + 2 sencillas", "privateBathroom": true }`.
 - `mpStatus`: último estado de Mercado Pago visto (`approved`, `rejected`, `in_process`, `pending`, `cancelled`) o `null`.
 - `tickets`: solo con `status: "paid"` (array de TicketPublic); vacío en otro caso.
 
@@ -136,9 +136,9 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
   "guestDiscountPercent": 25,
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
   "rooms": [
-    { "number": 1, "name": "Habitación 1", "capacity": 4, "price": 250000, "privateBathroom": false, "status": "available" },
-    { "number": 2, "name": "Habitación 2", "capacity": 4, "price": 250000, "privateBathroom": false, "status": "available" },
-    { "number": 3, "name": "Habitación 3", "capacity": 7, "price": 500000, "privateBathroom": true, "status": "booked" }
+    { "number": 1, "name": "Habitación 1", "capacity": 5, "minPeople": 3, "price": 300000, "presalePrice": 250000, "currentPrice": 250000, "beds": "1 cama doble + 1 sencilla", "privateBathroom": false, "status": "available" },
+    { "number": 2, "name": "Habitación 2", "capacity": 6, "minPeople": 4, "price": 420000, "presalePrice": 350000, "currentPrice": 350000, "beds": "2 camas king", "privateBathroom": false, "status": "available" },
+    { "number": 3, "name": "Habitación 3", "capacity": 7, "minPeople": 5, "price": 600000, "presalePrice": 500000, "currentPrice": 500000, "beds": "1 cama doble + 2 sencillas", "privateBathroom": true, "status": "booked" }
   ],
   "paymentAccounts": [
     { "label": "Nequi", "number": "3135995612", "holder": "" },
@@ -159,7 +159,7 @@ Calcula el precio antes de comprar (muestra el descuento de invitado). Rate limi
 { "kind": "ticket", "gender": "hombre", "cedula": "1088123456", "phone": "3001234567", "instagram": "@juan" }
 { "kind": "room", "roomNumber": 3 }
 ```
-`200 { "breakdown": Breakdown, "available": true, "reason": null }`
+`200 { "breakdown": Breakdown, "available": true, "reason": null }`. Para habitaciones el `base` es `presalePrice` en fase `preventa` y `price` en `general`.
 Si no se puede comprar: `available: false` y `reason` ∈ `SOLD_OUT`, `ROOM_UNAVAILABLE`, `SALES_CLOSED` (igual devuelve breakdown).
 
 ### `POST /api/public/orders`
@@ -255,7 +255,7 @@ Recuperar entradas. Rate limit 5/15min/IP.
     "guests": 2, "courtesy": 2,
     "pendingReview": 3, "pendingPayment": 5
   },
-  "rooms": { "booked": 1, "held": 1, "total": 3, "people": 7, "peopleCapacity": 15 },
+  "rooms": { "booked": 1, "held": 1, "total": 3, "people": 7, "peopleCapacity": 18 },
   "door": { "inside": 0, "roomsInside": 0, "entries": 0, "doorSales": 0 },
   "income": {
     "tickets": 820000, "rooms": 500000,
@@ -355,12 +355,12 @@ Recuperar entradas. Rate limit 5/15min/IP.
 
 ### Habitaciones
 
-**RoomAdmin**: `{ "number", "name", "capacity", "price", "privateBathroom", "blocked", "status", "order": null | { "id", "token", "status", "buyerName", "buyerPhone", "holdExpiresAt" } }`
+**RoomAdmin**: `{ "number", "name", "capacity" (máx.), "minPeople", "price" (normal), "presalePrice", "beds", "privateBathroom", "blocked", "status", "order": null | { "id", "token", "status", "buyerName", "buyerPhone", "holdExpiresAt" } }`
 
 | Método | Ruta | Body | Respuesta |
 |---|---|---|---|
 | GET | `/api/admin/rooms` | — | `{ "items": [RoomAdmin] }` |
-| PUT | `/api/admin/rooms/:number` | `{ name?, capacity? (1–20), price?, privateBathroom?, blocked? }` | `{ "room": RoomAdmin }` |
+| PUT | `/api/admin/rooms/:number` | `{ name?, capacity? (1–20), minPeople? (≤ capacity), price?, presalePrice?, beds?, privateBathroom?, blocked? }` | `{ "room": RoomAdmin }` |
 
 ### Ajustes
 
@@ -437,7 +437,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 
 | Método | Ruta | Body / Query | Respuesta |
 |---|---|---|---|
-| GET | `/api/door/config` | — | `{ "prices": { "mujer": 25000, "hombre": 40000 }, "guestDiscountPercent": 25, "parking": { "carro", "moto", "casco" }, "capacity": 100, "roomsCapacity": 15 }` |
+| GET | `/api/door/config` | — | `{ "prices": { "mujer": 25000, "hombre": 40000 }, "guestDiscountPercent": 25, "parking": { "carro", "moto", "casco" }, "capacity": 100, "roomsCapacity": 18 }` |
 | GET | `/api/door/stats` | — | ver abajo |
 | POST | `/api/door/scan` | `{ "value": "<texto del QR o código tecleado>" }` | `{ "result": "valid"\|"used"\|"void"\|"not_found", "ticket": TicketDoor\|null, "entry": DoorEntry\|null }` — no consume; `entry` = la entrada que lo usó (si `used`) |
 | POST | `/api/door/checkin` | `{ "ticketId", "vehicle"?: { type, plate }, "helmet"?: { "stored": true, "tag"? }, "paymentMethod"?: posMethod (para parqueadero/casco; defecto `efectivo`), "notes"? }` | `201 { "entry": DoorEntry, "ticket": TicketDoor }` · `409 TICKET_ALREADY_USED` / `TICKET_VOID` |
@@ -469,7 +469,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 ```json
 {
   "inside": 47, "capacity": 100,
-  "roomsInside": 9, "roomsCapacity": 15,
+  "roomsInside": 9, "roomsCapacity": 18,
   "byCategory": { "mujer": 20, "hombre": 22, "invitado": 3, "cortesia": 2, "habitacion": 9 },
   "tickets": { "sold": 80, "checkedIn": 40, "pending": 40 },
   "vehicles": { "carro": 10, "moto": 6 },

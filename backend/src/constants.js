@@ -57,7 +57,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 export const DEFAULT_ROOMS = Object.freeze([
-  { number: 1, name: 'Habitación 1', capacity: 4, price: 250000, privateBathroom: false },
-  { number: 2, name: 'Habitación 2', capacity: 4, price: 250000, privateBathroom: false },
-  { number: 3, name: 'Habitación 3', capacity: 7, price: 500000, privateBathroom: true },
+  { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, privateBathroom: false },
+  { number: 2, name: 'Habitación 2', beds: '2 camas king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, privateBathroom: false },
+  { number: 3, name: 'Habitación 3', beds: '1 cama doble + 2 sencillas', minPeople: 5, capacity: 7, presalePrice: 500000, price: 600000, privateBathroom: true },
 ]);

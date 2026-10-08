@@ -56,8 +56,12 @@ export function ticketBreakdown(settings, { gender, guest = null, now = new Date
   const total = applyDiscount(base, pct);
   return { phase, base, isGuest: true, discountPercent: pct, discount: base - total, total };
 }
-export const roomBreakdown = (settings, room, now = new Date()) =>
-  ({ phase: phaseAt(settings, now), base: room.price, isGuest: false, discountPercent: 0, discount: 0, total: room.price });
+export const roomPriceAt = (settings, room, now = new Date()) =>
+  (phaseAt(settings, now) === 'preventa' && room.presalePrice != null ? room.presalePrice : room.price);
+export const roomBreakdown = (settings, room, now = new Date()) => {
+  const p = roomPriceAt(settings, room, now);
+  return { phase: phaseAt(settings, now), base: p, isGuest: false, discountPercent: 0, discount: 0, total: p };
+};
 
 /** Invitado no redimido que coincide por cédula, celular o Instagram (ya normalizados). */
 export async function findGuestMatch({ cedula, phone, instagram } = {}) {
@@ -102,8 +106,9 @@ export function roomStatus(room, now = new Date()) {
   if (room.blocked) return 'blocked';
   return 'available';
 }
-export const roomPublic = (r) => ({
-  number: r.number, name: r.name, capacity: r.capacity, price: r.price, privateBathroom: !!r.privateBathroom, status: roomStatus(r),
+export const roomPublic = (r, settings) => ({
+  number: r.number, name: r.name, capacity: r.capacity, minPeople: r.minPeople ?? 1, price: r.price,
+  presalePrice: r.presalePrice ?? r.price, currentPrice: settings ? roomPriceAt(settings, r) : r.price, beds: r.beds || '', privateBathroom: !!r.privateBathroom, status: roomStatus(r),
 });
 
 /**

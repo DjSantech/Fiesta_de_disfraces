@@ -7,7 +7,7 @@ export const breakdownOut = (b = {}) => ({
   phase: b.phase ?? null, base: b.base ?? 0, isGuest: !!b.isGuest,
   discountPercent: b.discountPercent ?? 0, discount: b.discount ?? 0, total: b.total ?? 0,
 });
-const roomSnap = (r) => (r ? { number: r.number, name: r.name, capacity: r.capacity, privateBathroom: !!r.privateBathroom } : null);
+const roomSnap = (r) => (r ? { number: r.number, name: r.name, capacity: r.capacity, minPeople: r.minPeople ?? null, beds: r.beds || '', privateBathroom: !!r.privateBathroom } : null);
 const holdOut = (o) => (o.kind === 'room' && o.status === 'pending_payment' ? iso(o.holdExpiresAt) : null);
 
 export const ticketPublic = (t) => ({

@@ -47,9 +47,9 @@ export const FALLBACK_CONFIG = {
   guestDiscountPercent: 25,
   parking: { carro: 10000, moto: 5000, casco: 5000 },
   rooms: [
-    { number: 1, name: 'Habitación 1', capacity: 4, price: 250000, privateBathroom: false, status: 'available' },
-    { number: 2, name: 'Habitación 2', capacity: 4, price: 250000, privateBathroom: false, status: 'available' },
-    { number: 3, name: 'Habitación 3', capacity: 7, price: 500000, privateBathroom: true, status: 'available' },
+    { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, currentPrice: 250000, privateBathroom: false, status: 'available' },
+    { number: 2, name: 'Habitación 2', beds: '2 camas king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, currentPrice: 350000, privateBathroom: false, status: 'available' },
+    { number: 3, name: 'Habitación 3', beds: '1 cama doble + 2 sencillas', minPeople: 5, capacity: 7, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: true, status: 'available' },
   ],
   paymentAccounts: [
     { label: 'Nequi', number: '3135995612', holder: '' },
@@ -101,8 +101,29 @@ export const GUEST_NOTE =
 
 export const ROOMS_COPY = {
   includes: 'Incluyen la entrada · se alquilan por grupo completo, no por cama',
-  help: '¿Quieres ajustar tu grupo o tienes dudas? Escríbele al admin DJ Santech',
+  help: '¿Quieres más personas en la habitación o ajustar el precio? Escríbele directamente al admin DJ Santech',
   whatsappText: 'Hola DJ Santech, tengo una pregunta sobre las habitaciones de la Fiesta de Disfraces.',
+  whatsappTextFor: (name) => `Hola DJ Santech, quiero más personas en la ${name} o ajustar el precio. ¿Me ayudas?`,
+};
+
+/** Fotos por número de habitación (public/habitaciones). */
+export const ROOM_PHOTOS = {
+  1: [{ src: '/habitaciones/hab-1-cama-doble-y-sencilla.jpg', alt: 'Habitación 1: una cama doble y una cama sencilla' }],
+  2: [{ src: '/habitaciones/hab-2-dos-camas-king.jpg', alt: 'Habitación 2: dos camas king' }],
+  3: [
+    { src: '/habitaciones/hab-3-grande.jpg', alt: 'Habitación grande: una cama doble y dos camas sencillas' },
+    { src: '/habitaciones/hab-3-bano.jpg', alt: 'Baño privado de la habitación grande' },
+  ],
+};
+
+/** Qué incluye tu habitación (íconos lucide en components/public/rooms.jsx). */
+export const ROOM_PERKS = {
+  all: [
+    { icon: 'lock', text: 'Privacidad para tu grupo' },
+    { icon: 'bag', text: 'Un lugar donde dejar tus cosas con tranquilidad' },
+    { icon: 'bed', text: 'Puedes dormir si así lo deseas' },
+  ],
+  big: [{ icon: 'bath', text: 'Baño privado dentro de la habitación y más privacidad' }],
 };
 
 /**
@@ -136,15 +157,15 @@ export const MAP_ZONES = {
   },
   room1: {
     name: 'Habitación 1',
-    description: 'Habitación para 4 personas, dentro de la casa. Incluye la entrada de todo el grupo.',
+    description: '1 cama doble + 1 sencilla. De 3 a 5 personas, dentro de la casa. Incluye la entrada de todo el grupo.',
   },
   room2: {
     name: 'Habitación 2',
-    description: 'Habitación para 4 personas, dentro de la casa. Incluye la entrada de todo el grupo.',
+    description: '2 camas king. De 4 a 6 personas, dentro de la casa. Incluye la entrada de todo el grupo.',
   },
   room3: {
     name: 'Habitación 3',
-    description: 'La grande: para 7 personas y con baño privado al lado. Incluye la entrada de todo el grupo.',
+    description: 'La grande: 1 cama doble + 2 sencillas, de 5 a 7 personas y con baño privado. Incluye la entrada de todo el grupo.',
   },
   bano3: {
     name: 'Baño privado',

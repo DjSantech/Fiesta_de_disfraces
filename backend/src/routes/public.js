@@ -67,7 +67,7 @@ export function publicRouter(ctx, limits) {
       prices: { preventa: { ...settings.prices.preventa }, puerta: { ...settings.prices.puerta }, current: { ...currentPrices(settings, phase) } },
       guestDiscountPercent: settings.guestDiscountPercent,
       parking: { ...settings.parking },
-      rooms: rooms.map(roomPublic),
+      rooms: rooms.map((r) => roomPublic(r, settings)),
       paymentAccounts: settings.paymentAccounts.map((a) => ({ label: a.label, number: a.number, holder: a.holder || '' })),
       transferInstructions: settings.transferInstructions,
       contact: { ...settings.contact },

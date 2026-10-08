@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { MAP_ZONES } from '../../config/event';
 import { formatCOP } from '../../lib/format';
-import { ROOM_STATUS, RoomStatusBadge } from './rooms';
+import { ROOM_STATUS, RoomHelpNote, RoomPriceLine, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from './rooms';
 
 // Plano nocturno de la finca, fiel al boceto (docs/mapa-boceto.png):
 // Entrada arriba al centro → Parqueadero debajo; Salón arriba a la izquierda; Jacuzzi bajo el Salón;
@@ -84,7 +84,7 @@ function center(shape) {
 function roomAriaLabel(name, room, known) {
   if (!room) return name;
   const status = known ? (ROOM_STATUS[room.status] || ROOM_STATUS.blocked).label : 'consultando disponibilidad';
-  return `${name}: para ${room.capacity} personas, ${formatCOP(room.price)}, ${status}`;
+  return `${name}: ${room.beds ? `${room.beds}, ` : ''}${roomPeopleText(room).toLowerCase()}, ${formatCOP(room.currentPrice ?? room.price)}, ${status}`;
 }
 
 function statusColor(room, known) {
@@ -449,6 +449,8 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
   const room = zone.room ? roomsByNumber[zone.room] : null;
   const salesOpen = config.event?.salesOpen !== false;
   const parking = config.parking || {};
+  const phase = config.event?.phase;
+  const [viewing, setViewing] = useState(false);
 
   return (
     <div className="animate-fade-up rounded-3xl border border-blood/30 bg-[linear-gradient(160deg,rgb(225_29_46/0.12),rgb(21_21_28/0.9)_50%)] p-6" aria-live="polite" key={zone.id}>
@@ -479,22 +481,44 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
 
       {room && (
         <>
-          <dl className="mt-5 grid grid-cols-2 gap-2">
+          <RoomThumb number={room.number} className="mt-5 h-36 w-full rounded-2xl border border-white/10" />
+          <dl className="mt-4 grid grid-cols-1 gap-2">
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
               <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-fog">
-                <Users className="h-3.5 w-3.5" /> Capacidad
+                <Users className="h-3.5 w-3.5" /> Camas y personas
               </dt>
-              <dd className="mt-1 font-display text-xl text-bone">{room.capacity} personas</dd>
+              <dd className="mt-1 text-sm text-bone">
+                {room.beds ? `${room.beds} · ` : ''}
+                <span className="font-semibold">{roomPeopleText(room)}</span>
+              </dd>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
               <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fog">Precio</dt>
-              <dd className="mt-1 font-display text-xl text-bone">{formatCOP(room.price)}</dd>
+              <dd className="mt-1">
+                <RoomPriceLine room={room} phase={phase} size="sm" />
+              </dd>
             </div>
           </dl>
           <p className="mt-3 text-xs text-fog">
             Incluye la entrada de todo el grupo{room.privateBathroom ? ' · baño privado' : ''} · se alquila completa, no por cama.
           </p>
-          <div className="mt-5">
+          <button
+            type="button"
+            onClick={() => setViewing(true)}
+            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.04] text-sm font-semibold uppercase tracking-[0.1em] text-bone transition hover:bg-white/[0.08]"
+          >
+            Ver habitación
+          </button>
+          <RoomHelpNote contact={config.contact} room={room} className="mt-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3" />
+          <RoomViewModal
+            room={room}
+            phase={phase}
+            contact={config.contact}
+            open={viewing}
+            onClose={() => setViewing(false)}
+            buyTo={salesOpen && room.status === 'available' ? `/comprar?tipo=habitacion&hab=${room.number}` : null}
+          />
+          <div className="mt-3">
             {salesOpen && (room.status === 'available' || !known) ? (
               <Link
                 to={`/comprar?tipo=habitacion&hab=${room.number}`}
