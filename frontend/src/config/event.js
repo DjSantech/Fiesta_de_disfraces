@@ -7,7 +7,8 @@ export const EVENT = {
   presenter: 'DJ Santech presenta',
   city: 'Pereira',
   venue: 'Finca en Pereira',
-  venueNote: 'La ubicación se envía el 31',
+  zone: 'Combia, por la entrada a La Siria',
+  venueNote: 'La ubicación exacta se envía el 31',
   dateLabel: 'Sábado 31 de octubre',
   shortDate: '31·10',
   year: 2026,
@@ -77,7 +78,7 @@ export const PILLARS = [
   {
     icon: 'finca',
     title: 'Finca',
-    text: 'Una finca en Pereira para nosotros solos. La ubicación exacta te llega el 31, directo en tu entrada.',
+    text: 'Una finca en Combia, Pereira, por la entrada a La Siria, para nosotros solos. La ubicación exacta te llega el 31, directo en tu entrada.',
   },
   {
     icon: 'djs',

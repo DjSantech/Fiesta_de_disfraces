@@ -127,7 +127,7 @@ export function downloadIcs(startsAt, url, locationName) {
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Fiesta de Disfraces//ES', 'BEGIN:VEVENT',
     `UID:${f(s)}-fiesta-disfraces@pereira`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(s)}`, `DTEND:${f(e)}`,
     'SUMMARY:Fiesta de Disfraces · DJ Santech',
-    `LOCATION:${(locationName || 'Finca en Pereira (la ubicación se envía el 31)').replace(/,/g, '\\,')}`,
+    `LOCATION:${(locationName || 'Finca en Combia, Pereira, por la entrada a La Siria (la ubicación exacta se envía el 31)').replace(/,/g, '\\,')}`,
     `DESCRIPTION:Tu entrada: ${url}`, `URL:${url}`,
     'BEGIN:VALARM', 'TRIGGER:-PT3H', 'ACTION:DISPLAY', 'DESCRIPTION:Hoy es la Fiesta de Disfraces', 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR',
