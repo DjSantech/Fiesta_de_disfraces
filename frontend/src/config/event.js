@@ -13,7 +13,7 @@ export const EVENT = {
   shortDate: '31·10',
   year: 2026,
   tagline: 'La noche más terrorífica del año',
-  music: 'Música toda la noche con diferentes DJs',
+  music: 'Música toda la noche con 3 DJs diferentes',
   description:
     'Ven disfrazado y vive la noche más terrorífica del año: finca, buena música, luces y el mejor ambiente.',
 };
@@ -45,7 +45,7 @@ export const FALLBACK_CONFIG = {
     puerta: { mujer: 25000, hombre: 40000 },
     current: { mujer: 20000, hombre: 30000 },
   },
-  guestDiscountPercent: 25,
+  guest: { presaleDiscount: 5000, generalDiscount: 0 },
   parking: { carro: 10000, moto: 5000, casco: 5000 },
   rooms: [
     { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, currentPrice: 250000, privateBathroom: false, status: 'available' },
@@ -53,8 +53,8 @@ export const FALLBACK_CONFIG = {
     { number: 3, name: 'Habitación 3', beds: '1 cama doble + 2 sencillas', minPeople: 5, capacity: 7, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: true, status: 'available' },
   ],
   paymentAccounts: [
+    { label: 'Bre-B (llave)', number: '3135995612', holder: '' },
     { label: 'Nequi', number: '3135995612', holder: '' },
-    { label: 'Daviplata', number: '3135995612', holder: '' },
   ],
   transferInstructions:
     'Transfiere el valor exacto y sube el pantallazo del comprobante. Te confirmamos en pocas horas.',
@@ -82,8 +82,8 @@ export const PILLARS = [
   },
   {
     icon: 'djs',
-    title: 'DJs toda la noche',
-    text: 'Fiesta crossover: diferentes DJs, de todo un poco, hasta que el cuerpo aguante.',
+    title: '3 DJs diferentes',
+    text: 'Fiesta crossover: de todo un poco, hasta que el cuerpo aguante.',
   },
   {
     icon: 'luces',
@@ -98,7 +98,7 @@ export const PILLARS = [
 ];
 
 export const GUEST_NOTE =
-  '¿Estás en la lista de invitados? Tu descuento se aplica solo al comprar con tu cédula, celular o Instagram.';
+  '¿Estás en la lista de invitados? Tu precio de amigo cercano se aplica solo al comprar con tu cédula, celular o Instagram.';
 
 export const ROOMS_COPY = {
   includes: 'Incluyen la entrada · se alquilan por grupo completo, no por cama',
@@ -142,7 +142,7 @@ export const MAP_ZONES = {
   },
   salon: {
     name: 'Salón',
-    description: 'La pista principal: DJs toda la noche, luces y sonido de club.',
+    description: 'La pista principal: 3 DJs diferentes, luces y sonido de club.',
   },
   jacuzzi: {
     name: 'Piscina pequeña',
@@ -219,7 +219,7 @@ export const FAQ = [
   },
   {
     q: '¿Qué medios de pago hay?',
-    a: 'Mercado Pago (tarjeta, PSE y más), con confirmación automática. O transferencia por Nequi o Daviplata al 313 599 5612: subes el pantallazo del comprobante y te confirmamos.',
+    a: 'Mercado Pago (tarjeta, PSE y más), con confirmación automática. O transferencia por Bre-B (llave 313 599 5612) o Nequi al mismo número: subes el pantallazo del comprobante y te confirmamos.',
   },
   {
     q: '¿Cuándo llega la ubicación?',
@@ -250,7 +250,7 @@ export const LEGAL = {
 // Cinta que corre bajo el hero. La fase (preventa / venta general) se agrega sola al inicio.
 export const MARQUEE = [
   'Finca en Pereira',
-  'DJs toda la noche',
+  '3 DJs diferentes',
   'Ven disfrazado',
   'Solo mayores de edad',
   '31·10',

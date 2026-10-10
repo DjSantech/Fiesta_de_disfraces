@@ -5,6 +5,7 @@ import { EVENT } from '../../../config/event';
 import { formatCOP, formatTime, whatsappLink } from '../../../lib/format';
 import Countdown from '../Countdown';
 import { Embers } from '../ui';
+import WhatsAppButton from '../WhatsAppButton';
 import { Bat, Cobweb, Neon, Pumpkin, Skull } from '../decor';
 import { roomsAvailable, salesState } from '../usePublicConfig';
 import { dayMonth } from '../utils/dates';
@@ -124,7 +125,7 @@ export default function Hero({ config, ready }) {
   const meta = [
     { icon: CalendarDays, text: `${EVENT.dateLabel}${time ? ` · ${time}` : ''}` },
     { icon: MapPin, text: `${EVENT.venue} · ${EVENT.zone} · ubicación exacta el 31` },
-    { icon: Disc3, text: 'DJs toda la noche' },
+    { icon: Disc3, text: '3 DJs diferentes' },
   ];
 
   return (
@@ -196,6 +197,7 @@ export default function Hero({ config, ready }) {
 
         <div className={clsx('mt-8 w-full', enter(ready, 720).className)} style={enter(ready, 720).style}>
           <HeroCta config={config} />
+          <WhatsAppButton contact={config.contact} className="mt-4 w-full max-w-xl" />
           <a href="#lista" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-pumpkin-light underline-offset-4 hover:underline">
             <Ticket className="h-4 w-4" strokeWidth={1.75} />
             ¿Estás en la lista de invitados?

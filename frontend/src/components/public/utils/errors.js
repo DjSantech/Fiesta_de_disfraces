@@ -34,7 +34,7 @@ const MESSAGES = {
   },
   PAYMENT_PROVIDER_ERROR: {
     title: 'Mercado Pago no respondió',
-    message: 'Intenta de nuevo en un momento o paga por transferencia Nequi / Daviplata.',
+    message: 'Intenta de nuevo en un momento o paga por transferencia Bre-B / Nequi.',
   },
   INVALID_STATE: {
     title: 'Esta compra cambió de estado',

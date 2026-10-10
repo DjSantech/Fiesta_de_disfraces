@@ -4,6 +4,7 @@ import { ArrowRight, DoorOpen, Sparkles } from 'lucide-react';
 import { formatCOP } from '../../../lib/format';
 import { Reveal, SectionHeading } from '../ui';
 import { Cobweb } from '../decor';
+import WhatsAppButton from '../WhatsAppButton';
 import GuestCheck from '../GuestCheck';
 import { salesState } from '../usePublicConfig';
 import { dayMonth, daysUntil } from '../utils/dates';
@@ -121,6 +122,19 @@ export default function PricesSection({ config }) {
           </Reveal>
         </div>
 
+        {config.guest && (
+          <p className="mt-4 text-center text-sm text-fog">
+            Amigos cercanos (lista de invitados): {formatCOP(config.guest.presaleDiscount)} menos en preventa
+            {config.guest.generalDiscount > 0
+              ? ` y ${formatCOP(config.guest.generalDiscount)} menos sobre el precio de preventa en la venta general.`
+              : ' y conservas el precio de preventa en la venta general.'}
+          </p>
+        )}
+        {canBuy && (
+          <div className="mt-6 flex justify-center">
+            <WhatsAppButton contact={config.contact} />
+          </div>
+        )}
         <GuestCheck className="mt-4" />
 
         {!canBuy && (

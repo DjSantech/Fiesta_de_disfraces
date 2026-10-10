@@ -50,10 +50,8 @@ export function validateBuyer(buyer) {
   if (!String(buyer.phone || '').trim()) errors['buyer.phone'] = 'Escribe tu celular.';
   else if (!isValidPhone(buyer.phone)) errors['buyer.phone'] = 'Debe ser un celular colombiano de 10 dígitos que empiece por 3.';
 
-  if (!String(buyer.instagram || '').trim()) errors['buyer.instagram'] = 'Escribe tu usuario de Instagram.';
-  else if (!isValidInstagram(buyer.instagram)) errors['buyer.instagram'] = 'Solo letras, números, puntos y guion bajo (máximo 30).';
+  if (String(buyer.instagram || '').trim() && !isValidInstagram(buyer.instagram)) errors['buyer.instagram'] = 'Solo letras, números, puntos y guion bajo (máximo 30).';
 
-  if (String(buyer.email || '').trim() && !isValidEmail(buyer.email)) errors['buyer.email'] = 'Revisa el correo o déjalo vacío.';
   return errors;
 }
 
@@ -85,7 +83,6 @@ export function buildOrderPayload({ kind, gender, roomNumber, buyer, companions,
       cedula: normalizeCedula(buyer.cedula),
       phone: normalizePhone(buyer.phone),
       instagram: normalizeInstagram(buyer.instagram),
-      email: String(buyer.email || '').trim(),
     },
     companions:
       kind === 'room'

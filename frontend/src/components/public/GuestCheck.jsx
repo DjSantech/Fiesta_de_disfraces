@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowRight, Loader2, Search, Ticket } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
-import { whatsappLink } from '../../lib/format';
+import { whatsappLink, formatCOP } from '../../lib/format';
 import { Cobweb, Pumpkin } from './decor';
 import { Reveal } from './ui';
 import { usePublicConfig } from './usePublicConfig';
@@ -64,10 +64,17 @@ function Result({ res, query, contact }) {
     );
   }
   if (res.found && res.kind === 'descuento') {
+    const desc = res.discountPercent
+      ? `${res.discountPercent}% de descuento`
+      : res.phase === 'preventa'
+        ? `${formatCOP(res.presaleDiscount)} de descuento en tu entrada de preventa`
+        : res.generalDiscount > 0
+          ? `${formatCOP(res.generalDiscount)} de descuento sobre el precio de preventa`
+          : 'tu precio de preventa conservado';
     return (
       <div role="status" className="rounded-2xl border border-pumpkin/40 bg-pumpkin/[0.08] p-5">
         <p className="font-display text-[1.7rem] uppercase leading-tight text-bone">
-          {name !== 'bienvenido' && <>{name}: </>}tienes <span className="text-pumpkin-light">{res.discountPercent}% de descuento</span> en tu entrada
+          {name !== 'bienvenido' && <>{name}: </>}tienes <span className="text-pumpkin-light">{desc}</span>
         </p>
         <p className="mt-1 text-sm text-fog">Se aplica solo al comprar con los mismos datos.</p>
         <BuyButton to={buyLink(query)}>Comprar con descuento</BuyButton>

@@ -4,6 +4,7 @@ import { MARQUEE } from '../../config/event';
 import PublicLayout from '../../components/public/PublicLayout';
 import Intro, { shouldShowIntro } from '../../components/public/Intro';
 import Hero from '../../components/public/home/Hero';
+import Highlights from '../../components/public/home/Highlights';
 import NightSection from '../../components/public/home/NightSection';
 import PricesSection from '../../components/public/home/PricesSection';
 import RoomsSection from '../../components/public/home/RoomsSection';
@@ -33,6 +34,7 @@ export default function Home() {
     <PublicLayout header="home" footer="full">
       <AnimatePresence>{introOpen && <Intro key="intro" onDone={() => setIntroOpen(false)} />}</AnimatePresence>
       <Hero config={config} ready={!introOpen} />
+      <Highlights />
       <Marquee items={[phaseText, ...MARQUEE]} />
       <NightSection />
       <SectionBreak />

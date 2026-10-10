@@ -97,7 +97,7 @@ export default function PaymentResult() {
           </>
         }
       >
-        No se te cobró nada. Puedes intentarlo otra vez o pagar por Nequi / Daviplata.
+        No se te cobró nada. Puedes intentarlo otra vez o pagar por Bre-B / Nequi.
       </StateScreen>
     );
   else if (view === 'missing')

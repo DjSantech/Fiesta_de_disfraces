@@ -1,9 +1,8 @@
-QR de pago por transferencia
-============================
-Pon aquí las imágenes de los códigos QR (PNG, cuadradas, fondo blanco):
+Imagenes de pago (se muestran en el paso de transferencia):
 
-  qr-nequi.png       → QR de Nequi (3135995612)
-  qr-daviplata.png   → QR de Daviplata (3135995612)
+  logo-breb.png   -> logo de Bre-B (fondo blanco)
+  logo-nequi.png  -> logo de Nequi (fondo blanco)
+  qr-pago.png     -> QR de Bre-B / Nequi (llave 313 599 5612, "Santiago Guevara")
 
-La web las muestra solas en el paso de transferencia (/comprar y /orden/...).
-Si no existen, en producción simplemente no se muestran (en desarrollo sale un aviso).
+Si falta una imagen, simplemente no se muestra. El numero sale de la configuracion
+(paymentAccounts), no de estos archivos.

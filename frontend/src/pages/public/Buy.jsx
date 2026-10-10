@@ -9,6 +9,7 @@ import { LEGAL } from '../../config/event';
 import PublicLayout, { PageAtmosphere, PageContainer } from '../../components/public/PublicLayout';
 import { PolicyModal, PriceBreakdown, TransferPanel } from '../../components/public/payment';
 import { RoomHelpNote, RoomStatusBadge, roomPeopleText, roomPricing } from '../../components/public/rooms';
+import WhatsAppButton from '../../components/public/WhatsAppButton';
 import { Notice } from '../../components/public/ui';
 import { salesState, usePublicConfig, loadPublicConfig } from '../../components/public/usePublicConfig';
 import { describeError } from '../../components/public/utils/errors';
@@ -292,6 +293,12 @@ export default function Buy() {
               <Button size="lg" block disabled={!canNext1} onClick={() => go(2)}>
                 Continuar <ArrowRight className="h-4 w-4" />
               </Button>
+              {kind === 'ticket' && (
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <p className="text-sm text-fog">¿Prefieres comprar por WhatsApp?</p>
+                  <WhatsAppButton contact={config.contact} name={buyer.name} gender={gender} className="w-full" />
+                </div>
+              )}
             </div>
           )}
 
@@ -324,12 +331,11 @@ export default function Buy() {
                 placeholder="Sin puntos"
               />
               <Input label="Celular" required type="tel" inputMode="tel" autoComplete="tel-national" value={buyer.phone} onChange={setB('phone')} error={err('buyer.phone')} placeholder="300 123 4567" />
-              <Input label="Instagram" required leading="@" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={buyer.instagram} onChange={setB('instagram')} error={err('buyer.instagram')} placeholder="tuusuario" />
-              <Input label="Correo (opcional)" type="email" autoComplete="email" value={buyer.email} onChange={setB('email')} error={err('buyer.email')} />
+              <Input label="Instagram (opcional)" leading="@" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={buyer.instagram} onChange={setB('instagram')} error={err('buyer.instagram')} placeholder="tuusuario" hint="Si estás en la lista de invitados, ponlo para aplicar tu descuento" />
 
               {kind === 'ticket' && breakdown?.isGuest && (
-                <Notice tone="gold" icon={BadgePercent} title={`Estás en la lista: −${breakdown.discountPercent}%`}>
-                  Pagas {formatCOP(breakdown.total)} en vez de {formatCOP(breakdown.base)}.
+                <Notice tone="gold" icon={BadgePercent} title={breakdown.total === 0 ? 'Tienes entrada de CORTESÍA' : `Estás en la lista: descuento de ${formatCOP(breakdown.discount)}`}>
+                  {breakdown.total === 0 ? 'No pagas nada por tu entrada.' : <>Pagas {formatCOP(breakdown.total)} en vez de {formatCOP(breakdown.base)}.</>}
                 </Notice>
               )}
 
@@ -387,7 +393,7 @@ export default function Buy() {
                 {config.mercadoPago?.enabled && (
                   <OptionCard active={method === 'mercadopago'} onClick={() => setMethod('mercadopago')} icon={CreditCard} title="Tarjeta, PSE y más · Mercado Pago" hint={`Confirmación automática${config.mercadoPago.mock ? ' · modo de prueba' : ''}`} />
                 )}
-                <OptionCard active={method === 'transferencia'} onClick={() => setMethod('transferencia')} icon={Smartphone} title="Transferencia Nequi / Daviplata" hint="Subes el comprobante · confirmamos en pocas horas" />
+                <OptionCard active={method === 'transferencia'} onClick={() => setMethod('transferencia')} icon={Smartphone} title="Transferencia Bre-B / Nequi" hint="Subes el comprobante · confirmamos en pocas horas" />
               </div>
               <div className="rounded-3xl border border-white/10 bg-crypt/70 p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-fog">Resumen</p>
