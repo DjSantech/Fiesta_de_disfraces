@@ -9,6 +9,20 @@ export const BCRYPT_ROUNDS = 12;
 export async function ensureBaseData(config, logger) {
   await Promise.all(allModels.map((m) => m.init())); // índices únicos listos antes de atender
   await Settings.updateOne({ _id: SETTINGS_ID }, { $setOnInsert: DEFAULT_SETTINGS }, { upsert: true });
+  // Migración: reglas de invitados (reemplazan guestDiscountPercent).
+  for (const k of ['guestPresaleDiscount', 'guestGeneralDiscount']) {
+    await Settings.updateOne({ _id: SETTINGS_ID, [k]: { $exists: false } }, { $set: { [k]: DEFAULT_SETTINGS[k] } });
+  }
+  await Settings.collection.updateOne({ _id: SETTINGS_ID }, { $unset: { guestDiscountPercent: '' } });
+  // Migración: Daviplata sale; cuentas por defecto pasan a Bre-B (llave) + Nequi.
+  await Settings.updateOne(
+    { _id: SETTINGS_ID, paymentAccounts: { $elemMatch: { label: /daviplata/i } } },
+    { $set: { paymentAccounts: DEFAULT_SETTINGS.paymentAccounts.map((a) => ({ ...a })) } },
+  );
+  await Settings.updateOne(
+    { _id: SETTINGS_ID, transferInstructions: /daviplata/i },
+    { $set: { transferInstructions: DEFAULT_SETTINGS.transferInstructions } },
+  );
   for (const r of DEFAULT_ROOMS) {
     await Room.updateOne({ number: r.number }, { $setOnInsert: r }, { upsert: true });
     // Migración: habitaciones legacy (sin presalePrice) pasan a los nuevos datos; no toca reserva/apartado.

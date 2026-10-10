@@ -52,9 +52,21 @@ export function ticketBreakdown(settings, { gender, guest = null, now = new Date
   const phase = phaseAt(settings, now);
   const base = (prices || currentPrices(settings, phase))[gender];
   if (!guest) return { phase, base, isGuest: false, discountPercent: 0, discount: 0, total: base };
-  const pct = guest.discountPercent ?? settings.guestDiscountPercent;
-  const total = applyDiscount(base, pct);
-  return { phase, base, isGuest: true, discountPercent: pct, discount: base - total, total };
+  return guestBreakdown(settings, { gender, guest, phase, base });
+}
+/** Regla única de invitados (solo entradas). base = precio normal de la fase. */
+export function guestBreakdown(settings, { gender, guest, phase, base }) {
+  const pct = guest?.discountPercent ?? null;
+  let total;
+  if (pct !== null && pct !== undefined) total = applyDiscount(base, pct);
+  else {
+    const presale = settings.prices.preventa[gender];
+    const off = phase === 'preventa' ? settings.guestPresaleDiscount : settings.guestGeneralDiscount;
+    total = Math.max(0, presale - (off || 0));
+  }
+  total = Math.max(0, Math.min(base, total));
+  const discount = base - total;
+  return { phase, base, isGuest: true, discountPercent: base > 0 ? Math.round((discount * 100) / base) : 0, discount, total };
 }
 export const roomPriceAt = (settings, room, now = new Date()) =>
   (phaseAt(settings, now) === 'preventa' && room.presalePrice != null ? room.presalePrice : room.price);

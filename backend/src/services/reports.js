@@ -126,7 +126,7 @@ export async function barSummary() {
   const bm = countByKey(byMethod);
   return {
     total: tot[0]?.total || 0, count: tot[0]?.count || 0,
-    byMethod: { efectivo: bm.efectivo || 0, nequi: bm.nequi || 0, daviplata: bm.daviplata || 0, tarjeta: bm.tarjeta || 0 },
+    byMethod: { efectivo: bm.efectivo || 0, nequi: bm.nequi || 0, breb: bm.breb || 0, tarjeta: bm.tarjeta || 0 },
     byProduct: items, byCategory: [...cats.values()].sort((a, b) => b.revenue - a.revenue),
     courtesy: { count: tot[0]?.cc || 0, value: tot[0]?.cv || 0 },
   };
@@ -138,13 +138,13 @@ const L = {
   status: { pending_payment: 'Pendiente de pago', in_review: 'En revisión', paid: 'Pagada', rejected: 'Rechazada', expired: 'Expirada', cancelled: 'Cancelada', conflict: 'Conflicto' },
   kind: { ticket: 'Entrada', room: 'Habitación' },
   method: { mercadopago: 'Mercado Pago', transferencia: 'Transferencia', manual: 'Venta manual' },
-  manual: { efectivo: 'Efectivo', nequi: 'Nequi', daviplata: 'Daviplata', transferencia: 'Transferencia', cortesia: 'Cortesía' },
+  manual: { efectivo: 'Efectivo', nequi: 'Nequi', breb: 'Bre-B', transferencia: 'Transferencia', cortesia: 'Cortesía' },
   gender: { mujer: 'Mujer', hombre: 'Hombre' },
   phase: { preventa: 'Preventa', general: 'Venta general' },
   tkind: { general: 'General', room: 'Habitación', cortesia: 'Cortesía' },
   tstatus: { valid: 'Válida', used: 'Ya ingresó', void: 'Anulada' },
   cat: { mujer: 'Mujer', hombre: 'Hombre', invitado: 'Invitado', habitacion: 'Habitación', cortesia: 'Cortesía' },
-  pos: { efectivo: 'Efectivo', nequi: 'Nequi', daviplata: 'Daviplata', tarjeta: 'Tarjeta', cortesia: 'Cortesía' },
+  pos: { efectivo: 'Efectivo', nequi: 'Nequi', breb: 'Bre-B', tarjeta: 'Tarjeta', cortesia: 'Cortesía' },
   vehicle: { carro: 'Carro', moto: 'Moto' },
   expense: { finca: 'Finca / alquiler', sonido_luces: 'Sonido y luces', djs: 'DJs', bebidas: 'Bebidas / barra', decoracion: 'Decoración', seguridad: 'Seguridad / logística', publicidad: 'Publicidad', transporte: 'Transporte', otros: 'Otros' },
 };

@@ -119,7 +119,7 @@ export const settingsOut = (s) => ({
   eventStartsAt: iso(s.eventStartsAt), presaleEndsAt: iso(s.presaleEndsAt), salesOpen: !!s.salesOpen,
   capacity: s.capacity,
   prices: { preventa: { ...s.prices.preventa }, puerta: { ...s.prices.puerta } },
-  guestDiscountPercent: s.guestDiscountPercent,
+  guestPresaleDiscount: s.guestPresaleDiscount, guestGeneralDiscount: s.guestGeneralDiscount,
   parking: { carro: s.parking.carro, moto: s.parking.moto, casco: s.parking.casco },
   paymentAccounts: s.paymentAccounts.map((a) => ({ label: a.label, number: a.number, holder: a.holder || '' })),
   transferInstructions: s.transferInstructions,

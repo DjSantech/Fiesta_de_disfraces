@@ -94,6 +94,7 @@ export const instagram = z.string().transform(normalizeInstagram)
 export const optCedula = z.preprocess(emptyToNull, cedula.nullable());
 export const optPhone = z.preprocess(emptyToNull, phone.nullable());
 export const optInstagram = z.preprocess((v) => (v === '' || v == null || normalizeInstagram(v) === '' ? null : v), instagram.nullable());
+export const instagramOrEmpty = z.preprocess((v) => (v == null || normalizeInstagram(v) === '' ? '' : v), z.union([z.literal(''), instagram]));
 export const email = z.preprocess((v) => (v == null ? '' : v),
   z.string().trim().toLowerCase().max(120).pipe(z.union([z.literal(''), z.email({ error: 'Correo inválido.' })])));
 export const plate = z.string().transform(normalizePlate).refine((v) => PLATE_RE.test(v), { error: 'Placa inválida.' });

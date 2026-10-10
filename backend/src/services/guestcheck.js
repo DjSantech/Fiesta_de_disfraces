@@ -1,11 +1,11 @@
 // Consulta pública "¿estoy en la lista de invitados?". Nunca devuelve datos personales.
 import { Guest } from '../models/index.js';
 import { collapseSpaces, normalizeCedula, normalizePhone, normalizeInstagram, INSTAGRAM_RE } from '../lib/util.js';
-import { getSettings } from './core.js';
+import { getSettings, phaseAt } from './core.js';
 
 const fold = (s) => collapseSpaces(String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase());
 const cap = (w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '');
-const EMPTY = { found: false, ambiguous: false, kind: null, discountPercent: null, redeemed: false, firstName: null };
+const EMPTY = { found: false, ambiguous: false, kind: null, discountPercent: null, phase: null, presaleDiscount: 0, generalDiscount: 0, redeemed: false, firstName: null };
 
 export async function guestCheck(query) {
   const q = collapseSpaces(query);
@@ -33,9 +33,10 @@ export async function guestCheck(query) {
   }
   const g = matches[0];
   if (!g) return { ...EMPTY, ambiguous };
-  const pct = g.discountPercent ?? settings.guestDiscountPercent;
+  const own = g.discountPercent ?? null;
   return {
-    found: true, ambiguous: false, kind: pct === 100 ? 'cortesia' : 'descuento', discountPercent: pct,
+    found: true, ambiguous: false, kind: own === 100 ? 'cortesia' : 'descuento', discountPercent: own !== null && own < 100 ? own : null,
+    phase: phaseAt(settings), presaleDiscount: settings.guestPresaleDiscount, generalDiscount: settings.guestGeneralDiscount,
     redeemed: !!g.redeemed, firstName: cap(collapseSpaces(g.name).split(' ')[0]) || null,
   };
 }

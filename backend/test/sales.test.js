@@ -25,7 +25,7 @@ test('quote: preventa, general y descuento de invitado', async () => {
   assert.deepEqual(r.body, { breakdown: { phase: 'preventa', base: 30000, isGuest: false, discountPercent: 0, discount: 0, total: 30000 }, available: true, reason: null });
   await Guest.create({ name: 'Juan', instagram: 'juan' });
   r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre', instagram: '@JUAN' });
-  assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 30000, isGuest: true, discountPercent: 25, discount: 7500, total: 22500 });
+  assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 30000, isGuest: true, discountPercent: 17, discount: 5000, total: 25000 });
   r = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 3 });
   assert.equal(r.body.breakdown.total, 500000);
   r = await api.get('/api/public/config');
@@ -36,7 +36,7 @@ test('quote: preventa, general y descuento de invitado', async () => {
   r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'mujer', instagram: 'juan' });
   assert.equal(r.body.breakdown.phase, 'general');
   assert.equal(r.body.breakdown.base, 25000);
-  assert.equal(r.body.breakdown.total, 19000);
+  assert.equal(r.body.breakdown.total, 20000);
   r = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 3 });
   assert.equal(r.body.breakdown.total, 600000);
   r = await api.post('/api/public/quote').send({ kind: 'ticket' });
@@ -181,4 +181,63 @@ test('venta manual cortesía y SOLD_OUT', async () => {
   assert.equal(r.body.error.code, 'SOLD_OUT');
   r = await api.get('/api/public/config');
   assert.equal(r.body.event.soldOut, true);
+});
+
+test('reglas de invitados: preventa, general, extra, % propio y cortesía', async () => {
+  const q = (g, ig) => api.post('/api/public/quote').send({ kind: 'ticket', gender: g, instagram: ig }).then((r) => r.body.breakdown);
+  await Guest.create([{ name: 'Mujer', instagram: 'inv1' }, { name: 'Medio', instagram: 'inv50', discountPercent: 50 }, { name: 'Cort', instagram: 'inv100', discountPercent: 100 }]);
+  assert.equal((await q('mujer', 'inv1')).total, 15000);
+  assert.equal((await q('hombre', 'inv1')).total, 25000);
+  assert.equal((await q('hombre', 'inv50')).total, 15000);
+  assert.equal((await q('hombre', 'inv100')).total, 0);
+  await Settings.updateOne({ _id: 'main' }, { $set: { presaleEndsAt: new Date(Date.now() - 1000) } });
+  assert.equal((await q('mujer', 'inv1')).total, 20000);
+  assert.equal((await q('hombre', 'inv1')).total, 30000);
+  assert.equal((await q('hombre', 'inv1')).base, 40000);
+  await Settings.updateOne({ _id: 'main' }, { $set: { guestGeneralDiscount: 5000 } });
+  assert.equal((await q('mujer', 'inv1')).total, 15000);
+});
+
+test('cortesía de invitado: orden de $0 queda pagada', async () => {
+  await Guest.create({ name: 'Cort', cedula: '1088777666', discountPercent: 100 });
+  const r = await api.post('/api/public/orders').send(ticketOrder({ buyer: buyer({ cedula: '1088777666' }) }));
+  const o = await Order.findOne().lean();
+  assert.equal(o.breakdown.total, 0);
+  assert.equal(o.status, 'paid', JSON.stringify(r.body));
+});
+
+test('migración de ajustes y config pública', async () => {
+  await Settings.collection.updateOne({ _id: 'main' }, { $unset: { guestPresaleDiscount: '', guestGeneralDiscount: '' }, $set: { guestDiscountPercent: 25 } });
+  const { ensureBaseData } = await import('../src/services/bootstrap.js');
+  await ensureBaseData({ adminPassword: '' }, { warn() {} });
+  const s = await Settings.collection.findOne({ _id: 'main' });
+  assert.equal(s.guestPresaleDiscount, 5000);
+  assert.equal(s.guestGeneralDiscount, 0);
+  assert.equal(s.guestDiscountPercent, undefined);
+  const r = await api.get('/api/public/config');
+  assert.deepEqual(r.body.guest, { presaleDiscount: 5000, generalDiscount: 0 });
+});
+
+test('instagram opcional en pedido y quote; invitado por cédula sin instagram', async () => {
+  let r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre' });
+  assert.equal(r.status, 200);
+  const b = buyer({ instagram: '' });
+  await Guest.create({ name: 'Inv', cedula: b.cedula });
+  delete b.email;
+  r = await api.post('/api/public/orders').send(ticketOrder({ buyer: b }));
+  assert.equal(r.status, 201);
+  assert.equal(r.body.order.buyer.instagram, '');
+  assert.equal(r.body.order.breakdown.isGuest, true);
+});
+
+test('migración: paymentAccounts con Daviplata pasa a Bre-B + Nequi', async () => {
+  const { ensureBaseData } = await import('../src/services/bootstrap.js');
+  await Settings.updateOne({}, { $set: { paymentAccounts: [{ label: 'Nequi', number: '1', holder: '' }, { label: 'DAVIPLATA', number: '1', holder: '' }] } });
+  await ensureBaseData(ctx.config, ctx.logger);
+  let s = await Settings.findOne().lean();
+  assert.deepEqual(s.paymentAccounts.map((a) => a.label), ['Bre-B (llave)', 'Nequi']);
+  await Settings.updateOne({}, { $set: { paymentAccounts: [{ label: 'Otra', number: '2', holder: '' }] } });
+  await ensureBaseData(ctx.config, ctx.logger);
+  s = await Settings.findOne().lean();
+  assert.deepEqual(s.paymentAccounts.map((a) => a.label), ['Otra']);
 });

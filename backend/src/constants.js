@@ -4,7 +4,7 @@ export const GENDERS = ['mujer', 'hombre'];
 export const ORDER_KINDS = ['ticket', 'room'];
 export const ORDER_PAYMENT_METHODS = ['mercadopago', 'transferencia', 'manual'];
 export const PUBLIC_PAYMENT_METHODS = ['mercadopago', 'transferencia'];
-export const MANUAL_METHODS = ['efectivo', 'nequi', 'daviplata', 'transferencia', 'cortesia'];
+export const MANUAL_METHODS = ['efectivo', 'nequi', 'breb', 'transferencia', 'cortesia'];
 export const ORDER_STATUSES = ['pending_payment', 'in_review', 'paid', 'rejected', 'expired', 'cancelled', 'conflict'];
 export const TICKET_KINDS = ['general', 'room', 'cortesia'];
 export const PHASES = ['preventa', 'general'];
@@ -12,7 +12,7 @@ export const TICKET_STATUSES = ['valid', 'used', 'void'];
 export const ROOM_STATUSES = ['available', 'held', 'booked', 'blocked'];
 export const DOOR_CATEGORIES = ['mujer', 'hombre', 'invitado', 'habitacion', 'cortesia'];
 export const DOOR_SALE_CATEGORIES = ['mujer', 'hombre', 'invitado'];
-export const POS_METHODS = ['efectivo', 'nequi', 'daviplata', 'tarjeta', 'cortesia'];
+export const POS_METHODS = ['efectivo', 'nequi', 'breb', 'tarjeta', 'cortesia'];
 export const VEHICLE_TYPES = ['carro', 'moto'];
 export const PRODUCT_CATEGORIES = ['cocteles', 'licores', 'cervezas', 'gatorade', 'electrolit', 'agua', 'perfumes', 'otros'];
 export const EXPENSE_CATEGORIES = [
@@ -43,11 +43,12 @@ export const DEFAULT_SETTINGS = Object.freeze({
     preventa: { mujer: 20000, hombre: 30000 },
     puerta: { mujer: 25000, hombre: 40000 },
   },
-  guestDiscountPercent: 25,
+  guestPresaleDiscount: 5000,
+  guestGeneralDiscount: 0,
   parking: { carro: 10000, moto: 5000, casco: 5000 },
   paymentAccounts: [
+    { label: 'Bre-B (llave)', number: '3135995612', holder: '' },
     { label: 'Nequi', number: '3135995612', holder: '' },
-    { label: 'Daviplata', number: '3135995612', holder: '' },
   ],
   transferInstructions:
     'Transfiere el valor exacto y sube el pantallazo del comprobante. Te confirmamos en pocas horas.',

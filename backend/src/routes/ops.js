@@ -23,7 +23,7 @@ export function doorRouter() {
   r.get('/config', async (req, res) => {
     const [s, rooms] = await Promise.all([getSettings(), Room.find().select('capacity').lean()]);
     res.json({
-      prices: { ...s.prices.puerta }, guestDiscountPercent: s.guestDiscountPercent, parking: { ...s.parking },
+      prices: { ...s.prices.puerta }, presalePrices: { ...s.prices.preventa }, guest: { presaleDiscount: s.guestPresaleDiscount, generalDiscount: s.guestGeneralDiscount }, parking: { ...s.parking },
       capacity: s.capacity, roomsCapacity: rooms.reduce((a, x) => a + x.capacity, 0),
     });
   });

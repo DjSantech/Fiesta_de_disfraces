@@ -83,6 +83,9 @@ test('venta en puerta: invitado + carro + casco y ALREADY_HAS_TICKET', async () 
   assert.equal(r.body.entry.helmetAmount, 5000);
   assert.equal(r.body.entry.totalAmount, 35000);
   assert.equal(r.body.entry.guestListMatch, true);
+  r = await api.post('/api/door/sale').set('Authorization', puerta).send({ name: 'Lola', cedula: '1077000111', category: 'invitado', gender: 'mujer', paymentMethod: 'efectivo' });
+  assert.equal(r.body.entry.entryAmount, 20000);
+  assert.equal(r.body.entry.guestListMatch, false);
   r = await api.post('/api/door/sale').set('Authorization', puerta).send({ name: 'Ana', phone: '3001112233', category: 'mujer', paymentMethod: 'cortesia', vehicle: { type: 'moto', plate: 'AAA11A' } });
   assert.equal(r.body.entry.totalAmount, 0);
   r = await api.post('/api/door/sale').set('Authorization', puerta).send({ name: 'Sin datos', category: 'invitado', paymentMethod: 'efectivo' });
@@ -94,8 +97,8 @@ test('venta en puerta: invitado + carro + casco y ALREADY_HAS_TICKET', async () 
   assert.equal(r.body.error.code, 'ALREADY_HAS_TICKET');
   assert.ok(r.body.error.details.ticketId);
   r = await api.get('/api/door/stats').set('Authorization', puerta);
-  assert.equal(r.body.inside, 2);
-  assert.equal(r.body.money.total, 35000);
+  assert.equal(r.body.inside, 3);
+  assert.equal(r.body.money.total, 55000);
   assert.equal(r.body.tickets.pending, 1);
   r = await api.get('/api/door/lookup?q=pedro').set('Authorization', puerta);
   assert.equal(r.body.entries.length, 1);

@@ -4,7 +4,7 @@ import { Room, Ticket, Order } from '../models/index.js';
 import { PUBLIC_PAYMENT_METHODS, GENDERS, ORDER_KINDS } from '../constants.js';
 import { iso, notFound, tryIds, runInBackground, AppError } from '../lib/util.js';
 import {
-  validate, z, tokenParam, text, cedula, phone, instagram, optCedula, email, spanishErrorMap,
+  validate, z, tokenParam, text, cedula, phone, instagramOrEmpty, optCedula, email, spanishErrorMap,
 } from '../middleware/validate.js';
 import { receiptUpload } from '../middleware/http.js';
 import { getSettings, phaseAt, currentPrices, ticketsTaken, roomPublic } from '../services/core.js';
@@ -34,7 +34,7 @@ export const companionsSchema = z.array(z.object({ name: text(2, 80), cedula: op
 
 const orderBody = z.object({
   kind, gender, roomNumber,
-  buyer: z.object({ name: text(3, 80), cedula, phone, instagram, email }),
+  buyer: z.object({ name: text(3, 80), cedula, phone, instagram: instagramOrEmpty, email }),
   companions: companionsSchema,
   paymentMethod: z.enum(PUBLIC_PAYMENT_METHODS, { error: 'Elige Mercado Pago o transferencia.' }),
   acceptTerms: z.literal(true, { error: 'Debes confirmar que eres mayor de edad y aceptar la política de devoluciones.' }),
@@ -66,7 +66,7 @@ export function publicRouter(ctx, limits) {
         salesOpen: !!settings.salesOpen, soldOut: taken >= settings.capacity,
       },
       prices: { preventa: { ...settings.prices.preventa }, puerta: { ...settings.prices.puerta }, current: { ...currentPrices(settings, phase) } },
-      guestDiscountPercent: settings.guestDiscountPercent,
+      guest: { presaleDiscount: settings.guestPresaleDiscount, generalDiscount: settings.guestGeneralDiscount },
       parking: { ...settings.parking },
       rooms: rooms.map((r) => roomPublic(r, settings)),
       paymentAccounts: settings.paymentAccounts.map((a) => ({ label: a.label, number: a.number, holder: a.holder || '' })),

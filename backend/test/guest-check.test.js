@@ -8,10 +8,10 @@ before(startDb);
 after(stopDb);
 beforeEach(async () => {
   ({ api } = await setup());
-  await Settings.updateOne({ _id: 'main' }, { $set: { guestDiscountPercent: 30 } });
   await Guest.create([
     { name: 'Juan Carlos Pérez Gómez', cedula: '1088123456', phone: '3001234567', instagram: 'juan.perez' },
     { name: 'María Gómez Ruiz', instagram: 'mariag', redeemed: true },
+    { name: 'Pepe Ruiz Cano', cedula: '70111222', discountPercent: 30 },
     { name: 'Ana Torres Díaz', cedula: '52111222', discountPercent: 100 },
     { name: 'Luis Ramos Soto' }, { name: 'Luis Ramos Vera' },
   ]);
@@ -22,7 +22,7 @@ test('instagram con y sin @', async () => {
   for (const q of ['@Juan.Perez', 'juan.perez']) {
     const r = await check(q);
     assert.equal(r.status, 200);
-    assert.deepEqual(r.body, { found: true, ambiguous: false, kind: 'descuento', discountPercent: 30, redeemed: false, firstName: 'Juan' });
+    assert.deepEqual(r.body, { found: true, ambiguous: false, kind: 'descuento', discountPercent: null, phase: 'preventa', presaleDiscount: 5000, generalDiscount: 0, redeemed: false, firstName: 'Juan' });
   }
 });
 test('cédula y celular (con 57)', async () => {
@@ -36,7 +36,7 @@ test('nombre completo y parcial, sin tildes', async () => {
 });
 test('ambiguo no revela a nadie', async () => {
   const r = await check('luis ramos');
-  assert.deepEqual(r.body, { found: false, ambiguous: true, kind: null, discountPercent: null, redeemed: false, firstName: null });
+  assert.deepEqual(r.body, { found: false, ambiguous: true, kind: null, discountPercent: null, phase: null, presaleDiscount: 0, generalDiscount: 0, redeemed: false, firstName: null });
 });
 test('no encontrado y nombre de una palabra', async () => {
   assert.equal((await check('nadie.existe')).body.found, false);
@@ -46,7 +46,8 @@ test('no encontrado y nombre de una palabra', async () => {
 test('cortesía y redeemed', async () => {
   const c = (await check('52111222')).body;
   assert.equal(c.kind, 'cortesia');
-  assert.equal(c.discountPercent, 100);
+  assert.equal(c.discountPercent, null);
+  assert.equal((await check('70111222')).body.discountPercent, 30);
   const m = (await check('@mariag')).body;
   assert.equal(m.redeemed, true);
   assert.equal(m.firstName, 'María');

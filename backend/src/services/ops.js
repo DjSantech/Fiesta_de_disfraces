@@ -5,7 +5,7 @@ import {
   textRegex, escapeRegex, normalizePlate,
 } from '../lib/util.js';
 import { fieldError } from '../middleware/validate.js';
-import { getSettings, applyDiscount, findGuestMatch } from './core.js';
+import { getSettings, guestBreakdown, findGuestMatch } from './core.js';
 import { ticketDoor, doorEntryOut, saleOut } from './serializers.js';
 
 // ---------- Portería ----------
@@ -95,7 +95,7 @@ export async function doorSale(input, user) {
   const guest = await findGuestMatch({ cedula: input.cedula, phone: input.phone });
   const base = settings.prices.puerta[gender];
   let entryAmount = base;
-  if (input.category === 'invitado') entryAmount = applyDiscount(base, guest?.discountPercent ?? settings.guestDiscountPercent);
+  if (input.category === 'invitado') entryAmount = guestBreakdown(settings, { gender, guest, phase: 'general', base }).total;
   if (input.paymentMethod === 'cortesia') entryAmount = 0;
   const x = extras(settings, input);
   const entry = await DoorEntry.create({
@@ -191,7 +191,7 @@ export async function lookup(q) {
   ]);
   return {
     tickets: tickets.map(ticketDoor),
-    guests: guests.map((g) => ({ id: String(g._id), name: g.name, cedulaLast4: last4(g.cedula), discountPercent: g.discountPercent ?? settings.guestDiscountPercent })),
+    guests: guests.map((g) => ({ id: String(g._id), name: g.name, cedulaLast4: last4(g.cedula), discountPercent: g.discountPercent ?? null })),
     entries: entries.map(doorEntryOut),
   };
 }
