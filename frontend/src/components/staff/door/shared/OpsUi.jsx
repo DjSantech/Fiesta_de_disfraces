@@ -8,7 +8,7 @@ import { formatRelative } from '../../../../lib/format';
 import { useOnline } from './hooks';
 import { errorMessage, isConnectionError } from './errors';
 
-const METHOD_ICONS = { efectivo: Banknote, nequi: Smartphone, daviplata: Wallet, tarjeta: CreditCard, cortesia: Gift };
+const METHOD_ICONS = { efectivo: Banknote, nequi: Smartphone, breb: Wallet, tarjeta: CreditCard, cortesia: Gift };
 
 export const PAY_METHOD_OPTIONS = Object.keys(POS_METHOD_LABEL).map((value) => ({
   value,

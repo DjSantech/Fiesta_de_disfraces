@@ -305,7 +305,7 @@ export function SummaryTab() {
         <p className="mt-1 text-sm text-fog">{formatNumber(s.count)} ventas · promedio {formatCOP(s.count ? total / s.count : 0)}</p>
       </Card>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        {['efectivo', 'nequi', 'daviplata', 'tarjeta'].map((k) => (
+        {['efectivo', 'nequi', 'breb', 'tarjeta'].map((k) => (
           <Stat key={k} label={POS_METHOD_LABEL[k]} value={formatCOP(s.byMethod?.[k])} tone={k === 'efectivo' ? 'green' : 'neutral'} />
         ))}
         <Stat label="Cortesías" value={formatNumber(s.courtesy?.count)} hint={`Valor ${formatCOP(s.courtesy?.value)}`} tone="violet" className="col-span-2 lg:col-span-1" />

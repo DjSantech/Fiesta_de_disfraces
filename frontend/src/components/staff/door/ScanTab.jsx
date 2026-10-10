@@ -86,8 +86,7 @@ export function LookupSheet({ open, onClose, onCheckin, onSell }) {
                   <p className="font-bold text-bone">{g.name}</p>
                   <p className="text-sm text-fog">
                     {g.cedulaLast4 ? `CC ••••${g.cedulaLast4} · ` : ''}
-                    {g.discountPercent ?? 'descuento general'}
-                    {g.discountPercent != null ? '% de descuento' : ''}
+                    {g.discountPercent === 100 ? 'Cortesía' : g.discountPercent != null ? `${g.discountPercent}% de descuento` : 'Regla general de invitados'}
                   </p>
                 </div>
                 <Button size="lg" variant="secondary" onClick={() => onSell({ name: g.name, category: 'invitado' })}>

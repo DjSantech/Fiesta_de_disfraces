@@ -14,7 +14,7 @@ import { formatPhone, normalizeSearch } from '../../../components/staff/admin/ut
 
 const FIELDS = ['name', 'cedula', 'phone', 'instagram', 'discountPercent', 'note'];
 
-function GuestForm({ guest, generalPercent, onClose, onSaved }) {
+function GuestForm({ guest, onClose, onSaved }) {
   const toast = useToast();
   const [form, setForm] = useState({
     name: guest?.name || '',
@@ -79,15 +79,15 @@ function GuestForm({ guest, generalPercent, onClose, onSaved }) {
           <Input label="Instagram" leading="@" autoCapitalize="none" value={form.instagram} onChange={(e) => set('instagram', e.target.value.replace(/^@/, ''))} error={errors.instagram} autoComplete="off" />
         </div>
         <IntegerInput
-          label="Descuento propio (opcional)"
+          label="Descuento propio % (opcional)"
           suffix="%"
           max={100}
           maxDigits={3}
-          placeholder={`${generalPercent ?? 25} (general)`}
+          placeholder="Vacío = regla general"
           value={form.discountPercent}
           onChange={(n) => set('discountPercent', n)}
           error={errors.discountPercent}
-          hint={`Vacío = el general de Ajustes (${generalPercent ?? '—'}%).`}
+          hint="Vacío = regla general de Ajustes. 100 = Cortesía (entrada gratis)."
         />
         <Textarea label="Nota" rows={2} value={form.note} onChange={(e) => set('note', e.target.value)} error={errors.note} />
       </form>
@@ -171,8 +171,6 @@ Sofía Marín, , , @sofimarin`}</pre>
 export default function Guests() {
   const toast = useToast();
   const list = useFetch((signal) => staffApi('/api/admin/guests', { signal }), []);
-  const settings = useFetch((signal) => staffApi('/api/admin/settings', { signal }), []);
-  const general = settings.data?.settings?.guestDiscountPercent;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [editing, setEditing] = useState(null); // guest | 'new'
@@ -206,9 +204,9 @@ export default function Guests() {
 
   const discount = (g) =>
     g.discountPercent !== null && g.discountPercent !== undefined ? (
-      <Badge tone="orange">{g.discountPercent}%</Badge>
+      <Badge tone={g.discountPercent === 100 ? 'violet' : 'orange'}>{g.discountPercent === 100 ? 'Cortesía (100%)' : `${g.discountPercent}%`}</Badge>
     ) : (
-      <span className="text-sm text-fog">{general ?? '—'}% <span className="text-xs text-smoke">general</span></span>
+      <span className="text-sm text-fog">Regla general</span>
     );
 
   const status = (g) =>
@@ -308,7 +306,6 @@ export default function Guests() {
       {editing && (
         <GuestForm
           guest={editing === 'new' ? null : editing}
-          generalPercent={general}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); list.reload({ silent: true }); }}
         />

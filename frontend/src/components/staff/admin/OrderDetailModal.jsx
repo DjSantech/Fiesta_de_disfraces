@@ -171,7 +171,7 @@ function AmountSummary({ order }) {
         </div>
         <div className="flex flex-wrap justify-end gap-1.5">
           {b.phase && !isRoom && <Badge>{PHASE_LABEL[b.phase]}</Badge>}
-          {b.isGuest && <Badge tone="orange">Invitado −{b.discountPercent}%</Badge>}
+          {b.isGuest && <Badge tone="orange">Invitado{b.total === 0 ? ' · cortesía' : ''}</Badge>}
           {courtesy && <Badge tone="violet">Cortesía</Badge>}
         </div>
       </div>
@@ -180,7 +180,7 @@ function AmountSummary({ order }) {
           {b.base !== undefined && <Line label={baseLabel} value={formatCOP(b.base)} />}
           {b.discount > 0 && (
             <Line
-              label={`Descuento lista de invitados (${b.discountPercent}%)${order.guest?.name ? ` · ${order.guest.name}` : ''}`}
+              label={`Descuento lista de invitados${order.guest?.name ? ` · ${order.guest.name}` : ''}`}
               value={`−${formatCOP(b.discount)}`}
             />
           )}

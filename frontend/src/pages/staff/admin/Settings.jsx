@@ -23,7 +23,8 @@ function toForm(s) {
       preventa: { mujer: s.prices?.preventa?.mujer ?? null, hombre: s.prices?.preventa?.hombre ?? null },
       puerta: { mujer: s.prices?.puerta?.mujer ?? null, hombre: s.prices?.puerta?.hombre ?? null },
     },
-    guestDiscountPercent: s.guestDiscountPercent ?? null,
+    guestPresaleDiscount: s.guestPresaleDiscount ?? null,
+    guestGeneralDiscount: s.guestGeneralDiscount ?? null,
     parking: { carro: s.parking?.carro ?? null, moto: s.parking?.moto ?? null, casco: s.parking?.casco ?? null },
     paymentAccounts: (s.paymentAccounts || []).map((a) => ({ label: a.label || '', number: a.number || '', holder: a.holder || '' })),
     transferInstructions: s.transferInstructions || '',
@@ -48,7 +49,8 @@ function validate(f) {
   if (!f.capacity) e.capacity = 'Mínimo 1.';
   for (const p of ['preventa', 'puerta']) for (const g of ['mujer', 'hombre']) if (f.prices[p][g] === null) e[`prices.${p}.${g}`] = 'Obligatorio.';
   for (const k of ['carro', 'moto', 'casco']) if (f.parking[k] === null) e[`parking.${k}`] = 'Obligatorio.';
-  if (f.guestDiscountPercent === null) e.guestDiscountPercent = 'Obligatorio.';
+  if (f.guestPresaleDiscount === null) e.guestPresaleDiscount = 'Obligatorio.';
+  if (f.guestGeneralDiscount === null) e.guestGeneralDiscount = 'Obligatorio.';
   f.paymentAccounts.forEach((a, i) => {
     if (!a.label.trim()) e[`paymentAccounts.${i}.label`] = 'Obligatorio.';
     if (!a.number.trim()) e[`paymentAccounts.${i}.number`] = 'Obligatorio.';
@@ -199,7 +201,10 @@ export default function Settings() {
             <MoneyInput label="Puerta · Mujer" value={form.prices.puerta.mujer} onChange={(n) => set('prices.puerta.mujer', n)} error={err('prices.puerta.mujer')} />
             <MoneyInput label="Puerta · Hombre" value={form.prices.puerta.hombre} onChange={(n) => set('prices.puerta.hombre', n)} error={err('prices.puerta.hombre')} />
           </div>
-          <IntegerInput label="Descuento lista de invitados" suffix="%" max={100} maxDigits={3} value={form.guestDiscountPercent} onChange={(n) => set('guestDiscountPercent', n)} error={err('guestDiscountPercent')} hint="Se redondea a múltiplos de $500." />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <MoneyInput label="Descuento invitados en preventa ($)" value={form.guestPresaleDiscount} onChange={(n) => set('guestPresaleDiscount', n)} error={err('guestPresaleDiscount')} hint="Se resta al precio de preventa del género. Ej.: 5000." />
+            <MoneyInput label="Descuento extra invitados en venta general ($, sobre el precio de preventa)" value={form.guestGeneralDiscount} onChange={(n) => set('guestGeneralDiscount', n)} error={err('guestGeneralDiscount')} hint="En venta general conservan el precio de preventa menos este valor. 0 = solo conservan la preventa." />
+          </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <MoneyInput label="Parqueadero carro" value={form.parking.carro} onChange={(n) => set('parking.carro', n)} error={err('parking.carro')} />
             <MoneyInput label="Parqueadero moto" value={form.parking.moto} onChange={(n) => set('parking.moto', n)} error={err('parking.moto')} />

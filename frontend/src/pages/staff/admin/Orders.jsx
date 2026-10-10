@@ -117,7 +117,7 @@ function OrdersTable({ items, onOpen }) {
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-right">
                 <p className="font-semibold tabular-nums text-bone">{formatCOP(o.amount)}</p>
-                {o.breakdown?.isGuest && <p className="text-xs text-ember">Invitado −{o.breakdown.discountPercent}%</p>}
+                {o.breakdown?.isGuest && <p className="text-xs text-ember">Invitado −{formatCOP(o.breakdown.discount)}</p>}
               </td>
               <td className="px-3 py-3 text-fog">
                 <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
@@ -178,7 +178,7 @@ function OrderCard({ o, onOpen }) {
         </div>
         <div className="shrink-0 text-right">
           <p className="text-lg font-bold tabular-nums leading-none text-bone">{formatCOP(o.amount)}</p>
-          {o.breakdown?.isGuest && <p className="mt-1 text-xs text-ember">Invitado −{o.breakdown.discountPercent}%</p>}
+          {o.breakdown?.isGuest && <p className="mt-1 text-xs text-ember">Invitado −{formatCOP(o.breakdown.discount)}</p>}
         </div>
       </div>
     </li>

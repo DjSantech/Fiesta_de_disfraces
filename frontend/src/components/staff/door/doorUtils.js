@@ -46,9 +46,9 @@ export function normalizeTicketInput(raw) {
 /** Redondeo a múltiplos de $500. */
 export const roundTo500 = (n) => Math.round(n / 500) * 500;
 
-/** Descuento de invitado vigente: el de la persona en la lista o el general. */
+/** % propio del invitado (null = regla general: preventa del género menos el descuento de venta general). */
 export function guestPercent(config, guest) {
-  return guest?.discountPercent ?? config?.guestDiscountPercent ?? 0;
+  return guest?.discountPercent ?? null;
 }
 
 /** Precio de la entrada en puerta (sin vehículo/casco). */
@@ -57,7 +57,10 @@ export function doorEntryPrice(config, category, gender, guest) {
   const base = config?.prices?.[g];
   if (!base) return 0;
   if (category !== 'invitado') return base;
-  return roundTo500(base * (1 - guestPercent(config, guest) / 100));
+  const own = guestPercent(config, guest);
+  if (own !== null) return roundTo500(base * (1 - own / 100));
+  const presale = config?.presalePrices?.[g] ?? base;
+  return Math.max(0, presale - (config?.guest?.generalDiscount ?? 0));
 }
 
 export const parkingPrice = (config, vehicleType) => (vehicleType ? config?.parking?.[vehicleType] ?? 0 : 0);

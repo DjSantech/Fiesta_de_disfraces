@@ -19,7 +19,7 @@ export const ORDER_PAYMENT_METHOD_LABEL = {
 export const MANUAL_METHOD_LABEL = {
   efectivo: 'Efectivo',
   nequi: 'Nequi',
-  daviplata: 'Daviplata',
+  breb: 'Bre-B',
   transferencia: 'Transferencia',
   cortesia: 'Cortesía',
 };
@@ -86,7 +86,7 @@ export const DOOR_CATEGORY_LABEL = {
 export const POS_METHOD_LABEL = {
   efectivo: 'Efectivo',
   nequi: 'Nequi',
-  daviplata: 'Daviplata',
+  breb: 'Bre-B',
   tarjeta: 'Tarjeta',
   cortesia: 'Cortesía',
 };

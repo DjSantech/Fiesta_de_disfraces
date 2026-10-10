@@ -211,7 +211,7 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
           )}
           {match.guest && (
             <p className="flex items-center gap-2 rounded-2xl border border-toxic/40 bg-toxic/10 p-3 text-sm font-semibold text-toxic">
-              <ListChecks className="h-5 w-5 shrink-0" /> En lista de invitados: {match.guest.name} · {pct}% de descuento
+              <ListChecks className="h-5 w-5 shrink-0" /> En lista de invitados: {match.guest.name} · {pct === 100 ? 'cortesía' : pct !== null ? `${pct}% de descuento` : 'precio de amigo cercano'}
             </p>
           )}
 
@@ -226,7 +226,7 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
               options={[
                 { value: 'mujer', label: 'Mujer', hint: priceHint('mujer') },
                 { value: 'hombre', label: 'Hombre', hint: priceHint('hombre') },
-                { value: 'invitado', label: 'Invitado', hint: `−${pct}%` },
+                { value: 'invitado', label: 'Invitado', hint: pct === 100 ? 'Cortesía' : pct !== null ? `−${pct}%` : 'Amigo cercano' },
               ]}
             />
             {errors.category && <p className="text-xs font-medium text-danger-light">{errors.category}</p>}
@@ -246,7 +246,7 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
                 />
                 {errors.gender && <p className="text-xs font-medium text-danger-light">{errors.gender}</p>}
                 <p className="text-xs text-fog">
-                  Descuento {pct}% {match.guest ? `(lista: ${match.guest.name})` : '(descuento general de invitado)'}
+                  {pct !== null ? `Descuento ${pct}%` : 'Precio de preventa menos el descuento de venta general'} {match.guest ? `(lista: ${match.guest.name})` : '(regla general de invitados)'}
                 </p>
               </>
             )}
@@ -263,7 +263,7 @@ export default function SellTab({ config, prefill, onPrefillUsed, onChanged }) {
             <Input label="Nota (opcional)" value={form.notes} onChange={(e) => set({ notes: e.target.value })} maxLength={200} />
           </Card>
           <Card padding="sm" className="flex flex-col gap-1.5 text-sm">
-            <Line label={priceKnown ? `Entrada ${form.category === 'invitado' ? `invitado (−${pct}%)` : form.category}` : 'Entrada · elige categoría'} amount={entryAmount} muted={courtesy} />
+            <Line label={priceKnown ? `Entrada ${form.category === 'invitado' ? `invitado${pct !== null ? ` (−${pct}%)` : ''}` : form.category}` : 'Entrada · elige categoría'} amount={entryAmount} muted={courtesy} />
             {form.vehicleType && <Line label={`Parqueadero ${VEHICLE_LABEL[form.vehicleType].toLowerCase()}`} amount={parking} muted={courtesy} />}
             {form.helmet && <Line label="Casco" amount={helmet} muted={courtesy} />}
             <div className="mt-1 flex items-baseline justify-between border-t border-white/10 pt-2">
