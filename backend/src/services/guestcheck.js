@@ -8,7 +8,7 @@ const cap = (w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '');
 const EMPTY = { found: false, ambiguous: false, kind: null, discountPercent: null, phase: null, presaleDiscount: 0, generalDiscount: 0, redeemed: false, firstName: null };
 
 export async function guestCheck(query) {
-  const q = collapseSpaces(query);
+  const q = collapseSpaces(query).replace(/^@\s+/, '@'); // "@ usuario" -> "@usuario"
   const settings = await getSettings();
   let matches = [];
   let ambiguous = false;
@@ -17,8 +17,10 @@ export async function guestCheck(query) {
   if (/^\+?\d+$/.test(digits) || /^\d[\d\s.+-]*$/.test(q)) {
     const ced = normalizeCedula(digits);
     const ph = normalizePhone(digits);
-    matches = await Guest.find({ $or: [{ cedula: ced }, { phone: ph }] }).sort({ createdAt: 1 }).limit(5).lean();
-  } else if (!q.includes(' ') && INSTAGRAM_RE.test(ig) && !/^\d+$/.test(ig)) {
+    const or = [{ cedula: ced }, { phone: ph }];
+    if (INSTAGRAM_RE.test(ig)) or.push({ instagram: ig }); // usuarios de Instagram que son solo números
+    matches = await Guest.find({ $or: or }).sort({ createdAt: 1 }).limit(5).lean();
+  } else if (!q.includes(' ') && INSTAGRAM_RE.test(ig) && (!/^\d+$/.test(ig) || q.startsWith('@'))) {
     matches = await Guest.find({ instagram: ig }).sort({ createdAt: 1 }).limit(5).lean();
   } else {
     const words = fold(q).split(' ').filter(Boolean);

@@ -64,3 +64,24 @@ test('429 con rate limit', async () => {
   assert.equal(last.status, 429);
   assert.equal(last.body.error.code, 'RATE_LIMITED');
 });
+
+test('instagram sin @, en mayúsculas, con espacio tras la @ o pegando el enlace', async () => {
+  for (const q of ['JUAN.PEREZ', '  juan.perez  ', '@ juan.perez', 'instagram.com/juan.perez', 'https://www.instagram.com/juan.perez/?igsh=abc']) {
+    const r = await check(q);
+    assert.equal(r.body.found, true, q);
+    assert.equal(r.body.firstName, 'Juan', q);
+  }
+});
+test('usuario de instagram formado solo por números', async () => {
+  await Guest.create({ name: 'Carla Numérica Ruiz', instagram: '9876543210' });
+  assert.equal((await check('@9876543210')).body.firstName, 'Carla');
+  assert.equal((await check('9876543210')).body.firstName, 'Carla');
+});
+test('la compra aplica el descuento aunque escriban el instagram sin @', async () => {
+  for (const instagram of ['juan.perez', '@juan.perez', 'JUAN.PEREZ']) {
+    const r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'mujer', cedula: '1000000009', phone: '3009998877', instagram });
+    assert.equal(r.status, 200, instagram);
+    assert.equal(r.body.breakdown.isGuest, true, instagram);
+    assert.equal(r.body.breakdown.total, 15000, instagram);
+  }
+});
