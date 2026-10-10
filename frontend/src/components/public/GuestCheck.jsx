@@ -148,7 +148,7 @@ export default function GuestCheck({ className }) {
           Lista de invitados
         </p>
         <h3 className="mt-2 font-display text-[2.1rem] uppercase leading-none text-bone sm:text-5xl">¿Estás en la lista?</h3>
-        <p className="mt-2 max-w-xl text-sm text-fog">Consulta si tienes cortesía o descuento. Es rápido y no guardamos lo que escribes.</p>
+        <p className="mt-2 max-w-xl text-sm text-fog">Escribe tu @Instagram (o tu cédula, o tu nombre completo) y mira si tienes cortesía o descuento. Es rápido y no guardamos lo que escribes.</p>
 
         <form onSubmit={submit} className="mt-5 flex flex-col gap-2 sm:flex-row" noValidate>
           <label className="sr-only" htmlFor="guest-query">@Instagram, cédula o nombre completo</label>
@@ -159,7 +159,7 @@ export default function GuestCheck({ className }) {
               type="text"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="@tuinstagram, tu cédula o tu nombre completo"
+              placeholder="Ej: @santiguevara_05"
               autoComplete="off"
               autoCapitalize="none"
               autoCorrect="off"
