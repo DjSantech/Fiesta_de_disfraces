@@ -106,3 +106,17 @@ Haz push y prueba el enlace en https://developers.facebook.com/tools/debug/.
 | GitHub | $0 | Repos privados ilimitados |
 
 Para un evento de unos cientos de asistentes, el plan gratis alcanza. Si esperas mucho tráfico simultáneo, considera Render Starter (~USD 7/mes) solo durante el mes del evento.
+
+---
+
+## Despliegue automático con GitHub Actions
+
+El frontend se publica solo en Cloudflare Pages (`https://fiestadedisfraces.pages.dev`) cada vez que cambia `frontend/` en `main`, con `.github/workflows/deploy-frontend.yml`. No usa la conexión Git de Cloudflare: usa un token.
+
+1. **Token de Cloudflare:** dash.cloudflare.com → My Profile → API Tokens → Create Token → Custom token → permiso `Account · Cloudflare Pages · Edit`.
+2. **Account ID:** en Cloudflare → Workers & Pages (columna derecha) → "Account ID".
+3. **Secretos en GitHub** (repo → Settings → Secrets and variables → Actions → New repository secret): `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`.
+4. **Backend (opcional):** en Render → servicio → Settings → Deploy Hook, copia la URL y guárdala como secreto `RENDER_DEPLOY_HOOK_URL`. Así Render redespliega cuando cambia `backend/` (`deploy-backend.yml`).
+5. En Render, `FRONTEND_URL` debe incluir `https://fiestadedisfraces.pages.dev` (si pones varias, separadas por coma, la primera se usa para los enlaces).
+6. La URL del backend que usa el frontend sale de la variable de repo `VITE_API_URL` (por defecto `https://fiesta-disfraces-api.onrender.com`).
+7. Nunca pegues el token en un chat ni lo subas al repo.
