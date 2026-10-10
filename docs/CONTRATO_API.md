@@ -44,14 +44,14 @@ Fuente de verdad entre `frontend/` y `backend/`. Si algo no está aquí, no exis
 | `gender` | `mujer`, `hombre` |
 | `orderKind` | `ticket`, `room` |
 | `orderPaymentMethod` | `mercadopago`, `transferencia`, `manual` |
-| `manualMethod` | `efectivo`, `nequi`, `daviplata`, `transferencia`, `cortesia` |
+| `manualMethod` | `efectivo`, `nequi`, `breb`, `transferencia`, `cortesia` |
 | `orderStatus` | `pending_payment`, `in_review`, `paid`, `rejected`, `expired`, `cancelled`, `conflict` |
 | `ticketKind` | `general`, `room`, `cortesia` |
 | `phase` | `preventa`, `general` |
 | `ticketStatus` | `valid`, `used`, `void` |
 | `roomStatus` | `available`, `held`, `booked`, `blocked` |
 | `doorCategory` | `mujer`, `hombre`, `invitado`, `habitacion`, `cortesia` |
-| `posMethod` (puerta y barra) | `efectivo`, `nequi`, `daviplata`, `tarjeta`, `cortesia` |
+| `posMethod` (puerta y barra) | `efectivo`, `nequi`, `breb`, `tarjeta`, `cortesia` |
 | `vehicleType` | `carro`, `moto` |
 | `productCategory` | `cocteles`, `licores`, `cervezas`, `gatorade`, `electrolit`, `agua`, `perfumes`, `otros` |
 | `expenseCategory` | `finca`, `sonido_luces`, `djs`, `bebidas`, `decoracion`, `seguridad`, `publicidad`, `transporte`, `otros` |
@@ -63,7 +63,7 @@ Etiquetas en español para todos los enums: `frontend/src/lib/labels.js`.
 
 **Breakdown** (desglose de precio)
 ```json
-{ "phase": "preventa", "base": 30000, "isGuest": true, "discountPercent": 25, "discount": 7500, "total": 22500 }
+{ "phase": "preventa", "base": 30000, "isGuest": true, "discountPercent": 17, "discount": 5000, "total": 25000 }
 ```
 En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountPercent: 0`, `discount: 0`.
 
@@ -133,7 +133,7 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
     "puerta": { "mujer": 25000, "hombre": 40000 },
     "current": { "mujer": 20000, "hombre": 30000 }
   },
-  "guestDiscountPercent": 25,
+  "guest": { "presaleDiscount": 5000, "generalDiscount": 0 },
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
   "rooms": [
     { "number": 1, "name": "Habitación 1", "capacity": 5, "minPeople": 3, "price": 300000, "presalePrice": 250000, "currentPrice": 250000, "beds": "1 cama doble + 1 sencilla", "privateBathroom": false, "status": "available" },
@@ -141,8 +141,8 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
     { "number": 3, "name": "Habitación 3", "capacity": 7, "minPeople": 5, "price": 600000, "presalePrice": 500000, "currentPrice": 500000, "beds": "1 cama doble + 2 sencillas", "privateBathroom": true, "status": "booked" }
   ],
   "paymentAccounts": [
-    { "label": "Nequi", "number": "3135995612", "holder": "" },
-    { "label": "Daviplata", "number": "3135995612", "holder": "" }
+    { "label": "Bre-B (llave)", "number": "3135995612", "holder": "" },
+    { "label": "Nequi", "number": "3135995612", "holder": "" }
   ],
   "transferInstructions": "Transfiere el valor exacto y sube el pantallazo del comprobante. Te confirmamos en pocas horas.",
   "contact": { "whatsapp": "573135995612", "instagram": "", "adminName": "DJ Santech" },
@@ -176,7 +176,7 @@ Crea la compra. Rate limit 10/min/IP.
   "acceptData": true
 }
 ```
-Validación: `name` 3–80; `cedula`, `phone`, `instagram` obligatorios (ver normalización en ARQUITECTURA §7.3); `email` opcional (si viene, válido); `gender` obligatorio si `kind=ticket`; `roomNumber` obligatorio si `kind=room`; `companions` solo en habitación, máx. `capacity − 1`, cada uno `{ name (2–80), cedula? }`; `acceptTerms` y `acceptData` deben ser `true` (mayor de edad + política de devoluciones; tratamiento de datos Ley 1581 de 2012).
+Validación: `name` 3–80; `cedula` y `phone` obligatorios, `instagram` opcional (vacío u omitido es válido; si viene, se valida) (ver normalización en ARQUITECTURA §7.3); `email` ya no se pide en la web (opcional, por compatibilidad); `gender` obligatorio si `kind=ticket`; `roomNumber` obligatorio si `kind=room`; `companions` solo en habitación, máx. `capacity − 1`, cada uno `{ name (2–80), cedula? }`; `acceptTerms` y `acceptData` deben ser `true` (mayor de edad + política de devoluciones; tratamiento de datos Ley 1581 de 2012).
 
 `201`
 ```json
@@ -236,7 +236,7 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
 ```
 `query`: 2–80 caracteres. Detección: una palabra con/sin `@` (regex de Instagram, no solo dígitos) → coincidencia exacta por Instagram; solo dígitos (se limpian espacios/puntos/guiones y prefijo 57) → exacta por cédula o celular; otro caso es un nombre (mín. 2 palabras y 5 caracteres; todas las palabras escritas deben ser palabras del nombre del invitado, sin tildes ni mayúsculas).
 
-`200` siempre con la misma forma: `{ "found": true, "ambiguous": false, "kind": "cortesia"|"descuento"|null, "discountPercent": 30, "redeemed": false, "firstName": "Juan" }`. `kind="cortesia"` si el porcentaje efectivo es 100 (`guest.discountPercent ?? guestDiscountPercent`). Si varios invitados coinciden por nombre: `found:false, ambiguous:true`. Sin coincidencia: `found:false`, resto `null`/`false`. Nunca devuelve cédula, celular, Instagram ni apellidos. `400 VALIDATION_ERROR` si `query` es inválido.
+`200` siempre con la misma forma: `{ "found": true, "ambiguous": false, "kind": "cortesia"|"descuento"|null, "discountPercent": null, "phase": "preventa", "presaleDiscount": 5000, "generalDiscount": 0, "redeemed": false, "firstName": "Juan" }`. `kind="cortesia"` si `guest.discountPercent` es 100; `discountPercent` solo viene si es % propio < 100, si no `null`. Si varios invitados coinciden por nombre: `found:false, ambiguous:true`. Sin coincidencia: `found:false`, resto `null`/`false`. Nunca devuelve cédula, celular, Instagram ni apellidos. `400 VALIDATION_ERROR` si `query` es inválido.
 
 ---
 
@@ -381,7 +381,8 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
   "salesOpen": true,
   "capacity": 100,
   "prices": { "preventa": { "mujer": 20000, "hombre": 30000 }, "puerta": { "mujer": 25000, "hombre": 40000 } },
-  "guestDiscountPercent": 25,
+  "guestPresaleDiscount": 5000,
+  "guestGeneralDiscount": 0,
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
   "paymentAccounts": [ { "label": "Nequi", "number": "3135995612", "holder": "" } ],
   "transferInstructions": "...",
@@ -446,12 +447,12 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 
 | Método | Ruta | Body / Query | Respuesta |
 |---|---|---|---|
-| GET | `/api/door/config` | — | `{ "prices": { "mujer": 25000, "hombre": 40000 }, "guestDiscountPercent": 25, "parking": { "carro", "moto", "casco" }, "capacity": 100, "roomsCapacity": 18 }` |
+| GET | `/api/door/config` | — | `{ "prices": { "mujer": 25000, "hombre": 40000 }, "presalePrices": { "mujer": 20000, "hombre": 30000 }, "guest": { "presaleDiscount": 5000, "generalDiscount": 0 }, "parking": { "carro", "moto", "casco" }, "capacity": 100, "roomsCapacity": 18 }` |
 | GET | `/api/door/stats` | — | ver abajo |
 | POST | `/api/door/scan` | `{ "value": "<texto del QR o código tecleado>" }` | `{ "result": "valid"\|"used"\|"void"\|"not_found", "ticket": TicketDoor\|null, "entry": DoorEntry\|null }` — no consume; `entry` = la entrada que lo usó (si `used`) |
 | POST | `/api/door/checkin` | `{ "ticketId", "vehicle"?: { type, plate }, "helmet"?: { "stored": true, "tag"? }, "paymentMethod"?: posMethod (para parqueadero/casco; defecto `efectivo`), "notes"? }` | `201 { "entry": DoorEntry, "ticket": TicketDoor }` · `409 TICKET_ALREADY_USED` / `TICKET_VOID` |
 | POST | `/api/door/sale` | ver abajo | `201 { "entry": DoorEntry }` |
-| GET | `/api/door/lookup` | `q` (≥ 3 caracteres): cédula, celular, nombre, código o placa | `{ "tickets": [TicketDoor], "guests": [ { "id", "name", "cedulaLast4", "discountPercent" } ], "entries": [DoorEntry] }` (máx. 10 de cada uno) |
+| GET | `/api/door/lookup` | `q` (≥ 3 caracteres): cédula, celular, nombre, código o placa | `{ "tickets": [TicketDoor], "guests": [ { "id", "name", "cedulaLast4", "discountPercent": null|number } ], "entries": [DoorEntry] }` (máx. 10 de cada uno) |
 | GET | `/api/door/entries` | `q`, `vehicle` (`carro`\|`moto`\|`any`), `helmet` (`stored`), `includeVoided` (`1`), `page`, `limit` | lista paginada de DoorEntry (más recientes primero) |
 | PATCH | `/api/door/entries/:id` | `{ "vehicle"?: {type, plate}\|null, "helmet"?: { stored, tag?, returned? }\|null, "notes"? }` | `{ "entry" }` (recalcula parqueadero/casco y total) |
 | POST | `/api/door/entries/:id/void` | `{ "reason": string }` | `{ "entry" }` (si venía de ticket, el ticket vuelve a `valid`) |
@@ -471,7 +472,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 }
 ```
 - `name` obligatorio; al menos `cedula` o `phone`. `gender` obligatorio si `category = invitado` (en mujer/hombre se infiere).
-- El backend calcula: `entryAmount` = `prices.puerta[gender]` (invitado: con descuento de la lista si la persona está, si no con `guestDiscountPercent`), `parkingAmount` = `parking[vehicle.type]`, `helmetAmount` = `parking.casco` si `helmet.stored`. `paymentMethod = cortesia` → todo 0. `guestListMatch` = la persona está en la lista.
+- El backend calcula: `entryAmount` = `prices.puerta[gender]` (invitado: con descuento de la lista si la persona está, si no con la regla por defecto de invitados en fase general: `presalePrices[género] − guest.generalDiscount`), `parkingAmount` = `parking[vehicle.type]`, `helmetAmount` = `parking.casco` si `helmet.stored`. `paymentMethod = cortesia` → todo 0. `guestListMatch` = la persona está en la lista.
 - Si la cédula tiene un ticket `valid`, responde `409 ALREADY_HAS_TICKET` con `details: { ticketId }` para que portería haga el check-in en vez de cobrar.
 
 `GET /api/door/stats`
@@ -485,7 +486,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
   "helmets": { "stored": 5, "returned": 1 },
   "money": {
     "entries": 450000, "parking": 130000, "helmets": 25000, "total": 605000,
-    "byMethod": { "efectivo": 400000, "nequi": 205000, "daviplata": 0, "tarjeta": 0, "cortesia": 0 }
+    "byMethod": { "efectivo": 400000, "nequi": 205000, "breb": 0, "tarjeta": 0, "cortesia": 0 }
   }
 }
 ```
@@ -525,7 +526,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 ```json
 {
   "total": 1250000, "count": 140,
-  "byMethod": { "efectivo": 800000, "nequi": 300000, "daviplata": 50000, "tarjeta": 100000 },
+  "byMethod": { "efectivo": 800000, "nequi": 300000, "breb": 50000, "tarjeta": 100000 },
   "byProduct": [ { "productId": "...", "name": "Gatorade", "category": "gatorade", "qty": 40, "revenue": 240000, "cost": 120000, "profit": 120000 } ],
   "byCategory": [ { "category": "gatorade", "qty": 40, "revenue": 240000 } ],
   "courtesy": { "count": 5, "value": 60000 }

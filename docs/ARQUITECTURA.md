@@ -21,7 +21,7 @@ Web para promocionar y vender la fiesta de disfraces del **sábado 31 de octubre
 - Base de datos → **MongoDB**. Local: `mongod` embebido con datos persistentes (mongodb-memory-server) en `mongodb://127.0.0.1:27017/fiesta_disfraces`, al que te conectas con **Compass**. Producción: **MongoDB Atlas** (también conectable con Compass).
 - Pagos:
   - **Mercado Pago Checkout Pro** (tarjeta, PSE, etc.): confirmación automática (al volver del checkout + webhook).
-  - **Transferencia Nequi / Daviplata** (3135995612 + QR): el comprador sube el pantallazo del comprobante y el admin lo aprueba. No hay API pública de Nequi/Daviplata para verificar solo, así que esto es manual.
+  - **Transferencia Bre-B (llave) / Nequi** (3135995612 + QR): el comprador sube el pantallazo del comprobante y el admin lo aprueba. No hay API pública de Bre-B/Nequi para verificar solo, así que esto es manual.
   - **Modo simulado**: si no hay `MP_ACCESS_TOKEN` y `NODE_ENV !== 'production'`, Mercado Pago se simula para probar todo el flujo en local.
 
 ## 3. Estructura
@@ -43,7 +43,7 @@ FIESTA_DISFRACES/
 │  ├─ scripts/seed-demo.js datos de ejemplo (productos, usuarios puerta/barra, invitados)
 │  └─ test/                node --test + supertest + mongodb-memory-server
 └─ frontend/
-   ├─ public/              _redirects (SPA en Cloudflare), pagos/ (QR de Nequi/Daviplata), sponsors/
+   ├─ public/              _redirects (SPA en Cloudflare), pagos/ (logos y QR de Bre-B/Nequi), sponsors/
    └─ src/
       ├─ App.jsx           rutas (ya definidas, no cambiar sin avisar)
       ├─ index.css         Tailwind v4 + tokens de diseño + efectos
@@ -83,7 +83,7 @@ FIESTA_DISFRACES/
 ```
 📅 Sábado 31 de octubre
 📍 Finca en Pereira (la ubicación se envía el 31)
-🎧 Música toda la noche con Diferentes Djs
+🎧 Música toda la noche con 3 DJs diferentes
 
 Ven disfrazado y vive la noche más terrorífica del año: finca, buena música, luces y el mejor ambiente.
 
@@ -110,13 +110,13 @@ Si quieres ajustar tu grupo o tienes dudas sobre las habitaciones, escríbele al
 
 Patrocinadores (por ahora espacio reservado para el logo, con nombre y enlace): powermixlucesysonido.com, ceoenfragancia.com, vapitosprincys.com, panesypan.com.
 
-Pagos por transferencia: Nequi y Daviplata al **3135995612** + código QR (imagen en `frontend/public/pagos/`).
+Pagos por transferencia: Bre-B (llave) y Nequi al **3135995612** + código QR (`qr-pago.png`) (imagen en `frontend/public/pagos/`).
 
 ### Supuestos (configurables, confirmar con el organizador)
 
 - Hora de inicio: 9:00 p. m. (`eventStartsAt` = 2026-10-31T21:00:00-05:00).
 - Preventa hasta el sábado 24 de octubre a las 11:59 p. m. (`presaleEndsAt` = 2026-10-24T23:59:59-05:00). Después, la venta en línea sigue con precios de puerta ("venta general").
-- Descuento lista de invitados: 25% (redondeado a múltiplos de $500).
+- Invitados = "amigos cercanos": preventa = precio de preventa − `guestPresaleDiscount` ($5.000); venta general/puerta = precio de preventa − `guestGeneralDiscount` ($0). Cortesía = `guest.discountPercent` 100.
 - Habitaciones (precio por habitación completa, incluye la entrada de todo el grupo; preventa hasta el 24 oct, luego precio normal): 1 = 1 cama doble + 1 sencilla, 3 a 5 personas, $250.000 / $300.000; 2 = 2 camas king, 4 a 6 personas, $350.000 / $420.000; 3 = grande, 1 cama doble + 2 sencillas, 5 a 7 personas, baño privado, $500.000 / $600.000. Capacidad máxima total = suma real de las habitaciones (5 + 6 + 7 = 18).
 - Aforo general: 100 personas (las personas de habitaciones van aparte).
 - El círculo pequeño junto a la piscina del boceto se rotula "Piscina pequeña".
@@ -125,8 +125,8 @@ Pagos por transferencia: Nequi y Daviplata al **3135995612** + código QR (image
 ## 7. Reglas de negocio (backend las impone; frontends las reflejan)
 
 1. **Fase y precio.** `fase = 'preventa'` si ahora ≤ `presaleEndsAt`, si no `'general'`. Entrada en línea: preventa → `prices.preventa[genero]`; general → `prices.puerta[genero]`. Puerta usa siempre `prices.puerta`.
-2. **Lista de invitados.** Si cédula, celular o Instagram (normalizados) coinciden con un invitado no redimido: descuento = `guest.discountPercent ?? settings.guestDiscountPercent`. `total = redondear_a_500(base × (1 − %/100))`. Solo aplica a entradas (no habitaciones). Se marca redimido cuando la orden queda pagada. En puerta: categoría "invitado" usa el precio de puerta del género con ese descuento.
-3. **Normalización.** Cédula: quitar espacios, puntos y guiones, mayúsculas, `^[A-Z0-9]{5,15}$`. Celular: dígitos; quitar prefijo 57; debe quedar en 10 dígitos que empiezan por 3. Instagram: minúsculas, sin `@`, `^[a-z0-9._]{1,30}$`. Placa: mayúsculas sin espacios ni guiones.
+2. **Lista de invitados.** Si cédula, celular o Instagram (normalizados) coinciden con un invitado no redimido: precio por una única función (`guestBreakdown` en `services/core.js`): si `guest.discountPercent` no es null → `redondear_a_500(base × (1 − %/100))` con base = precio normal de la fase (100 = cortesía, $0); si es null → fase preventa: `preventa[género] − guestPresaleDiscount`; fase general: `preventa[género] − guestGeneralDiscount` (piso 0). `breakdown.base` = precio normal de la fase, `discount = base − total`. Solo aplica a entradas (no habitaciones). Se marca redimido cuando la orden queda pagada (la de $0 queda pagada al crearse). En puerta: categoría "invitado" usa la misma función en fase general (esté o no en la lista).
+3. **Normalización.** Cédula: quitar espacios, puntos y guiones, mayúsculas, `^[A-Z0-9]{5,15}$`. Celular: dígitos; quitar prefijo 57; debe quedar en 10 dígitos que empiezan por 3. Instagram (opcional al comprar): minúsculas, sin `@`, `^[a-z0-9._]{1,30}$`. Placa: mayúsculas sin espacios ni guiones.
 4. **Una entrada por cédula.** No se crea orden si ya hay un ticket `valid`/`used` con esa cédula o una orden `in_review` con esa cédula (error `ALREADY_HAS_TICKET`). Nunca se devuelve el token de otra orden en ese error. Si hay una orden `pending_payment` previa de esa cédula, se cancela y se crea la nueva.
 5. **Aforo.** `soldOut` cuando (tickets `valid`/`used` de tipo `general`+`cortesia`) + (órdenes `ticket` en `in_review`) ≥ `capacity`. Las habitaciones tienen su propio cupo (suma de la capacidad de las habitaciones, hoy 18).
 6. **Habitaciones.** Se compran completas. El precio depende de la fase como las entradas: `preventa` → `presalePrice`; `general` → `price` (el `base` del Breakdown es ese precio). Cada habitación tiene `beds`, `minPeople` (informativo, no bloquea) y `capacity` (máximo; companions ≤ capacity − 1). En bootstrap, las habitaciones sin `presalePrice` (legacy) se migran a los valores por defecto sin tocar su estado de apartado/reserva. Al crear la orden se "aparta" la habitación 60 min (`holdExpiresAt`). Si suben comprobante, queda apartada hasta que el admin decida. Al pagar → `booked`. Al rechazar/expirar → libre. Estados: `available` · `held` (apartada, pago en curso) · `booked` · `blocked` (bloqueada por admin). Una orden de habitación pagada genera **tantos tickets como capacidad** (máximo de personas: 5, 6 o 7): el primero a nombre del comprador, luego los acompañantes que dio, y el resto como "Acompañante N · Hab. X" (el admin puede renombrarlos).

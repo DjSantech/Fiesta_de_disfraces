@@ -32,3 +32,8 @@ media/
 
 # Notas privadas (usuarios/contraseñas)
 CREDENCIALES*.txt
+
+# Datos de Instagram (datos de terceros, NUNCA subir)
+instagram-*.zip
+instagram-*/
+_private/

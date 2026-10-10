@@ -25,7 +25,7 @@ npm run seed:demo       # (otra terminal, opcional) usuarios puerta/barra, produ
 
 | Qué | Dónde |
 |---|---|
-| QR de Nequi/Daviplata | `frontend/public/pagos/qr-nequi.png`, `qr-daviplata.png` |
+| Logos y QR de Bre-B/Nequi | `frontend/public/pagos/logo-breb.png`, `logo-nequi.png`, `qr-pago.png` |
 | Logos de patrocinadores | `frontend/public/sponsors/` + `logo` en `frontend/src/config/event.js` |
 | Textos, mapa, FAQ | `frontend/src/config/event.js` |
 | Precios, fechas, aforo, cuentas, descuento, ubicación | Panel admin → Ajustes |
