@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowRight, Bath, BedDouble, Eye, Map as MapIcon, TicketCheck, Users } from 'lucide-react';
 import { ROOMS_COPY } from '../../../config/event';
-import { ROOM_STATUS, RoomHelpNote, RoomPriceLine, RoomRowMini, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from '../rooms';
+import { ROOM_STATUS, RoomHelpNote, RoomPerks, RoomPriceLine, RoomRowMini, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from '../rooms';
 import { Cobweb } from '../decor';
 import { Reveal, SectionHeading } from '../ui';
 
@@ -116,7 +116,11 @@ export default function RoomsSection({ config, known }) {
           </div>
         </SectionHeading>
 
-        <ul className="mt-12 grid gap-4 lg:grid-cols-3 lg:gap-5">
+        <Reveal className="mt-10">
+          <RoomPerks variant="panel" />
+        </Reveal>
+
+        <ul className="mt-6 grid gap-4 lg:grid-cols-3 lg:gap-5">
           {rooms.map((room, i) => (
             <RoomCard key={room.number} room={room} known={known} salesOpen={config.event.salesOpen !== false} index={i} phase={phase} onView={setViewing} />
           ))}

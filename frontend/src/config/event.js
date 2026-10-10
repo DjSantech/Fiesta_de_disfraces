@@ -118,13 +118,33 @@ export const ROOM_PHOTOS = {
 };
 
 /** Qué incluye tu habitación (íconos lucide en components/public/rooms.jsx). */
+export const ROOM_PERKS_TITLE = 'Ventajas de tu habitación';
+export const ROOM_PERKS_KICKER = 'Esto es lo que ganas al reservar';
+
+/** Ventajas de reservar habitación. `icon`: ticket | bed | parking | lock | gift | bath. `highlight` la resalta. */
 export const ROOM_PERKS = {
   all: [
-    { icon: 'lock', text: 'Privacidad para tu grupo' },
-    { icon: 'bag', text: 'Un lugar donde dejar tus cosas con tranquilidad' },
-    { icon: 'bed', text: 'Puedes dormir si así lo deseas' },
+    { icon: 'ticket', title: 'La entrada viene incluida', text: 'Para todo tu grupo, sin pagar nada más por entrar.' },
+    { icon: 'bed', title: 'Dónde dormir y guardar tus cosas', text: 'Descansa si quieres y deja tus cosas seguras mientras disfrutas.' },
+    { icon: 'parking', title: 'No pagas parqueadero', text: 'El parqueadero va por cuenta de la habitación.' },
+    { icon: 'lock', title: 'Privacidad', text: 'Un espacio solo para tu grupo.' },
+    {
+      icon: 'gift',
+      title: 'Cortesía de la casa',
+      text: 'Un cóctel o shot de cortesía por persona, o un vape para todo el grupo.',
+      highlight: true,
+      badge: 'Cortesía',
+    },
   ],
-  big: [{ icon: 'bath', text: 'Baño privado dentro de la habitación y más privacidad' }],
+  big: [
+    {
+      icon: 'bath',
+      title: 'Baño privado',
+      text: 'Dentro de la habitación, solo para tu grupo, y aún más privacidad.',
+      highlight: true,
+      badge: 'Solo la grande',
+    },
+  ],
 };
 
 /**

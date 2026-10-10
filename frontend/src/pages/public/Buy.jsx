@@ -8,7 +8,7 @@ import { formatCOP } from '../../lib/format';
 import { LEGAL } from '../../config/event';
 import PublicLayout, { PageAtmosphere, PageContainer } from '../../components/public/PublicLayout';
 import { PolicyModal, PriceBreakdown, TransferPanel } from '../../components/public/payment';
-import { RoomHelpNote, RoomStatusBadge, roomPeopleText, roomPricing } from '../../components/public/rooms';
+import { RoomHelpNote, RoomPerks, RoomStatusBadge, roomPeopleText, roomPricing } from '../../components/public/rooms';
 import WhatsAppButton from '../../components/public/WhatsAppButton';
 import { Notice } from '../../components/public/ui';
 import { salesState, usePublicConfig, loadPublicConfig } from '../../components/public/usePublicConfig';
@@ -285,6 +285,7 @@ export default function Buy() {
                       />
                     );
                   })}
+                  <RoomPerks room={room} />
                   <RoomHelpNote contact={config.contact} room={room} className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4" />
                   {paramRoom && live && !room && <p className="text-sm text-gold">La Habitación {paramRoom} ya no está disponible. Elige otra.</p>}
                 </div>

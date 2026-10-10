@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import clsx from 'clsx';
-import { Bath, BedDouble, ChevronLeft, ChevronRight, Lock, Luggage, Users } from 'lucide-react';
-import { ROOMS_COPY, ROOM_PERKS, ROOM_PHOTOS } from '../../config/event';
+import { Bath, BedDouble, ChevronLeft, ChevronRight, Gift, Lock, SquareParking, Ticket, Users } from 'lucide-react';
+import { ROOMS_COPY, ROOM_PERKS, ROOM_PERKS_KICKER, ROOM_PERKS_TITLE, ROOM_PHOTOS } from '../../config/event';
 import { formatCOP, whatsappLink } from '../../lib/format';
 import Modal from '../ui/Modal';
 import { WhatsAppIcon } from './icons';
@@ -117,23 +117,75 @@ export function RoomPriceLine({ room, phase, size = 'lg', className }) {
   );
 }
 
-const PERK_ICONS = { lock: Lock, bag: Luggage, bed: BedDouble, bath: Bath };
+const PERK_ICONS = { ticket: Ticket, bed: BedDouble, parking: SquareParking, lock: Lock, gift: Gift, bath: Bath };
 
-export function RoomPerks({ room, className }) {
-  const perks = [...ROOM_PERKS.all, ...(room.privateBathroom ? ROOM_PERKS.big : [])];
+function PerkCard({ perk, large = false }) {
+  const I = PERK_ICONS[perk.icon] || Lock;
   return (
-    <div className={className}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fog">Qué incluye tu habitación</p>
-      <ul className="mt-2.5 flex flex-col gap-2">
-        {perks.map((p) => {
-          const I = PERK_ICONS[p.icon] || Lock;
-          return (
-            <li key={p.text} className="flex items-start gap-2.5 text-sm text-bone/90">
-              <I className="mt-0.5 h-4 w-4 shrink-0 text-pumpkin-light" strokeWidth={1.75} aria-hidden="true" />
-              {p.text}
-            </li>
-          );
-        })}
+    <li
+      className={clsx(
+        'relative flex items-start gap-3.5 rounded-2xl border p-4',
+        perk.highlight ? 'border-ember/50 bg-ember/[0.09] shadow-[0_0_34px_-14px_rgb(255_179_64/0.7)]' : 'border-white/10 bg-ink/60',
+      )}
+    >
+      <span
+        className={clsx(
+          'flex shrink-0 items-center justify-center rounded-full ring-1',
+          large ? 'h-12 w-12' : 'h-10 w-10',
+          perk.highlight ? 'bg-ember/20 text-ember ring-ember/50' : 'bg-pumpkin/15 text-pumpkin-light ring-pumpkin/40',
+        )}
+      >
+        <I className={large ? 'h-6 w-6' : 'h-5 w-5'} strokeWidth={1.75} aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        {perk.badge && (
+          <span className="mb-1 inline-block rounded-full bg-ember/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ember">{perk.badge}</span>
+        )}
+        <p className="font-semibold leading-snug text-bone">{perk.title}</p>
+        <p className="mt-0.5 text-sm leading-relaxed text-fog">{perk.text}</p>
+      </div>
+    </li>
+  );
+}
+
+/**
+ * Ventajas de reservar habitación.
+ * variant="panel": bloque grande y llamativo (Home), muestra también el extra de la habitación grande.
+ * variant="compact": lista para el modal "Ver habitación" y la compra; suma el baño solo si la habitación lo tiene.
+ */
+export function RoomPerks({ room, variant = 'compact', className }) {
+  const perks = variant === 'panel' ? [...ROOM_PERKS.all, ...ROOM_PERKS.big] : [...ROOM_PERKS.all, ...(room?.privateBathroom ? ROOM_PERKS.big : [])];
+  if (variant === 'panel') {
+    return (
+      <section
+        aria-labelledby="ventajas-hab"
+        className={clsx(
+          'relative overflow-hidden rounded-3xl border border-pumpkin/40 bg-gradient-to-br from-pumpkin/[0.12] via-crypt/80 to-ink p-5 shadow-[0_0_70px_-24px_rgb(255_106_0/0.75)] sm:p-8',
+          className,
+        )}
+      >
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-pumpkin/20 blur-3xl" aria-hidden="true" />
+        <div className="relative">
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-ember">{ROOM_PERKS_KICKER}</p>
+          <h3 id="ventajas-hab" className="text-glow-ember mt-2 font-display text-[2rem] uppercase leading-none text-bone sm:text-5xl">
+            {ROOM_PERKS_TITLE}
+          </h3>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {perks.map((p) => (
+              <PerkCard key={p.title} perk={p} large />
+            ))}
+          </ul>
+        </div>
+      </section>
+    );
+  }
+  return (
+    <div className={clsx('rounded-2xl border border-pumpkin/30 bg-pumpkin/[0.05] p-4', className)}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-ember">{ROOM_PERKS_TITLE}</p>
+      <ul className="mt-3 flex flex-col gap-2.5">
+        {perks.map((p) => (
+          <PerkCard key={p.title} perk={p} />
+        ))}
       </ul>
     </div>
   );
