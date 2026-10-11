@@ -63,7 +63,7 @@ Etiquetas en español para todos los enums: `frontend/src/lib/labels.js`.
 
 **Breakdown** (desglose de precio)
 ```json
-{ "phase": "preventa", "base": 30000, "isGuest": true, "discountPercent": 17, "discount": 5000, "total": 25000 }
+{ "phase": "preventa", "base": 35000, "isGuest": true, "discountPercent": 14, "discount": 5000, "total": 30000 }
 ```
 En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountPercent: 0`, `discount: 0`.
 
@@ -129,9 +129,9 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
     "soldOut": false
   },
   "prices": {
-    "preventa": { "mujer": 20000, "hombre": 30000 },
+    "preventa": { "mujer": 20000, "hombre": 35000 },
     "puerta": { "mujer": 25000, "hombre": 40000 },
-    "current": { "mujer": 20000, "hombre": 30000 }
+    "current": { "mujer": 20000, "hombre": 35000 }
   },
   "guest": { "presaleDiscount": 5000, "generalDiscount": 0 },
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
@@ -380,7 +380,7 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
   "presaleEndsAt": "2026-10-25T04:59:59.000Z",
   "salesOpen": true,
   "capacity": 100,
-  "prices": { "preventa": { "mujer": 20000, "hombre": 30000 }, "puerta": { "mujer": 25000, "hombre": 40000 } },
+  "prices": { "preventa": { "mujer": 20000, "hombre": 35000 }, "puerta": { "mujer": 25000, "hombre": 40000 } },
   "guestPresaleDiscount": 5000,
   "guestGeneralDiscount": 0,
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
@@ -405,6 +405,18 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
 | POST | `/api/admin/users` | `{ username (3–30, [a-z0-9._-]), name (2–60), password (≥ 8), role }` | `201 { "user" }` · `409 USERNAME_TAKEN` |
 | PUT | `/api/admin/users/:id` | `{ name?, role?, password?, active? }` | `{ "user" }` (no puede quitarse a sí mismo el rol admin ni desactivarse) |
 | DELETE | `/api/admin/users/:id` | — | `204` (no puede borrarse a sí mismo) |
+
+### Eliminación y auditoría
+
+Se elimina la **compra completa** (no hay borrado de un ticket suelto): se borran sus tickets y su comprobante (`Receipt`), se libera la habitación que tuviera apartada/reservada con esa orden, y el invitado que la usó vuelve a `redeemed = false`. Las ventas de puerta/barra no se tocan. Antes del borrado se escribe un `AuditLog` inmutable con un resumen mínimo (sin cédula completa, celular ni token); si el borrado falla, el registro se retira.
+
+| Método | Ruta | Body / Query | Respuesta |
+|---|---|---|---|
+| POST | `/api/admin/orders/:id/delete` | `{ "reason": string (3–200, obligatorio) }` | `200 { "deleted": { "orderId", "tickets": n, "roomReleased": number\|null, "guestUnredeemed": boolean }, "audit": { "id" } }` · `404` · `409 HAS_CHECKINS` (algún ticket `used` o con entrada de puerta no anulada: deshacer antes con Entradas → Restaurar) |
+| POST | `/api/admin/orders/delete-many` | `{ "ids": [ObjectId] (1–100), "reason" }` | `200 { "deleted": n, "skipped": [{ "id", "code": "NOT_FOUND"\|"HAS_CHECKINS", "message" }] }` — un registro de auditoría por compra, con `meta.batch` compartido |
+| GET | `/api/admin/audit` | `action?` (`order.delete`, `ticket.void`, `ticket.restore`, `guest.delete`, `expense.delete`, `user.delete`), `q?` (comprador, actor, motivo, código), `page`, `limit` | lista paginada de **AuditEntry**, la más reciente primero |
+
+**AuditEntry** = `{ "id", "at": ISO, "actor": { "id", "username", "name", "role" }, "action", "target": { "type": "order"\|"ticket"\|"guest"\|"expense"\|"user", "id", "summary": {…} }, "reason": string\|null, "meta": {…} }`. Para `order.delete`: `summary = { buyerName, cedulaLast4, instagram, kind, gender, roomNumber, amount, paymentMethod, status, phase, createdAt, ticketCodes[], ticketCount }` y `meta = { ticketsDeleted, roomReleased, guestUnredeemed, batch? }`. También se auditan (sin cambiar su respuesta): anular y restaurar ticket, eliminar invitado, gasto y usuario de staff. No hay rutas para editar ni borrar registros de auditoría.
 
 ### Exportar CSV
 
@@ -533,3 +545,17 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 }
 ```
 `cost`/`profit` usan `product.cost` (si es `null`, `cost: null` y `profit: null`). Excluye anuladas.
+
+## Notificaciones salientes
+
+Con `N8N_WEBHOOK_URL` definida, el backend hace `POST` JSON (timeout 5 s, sin reintentos; nunca bloquea ni rompe la petición del comprador, los errores solo se registran). Si existe `N8N_WEBHOOK_SECRET` se envía en el encabezado `x-fd-secret`. En producción la URL debe ser https (si no, se desactiva con una advertencia al arrancar). Guía: `docs/N8N_WHATSAPP.md`.
+
+### `order.in_review`
+Una sola vez, en la transición `pending_payment` → `in_review` (primer comprobante en `POST /api/public/orders/:token/receipt`). Reemplazar el comprobante no repite el aviso. No incluye cédula, celular ni el `token` público.
+
+```json
+{ "event": "order.in_review", "orderId": "<id interno>", "kind": "ticket|room", "gender": "mujer|hombre|null",
+  "roomNumber": null, "roomName": null, "phase": "preventa|general", "amount": 20000,
+  "paymentMethod": "transferencia", "buyerName": "Laura Gómez", "hasInstagram": true, "isGuest": false,
+  "createdAt": "ISO-8601", "adminUrl": "<FRONTEND_URL>/staff/admin/compras?estado=in_review" }
+```

@@ -87,7 +87,7 @@ FIESTA_DISFRACES/
 
 Ven disfrazado y vive la noche más terrorífica del año: finca, buena música, luces y el mejor ambiente.
 
-🎟️ PREVENTA (hasta el 24)          Mujeres: $20.000   Hombres: $30.000
+🎟️ PREVENTA (hasta el 24)          Mujeres: $20.000   Hombres: $35.000
 🎟️ VENTA (en puerta)               Mujeres: $25.000   Hombres: $40.000
 
 🛏️ HABITACIONES (incluyen la entrada) — se alquilan por grupo completo, no por cama:
@@ -137,6 +137,7 @@ Pagos por transferencia: Bre-B (llave) y Nequi al **3135995612** + código QR (`
 11. **Puerta.** Venta en puerta: nombre + (cédula o celular) + categoría `mujer`/`hombre`/`invitado` (si invitado, también género) + método de pago. Vehículo opcional (carro/moto + placa) y casco opcional (+ ficha). Cobro: entrada + parqueadero + casco. Método `cortesia` → todo en $0. Los que entran con QR pagan solo parqueadero/casco si aplica.
 12. **Barra.** Precios desde la base de datos (el cliente solo manda ids y cantidades). Stock opcional por producto: se descuenta, puede quedar negativo y se avisa. Venta `cortesia` → total $0 y se guarda el valor regalado. Ventas anulables (devuelven stock).
 13. **Gastos a librar.** El admin registra gastos (pagados o pendientes). El dashboard muestra ingresos totales vs. gastos y el porcentaje de gastos "librados" (cubiertos).
+14. **Eliminar compras y auditoría.** Solo el admin elimina una compra completa (tickets y comprobante; libera la habitación y des-redime al invitado), con motivo obligatorio y registro inmutable en `AuditLog` (resumen mínimo, sin cédula completa/celular/token). Si algún ticket ya ingresó → `409 HAS_CHECKINS`. No toca ventas de puerta/barra. También se auditan anular/restaurar ticket y borrar invitado, gasto o usuario.
 
 ## 8. Roles y acceso
 

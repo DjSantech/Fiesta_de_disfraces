@@ -36,6 +36,7 @@ Orden recomendado: GitHub → Atlas → Render → Cloudflare → volver a Rende
 | `ADMIN_PASSWORD` | Contraseña fuerte (12+ caracteres) |
 | `MP_ACCESS_TOKEN` | Access Token de **producción** de Mercado Pago (paso 6) |
 | `MP_WEBHOOK_SECRET` | Clave secreta del webhook (paso 6) |
+| `N8N_WEBHOOK_URL` / `N8N_WEBHOOK_SECRET` | Opcionales: aviso por WhatsApp vía n8n al quedar una compra en revisión (ver `docs/N8N_WHATSAPP.md`) |
 
 3. Espera el deploy y abre `https://TU-BACKEND.onrender.com/api/health` → debe responder OK.
 4. Cada cambio de variables en Render → **Save, rebuild and deploy**.
