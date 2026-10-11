@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowRight, DoorOpen, Sparkles } from 'lucide-react';
+import { ArrowRight, DoorOpen, Sparkles, Users } from 'lucide-react';
 import { formatCOP } from '../../../lib/format';
 import { Reveal, SectionHeading } from '../ui';
 import { Cobweb } from '../decor';
@@ -105,7 +105,7 @@ export default function PricesSection({ config }) {
                 {presaleOver ? 'En línea y en puerta' : 'El 31, en la entrada'}
               </span>
             </div>
-            <p className="mt-2 text-sm text-fog">{presaleOver ? 'Compra en línea y llega con tu QR.' : 'Si quedan cupos el día de la fiesta.'}</p>
+            <p className="mt-2 text-sm text-fog">{presaleOver ? 'Compra en línea y llega con tu QR.' : 'Aforo limitado: si quedan cupos el día de la fiesta, el precio en la finca puede subir.'}</p>
             <div className="mt-5">
               <PriceRow label="Mujeres" value={puerta.mujer} />
               <PriceRow label="Hombres" value={puerta.hombre} />
@@ -121,6 +121,11 @@ export default function PricesSection({ config }) {
             )}
           </Reveal>
         </div>
+
+        <p className="mx-auto mt-5 flex w-fit max-w-full items-center gap-2 rounded-2xl border border-ember/40 bg-ember/10 px-4 py-2 text-center text-sm font-semibold text-ember">
+          <Users className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+          Aforo limitado · en la finca el precio puede subir
+        </p>
 
         {config.guest && (
           <p className="mt-4 text-center text-sm text-fog">

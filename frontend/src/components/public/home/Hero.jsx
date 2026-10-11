@@ -65,7 +65,7 @@ export function HeroCta({ config, size = 'hero', className }) {
           <Clock3 className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
           {state === 'preventa' ? (
             <span>
-              Preventa hasta el <span className="font-semibold text-bone">{presale}</span>
+              Preventa hasta el <span className="font-semibold text-bone">{presale}</span> · aforo limitado
             </span>
           ) : (
             <span>

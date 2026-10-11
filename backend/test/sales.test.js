@@ -22,10 +22,10 @@ test('redondeo a 500 y descuento', () => {
 
 test('quote: preventa, general y descuento de invitado', async () => {
   let r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre' });
-  assert.deepEqual(r.body, { breakdown: { phase: 'preventa', base: 30000, isGuest: false, discountPercent: 0, discount: 0, total: 30000 }, available: true, reason: null });
+  assert.deepEqual(r.body, { breakdown: { phase: 'preventa', base: 35000, isGuest: false, discountPercent: 0, discount: 0, total: 35000 }, available: true, reason: null });
   await Guest.create({ name: 'Juan', instagram: 'juan' });
   r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre', instagram: '@JUAN' });
-  assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 30000, isGuest: true, discountPercent: 17, discount: 5000, total: 25000 });
+  assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 35000, isGuest: true, discountPercent: 14, discount: 5000, total: 30000 });
   r = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 3 });
   assert.equal(r.body.breakdown.total, 500000);
   r = await api.get('/api/public/config');
@@ -187,12 +187,12 @@ test('reglas de invitados: preventa, general, extra, % propio y cortesía', asyn
   const q = (g, ig) => api.post('/api/public/quote').send({ kind: 'ticket', gender: g, instagram: ig }).then((r) => r.body.breakdown);
   await Guest.create([{ name: 'Mujer', instagram: 'inv1' }, { name: 'Medio', instagram: 'inv50', discountPercent: 50 }, { name: 'Cort', instagram: 'inv100', discountPercent: 100 }]);
   assert.equal((await q('mujer', 'inv1')).total, 15000);
-  assert.equal((await q('hombre', 'inv1')).total, 25000);
-  assert.equal((await q('hombre', 'inv50')).total, 15000);
+  assert.equal((await q('hombre', 'inv1')).total, 30000);
+  assert.equal((await q('hombre', 'inv50')).total, 17500);
   assert.equal((await q('hombre', 'inv100')).total, 0);
   await Settings.updateOne({ _id: 'main' }, { $set: { presaleEndsAt: new Date(Date.now() - 1000) } });
   assert.equal((await q('mujer', 'inv1')).total, 20000);
-  assert.equal((await q('hombre', 'inv1')).total, 30000);
+  assert.equal((await q('hombre', 'inv1')).total, 35000);
   assert.equal((await q('hombre', 'inv1')).base, 40000);
   await Settings.updateOne({ _id: 'main' }, { $set: { guestGeneralDiscount: 5000 } });
   assert.equal((await q('mujer', 'inv1')).total, 15000);

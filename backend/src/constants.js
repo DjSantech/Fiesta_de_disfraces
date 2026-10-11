@@ -40,7 +40,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   salesOpen: true,
   capacity: 100,
   prices: {
-    preventa: { mujer: 20000, hombre: 30000 },
+    preventa: { mujer: 20000, hombre: 35000 },
     puerta: { mujer: 25000, hombre: 40000 },
   },
   guestPresaleDiscount: 5000,

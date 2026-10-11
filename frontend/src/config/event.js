@@ -41,9 +41,9 @@ export const FALLBACK_CONFIG = {
     soldOut: false,
   },
   prices: {
-    preventa: { mujer: 20000, hombre: 30000 },
+    preventa: { mujer: 20000, hombre: 35000 },
     puerta: { mujer: 25000, hombre: 40000 },
-    current: { mujer: 20000, hombre: 30000 },
+    current: { mujer: 20000, hombre: 35000 },
   },
   guest: { presaleDiscount: 5000, generalDiscount: 0 },
   parking: { carro: 10000, moto: 5000, casco: 5000 },
