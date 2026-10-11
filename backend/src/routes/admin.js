@@ -1,7 +1,7 @@
 // Panel de administración (rol admin): /api/admin/*
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { Order, Ticket, Receipt, Guest, Expense, Room, User, DoorEntry } from '../models/index.js';
+import { Order, Ticket, Receipt, Guest, Expense, Room, User, DoorEntry, AuditLog } from '../models/index.js';
 import {
   ORDER_STATUSES, ORDER_KINDS, ORDER_PAYMENT_METHODS, MANUAL_METHODS, GENDERS, TICKET_STATUSES, TICKET_KINDS,
   EXPENSE_CATEGORIES, ROLES,
@@ -19,6 +19,9 @@ import { presentOrder, approveOrder, rejectOrder, createManualOrder } from '../s
 import { dashboard, exportCsv, EXPORT_DATASETS, expenseTotals } from '../services/reports.js';
 import { voidEntry } from '../services/ops.js';
 import { orderAdmin, ticketAdmin, guestOut, expenseOut, userOut, settingsOut } from '../services/serializers.js';
+import { logAudit, discardAudit, ticketSummary } from '../services/audit.js';
+import { deleteOrder, newBatchId } from '../services/deletion.js';
+import { OBJECT_ID_RE } from '../lib/util.js';
 import { companionsSchema } from './public.js';
 import { BCRYPT_ROUNDS } from '../services/bootstrap.js';
 
@@ -86,6 +89,29 @@ export function adminRouter() {
     res.status(201).json({ order: await presentOrder(id, 'admin') });
   });
 
+  r.post('/orders/delete-many', validate({
+    body: z.object({ ids: z.array(z.string().regex(OBJECT_ID_RE, { error: 'Identificador inválido.' })).min(1).max(100), reason: text(3, 200) }),
+  }), async (req, res) => {
+    const batch = newBatchId();
+    let deleted = 0;
+    const skipped = [];
+    for (const id of [...new Set(req.valid.body.ids)]) {
+      try {
+        await deleteOrder(id, req.user, req.valid.body.reason, batch);
+        deleted++;
+      } catch (err) {
+        if (!(err instanceof AppError) || err.status >= 500) throw err;
+        skipped.push({ id, code: err.code, message: err.message });
+      }
+    }
+    res.json({ deleted, skipped });
+  });
+
+  r.post('/orders/:id/delete', validate({ params: idParam, body: reason }), async (req, res) => {
+    const { auditId, ...deleted } = await deleteOrder(req.valid.params.id, req.user, req.valid.body.reason);
+    res.json({ deleted, audit: { id: auditId } });
+  });
+
   r.post('/orders/:id/approve', validate({ params: idParam, body: z.object({ notes: optText(500) }) }), async (req, res) => {
     const id = await approveOrder(req.valid.params.id, req.user, req.valid.body.notes);
     res.json({ order: await presentOrder(id, 'admin') });
@@ -131,6 +157,7 @@ export function adminRouter() {
   });
 
   r.post('/tickets/:id/void', validate({ params: idParam, body: voidReason }), async (req, res) => {
+    const prev = await Ticket.findById(req.valid.params.id).lean();
     const t = await Ticket.findOneAndUpdate(
       { _id: req.valid.params.id, status: { $in: ['valid', 'used'] } },
       { $set: { status: 'void', voidReason: req.valid.body.reason, voidedAt: new Date() } },
@@ -140,6 +167,7 @@ export function adminRouter() {
       if (!(await Ticket.exists({ _id: req.valid.params.id }))) throw notFound('No encontramos esa entrada.');
       throw invalidState('Esta entrada ya estaba anulada.');
     }
+    await logAudit(req.user, { action: 'ticket.void', target: { type: 'ticket', id: t._id, summary: ticketSummary(t) }, reason: req.valid.body.reason, meta: { previousStatus: prev?.status ?? null } });
     res.json({ ticket: await ticketWithOrder(t) });
   });
 
@@ -156,6 +184,7 @@ export function adminRouter() {
     if (!t) throw invalidState('La entrada cambió de estado. Recarga.');
     const entries = await DoorEntry.find({ 'ticket.id': cur._id, voided: false }).select('_id').lean();
     for (const e of entries) await voidEntry(e._id, 'Check-in deshecho por el admin').catch(() => {});
+    await logAudit(req.user, { action: 'ticket.restore', target: { type: 'ticket', id: cur._id, summary: ticketSummary(cur) }, meta: { previousStatus: cur.status, entriesVoided: entries.length } });
     res.json({ ticket: await ticketWithOrder(await Ticket.findById(cur._id).lean()) });
   });
 
@@ -240,8 +269,13 @@ export function adminRouter() {
   });
 
   r.delete('/guests/:id', validate({ params: idParam }), async (req, res) => {
-    const d = await Guest.findByIdAndDelete(req.valid.params.id).lean();
-    if (!d) throw notFound('No encontramos ese invitado.');
+    const g = await Guest.findById(req.valid.params.id).lean();
+    if (!g) throw notFound('No encontramos ese invitado.');
+    const entry = await logAudit(req.user, {
+      action: 'guest.delete', target: { type: 'guest', id: g._id, summary: { name: g.name, cedulaLast4: g.cedula ? g.cedula.slice(-4) : null, instagram: g.instagram || null, discountPercent: g.discountPercent, redeemed: !!g.redeemed } },
+    });
+    const d = await Guest.findByIdAndDelete(g._id).lean().catch(async (err) => { await discardAudit(entry); throw err; });
+    if (!d) { await discardAudit(entry); throw notFound('No encontramos ese invitado.'); }
     res.status(204).end();
   });
 
@@ -268,7 +302,11 @@ export function adminRouter() {
     res.json({ expense: expenseOut(x) });
   });
   r.delete('/expenses/:id', validate({ params: idParam }), async (req, res) => {
-    if (!(await Expense.findByIdAndDelete(req.valid.params.id))) throw notFound('No encontramos ese gasto.');
+    const x = await Expense.findById(req.valid.params.id).lean();
+    if (!x) throw notFound('No encontramos ese gasto.');
+    const entry = await logAudit(req.user, { action: 'expense.delete', target: { type: 'expense', id: x._id, summary: { concept: x.concept, category: x.category, amount: x.amount, paid: !!x.paid } } });
+    const d = await Expense.findByIdAndDelete(x._id).catch(async (err) => { await discardAudit(entry); throw err; });
+    if (!d) { await discardAudit(entry); throw notFound('No encontramos ese gasto.'); }
     res.status(204).end();
   });
 
@@ -361,8 +399,29 @@ export function adminRouter() {
   });
   r.delete('/users/:id', validate({ params: idParam }), async (req, res) => {
     if (req.valid.params.id === req.user.id) throw fieldError('id', 'No puedes borrar tu propio usuario.');
-    if (!(await User.findByIdAndDelete(req.valid.params.id))) throw notFound('No encontramos ese usuario.');
+    const u = await User.findById(req.valid.params.id).lean();
+    if (!u) throw notFound('No encontramos ese usuario.');
+    const entry = await logAudit(req.user, { action: 'user.delete', target: { type: 'user', id: u._id, summary: { username: u.username, name: u.name, role: u.role } } });
+    const d = await User.findByIdAndDelete(u._id).catch(async (err) => { await discardAudit(entry); throw err; });
+    if (!d) { await discardAudit(entry); throw notFound('No encontramos ese usuario.'); }
     res.status(204).end();
+  });
+
+  // ---------- Auditoría (solo lectura) ----------
+  const AUDIT_ACTIONS = ['order.delete', 'ticket.void', 'ticket.restore', 'guest.delete', 'expense.delete', 'user.delete'];
+  r.get('/audit', validate({ query: z.object({ action: optEnum(AUDIT_ACTIONS), q: qParam, ...pagination }) }), async (req, res) => {
+    const q = req.valid.query;
+    const f = {};
+    if (q.action) f.action = q.action;
+    if (q.q) {
+      const rx = new RegExp(escapeRegex(q.q), 'i');
+      f.$or = [{ 'target.summary.buyerName': rx }, { 'target.summary.name': rx }, { 'target.summary.holderName': rx }, { 'target.summary.concept': rx }, { 'target.summary.username': rx }, { 'target.summary.ticketCodes': rx }, { 'target.summary.code': rx }, { 'actor.name': rx }, { 'actor.username': rx }, { reason: rx }];
+    }
+    const [rows, total] = await Promise.all([
+      AuditLog.find(f).sort({ at: -1, _id: -1 }).skip((q.page - 1) * q.limit).limit(q.limit).lean(),
+      AuditLog.countDocuments(f),
+    ]);
+    res.json(page(rows.map((a) => ({ id: String(a._id), at: a.at.toISOString(), actor: a.actor, action: a.action, target: a.target, reason: a.reason, meta: a.meta })), total, q));
   });
 
   // ---------- CSV ----------

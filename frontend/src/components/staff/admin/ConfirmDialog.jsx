@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { Button, Modal, Textarea } from '../../ui';
 import { useEscapeCapture } from './hooks';
 
-const CONFIRM_VARIANT = { danger: 'primary', success: 'success', primary: 'primary', ember: 'ember' };
+const CONFIRM_VARIANT = { danger: 'destructive', success: 'success', primary: 'primary', ember: 'ember' };
 const ICON_TONE = {
   danger: 'bg-danger/12 text-danger-light ring-danger/30',
   success: 'bg-toxic/10 text-toxic ring-toxic/30',

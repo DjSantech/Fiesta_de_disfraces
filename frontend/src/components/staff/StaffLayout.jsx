@@ -9,6 +9,7 @@ import {
   LogOut,
   Martini,
   Receipt,
+  ScrollText,
   Settings,
   Ticket,
   UserCog,
@@ -26,6 +27,7 @@ const ADMIN_LINKS = [
   { to: '/staff/admin/gastos', label: 'Gastos', icon: Wallet },
   { to: '/staff/admin/ajustes', label: 'Ajustes', icon: Settings },
   { to: '/staff/admin/usuarios', label: 'Usuarios', icon: UserCog },
+  { to: '/staff/admin/auditoria', label: 'Auditoría', icon: ScrollText },
 ];
 
 const OPS_LINKS = [

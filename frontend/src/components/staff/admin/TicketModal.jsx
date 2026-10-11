@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import clsx from 'clsx';
-import { Ban, CircleCheck, DoorOpen, Receipt, RotateCcw, Save, Undo2, UserRound } from 'lucide-react';
+import { Ban, CircleCheck, DoorOpen, Receipt, RotateCcw, Save, Trash2, Undo2, UserRound } from 'lucide-react';
 import { Badge, Button, Input, Modal, useToast } from '../../ui';
 import { fieldError, staffApi } from '../../../lib/api';
 import { formatDateTime } from '../../../lib/format';
 import { GENDER_LABEL, PHASE_LABEL, TICKET_KIND_LABEL, TICKET_STATUS_LABEL, TICKET_STATUS_TONE } from '../../../lib/labels';
 import ConfirmDialog from './ConfirmDialog';
+import DeleteOrdersDialog from './DeleteOrdersDialog';
 import CopyButton from './CopyButton';
 import { DetailGrid, DetailItem, DetailSection } from './Detail';
 import { InstagramLink, PhoneLink, WhatsAppButton } from './Contact';
@@ -31,7 +32,9 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
   const [holderCedula, setHolderCedula] = useState(initial.holderCedula || '');
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
-  const [confirm, setConfirm] = useState(null); // 'void' | 'restore'
+  const [confirm, setConfirm] = useState(null); // 'void' | 'restore' | 'delete'
+  const [orderTickets, setOrderTickets] = useState(null);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const nameChanged = holderName.trim() !== (ticket.holderName || '');
   const cedulaChanged = holderCedula.trim() !== (ticket.holderCedula || '');
@@ -88,6 +91,19 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
     } catch (err) {
       toast.error(err.message);
       throw err;
+    }
+  };
+
+  const askDeleteOrder = async () => {
+    setLoadingDelete(true);
+    try {
+      const res = await staffApi(`/api/admin/orders/${ticket.order.id}`);
+      setOrderTickets(res.order?.tickets?.length ?? 1);
+      setConfirm('delete');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoadingDelete(false);
     }
   };
 
@@ -252,9 +268,28 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
               )}
             </div>
           </DetailSection>
+          {ticket.order?.id && (
+            <div className="border-t border-white/10 pt-4">
+              <Button variant="danger" className="w-full sm:w-auto" onClick={askDeleteOrder} loading={loadingDelete}>
+                <Trash2 className="h-4 w-4" />
+                Eliminar compra de esta entrada
+              </Button>
+              <p className="mt-2 text-xs text-smoke">Se elimina la compra completa y todas sus entradas. Queda registro en Auditoría.</p>
+            </div>
+          )}
         </div>
       </Modal>
 
+      <DeleteOrdersDialog
+        open={confirm === 'delete'}
+        orders={[{ id: ticket.order?.id, name: buyer?.name || ticket.holderName, tickets: orderTickets ?? 1 }]}
+        onClose={() => setConfirm(null)}
+        onDone={() => {
+          setConfirm(null);
+          onChanged?.(null);
+          onClose?.();
+        }}
+      />
       <ConfirmDialog
         open={confirm === 'void'}
         onClose={() => setConfirm(null)}

@@ -129,3 +129,22 @@ export const ROLE_LABEL = {
 export function toOptions(labelMap) {
   return Object.entries(labelMap).map(([value, label]) => ({ value, label }));
 }
+
+export const AUDIT_ACTION_LABEL = {
+  'order.delete': 'Compra eliminada',
+  'ticket.void': 'Entrada anulada',
+  'ticket.restore': 'Entrada restaurada',
+  'guest.delete': 'Invitado eliminado',
+  'expense.delete': 'Gasto eliminado',
+  'user.delete': 'Usuario eliminado',
+};
+
+/** Tono de Badge por acción de auditoría */
+export const AUDIT_ACTION_TONE = {
+  'order.delete': 'red',
+  'ticket.void': 'amber',
+  'ticket.restore': 'green',
+  'guest.delete': 'red',
+  'expense.delete': 'red',
+  'user.delete': 'red',
+};

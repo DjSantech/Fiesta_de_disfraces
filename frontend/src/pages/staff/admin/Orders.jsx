@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { BedDouble, Paperclip, Plus, Receipt, SearchX, Ticket } from 'lucide-react';
+import { BedDouble, Paperclip, Plus, Receipt, SearchX, Ticket, Trash2, X } from 'lucide-react';
 import { Badge, Button, EmptyState, PageSpinner, Select, Spinner, Tabs } from '../../../components/ui';
 import { staffApi } from '../../../lib/api';
 import { useFetch } from '../../../lib/useFetch';
@@ -20,6 +20,7 @@ import Pagination from '../../../components/staff/admin/Pagination';
 import ExportMenu from '../../../components/staff/admin/ExportMenu';
 import OrderDetailModal from '../../../components/staff/admin/OrderDetailModal';
 import ManualSaleModal from '../../../components/staff/admin/ManualSaleModal';
+import DeleteOrdersDialog from '../../../components/staff/admin/DeleteOrdersDialog';
 import { InstagramLink } from '../../../components/staff/admin/Contact';
 import { useSearchBox, useUrlFilters } from '../../../components/staff/admin/hooks';
 import { formatPhone, toQuery } from '../../../components/staff/admin/utils';
@@ -75,12 +76,29 @@ function StatusBadge({ status }) {
   );
 }
 
-function OrdersTable({ items, onOpen }) {
+function SelectBox({ checked, onChange, label, className }) {
+  return (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      onClick={(e) => e.stopPropagation()}
+      aria-label={label}
+      className={clsx('h-5 w-5 shrink-0 cursor-pointer rounded accent-pumpkin', className)}
+    />
+  );
+}
+
+function OrdersTable({ items, onOpen, selection }) {
+  const allChecked = items.length > 0 && items.every((o) => selection.has(o.id));
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-white/[0.08] bg-crypt/60 lg:block">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-white/[0.08] bg-white/[0.02] text-[11px] uppercase tracking-wider text-smoke">
           <tr>
+            <th className="w-10 py-3 pl-4 pr-0">
+              <SelectBox checked={allChecked} onChange={() => selection.toggleAll(items)} label="Seleccionar todo lo visible" />
+            </th>
             <th className="px-4 py-3 font-semibold">Persona</th>
             <th className="px-3 py-3 font-semibold">Celular</th>
             <th className="px-3 py-3 font-semibold">Cédula</th>
@@ -103,8 +121,14 @@ function OrdersTable({ items, onOpen }) {
                   onOpen(o);
                 }
               }}
-              className="cursor-pointer transition hover:bg-white/[0.035] focus-visible:bg-white/[0.05] focus-visible:outline-none"
+              className={clsx(
+                'cursor-pointer transition hover:bg-white/[0.035] focus-visible:bg-white/[0.05] focus-visible:outline-none',
+                selection.has(o.id) && 'bg-danger/[0.07]',
+              )}
             >
+              <td className="w-10 py-3 pl-4 pr-0">
+                <SelectBox checked={selection.has(o.id)} onChange={() => selection.toggle(o)} label={`Seleccionar compra de ${o.buyer?.name}`} />
+              </td>
               <td className="max-w-[240px] px-4 py-3">
                 <p className="truncate font-medium text-bone">{o.buyer?.name}</p>
                 <InstagramLink user={o.buyer?.instagram} className="max-w-full text-xs" />
@@ -139,9 +163,15 @@ function OrdersTable({ items, onOpen }) {
   );
 }
 
-function OrderCard({ o, onOpen }) {
+function OrderCard({ o, onOpen, selection }) {
+  const checked = selection.has(o.id);
   return (
-    <li className="relative rounded-2xl border border-white/[0.08] bg-crypt/80 p-4 transition hover:border-white/15 has-[button:active]:scale-[0.99]">
+    <li
+      className={clsx(
+        'relative rounded-2xl border bg-crypt/80 p-4 transition has-[button:active]:scale-[0.99]',
+        checked ? 'border-danger/50' : 'border-white/[0.08] hover:border-white/15',
+      )}
+    >
       <button
         type="button"
         onClick={() => onOpen(o)}
@@ -149,7 +179,12 @@ function OrderCard({ o, onOpen }) {
         aria-label={`Ver compra de ${o.buyer?.name}`}
       />
       <div className="pointer-events-none relative flex items-start justify-between gap-3">
-        <p className="min-w-0 truncate text-base font-semibold text-bone">{o.buyer?.name}</p>
+        <p className="flex min-w-0 items-center gap-3 text-base font-semibold text-bone">
+          <span className="pointer-events-auto relative z-10 -m-2 p-2">
+            <SelectBox checked={checked} onChange={() => selection.toggle(o)} label={`Seleccionar compra de ${o.buyer?.name}`} />
+          </span>
+          <span className="truncate">{o.buyer?.name}</span>
+        </p>
         <StatusBadge status={o.status} />
       </div>
       <div className="pointer-events-none relative mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fog">
@@ -196,6 +231,8 @@ export default function Orders() {
   const [search, setSearch] = useSearchBox(q, (value) => updateParams({ q: value }));
   const [selected, setSelected] = useState(null);
   const [manualOpen, setManualOpen] = useState(false);
+  const [picked, setPicked] = useState(() => new Map()); // id -> { id, name, tickets }
+  const [deleting, setDeleting] = useState(false);
 
   // Cantidades para las pestañas (solo el total: limit=1).
   const counts = useFetch(
@@ -218,6 +255,34 @@ export default function Orders() {
     enabled: estado !== null,
     interval: 45000,
   });
+
+  // La selección vale solo para lo que se está viendo: al cambiar filtros o página se limpia.
+  useEffect(() => {
+    setPicked(new Map());
+  }, [query]);
+
+  const pick = (o) => ({ id: o.id, name: o.buyer?.name || 'Sin nombre', tickets: o.tickets?.length ?? 0 });
+  const selection = {
+    has: (id) => picked.has(id),
+    toggle: (o) =>
+      setPicked((prev) => {
+        const next = new Map(prev);
+        if (next.has(o.id)) next.delete(o.id);
+        else next.set(o.id, pick(o));
+        return next;
+      }),
+    toggleAll: (rows) =>
+      setPicked((prev) => {
+        const all = rows.every((o) => prev.has(o.id));
+        const next = new Map(prev);
+        for (const o of rows) {
+          if (all) next.delete(o.id);
+          else next.set(o.id, pick(o));
+        }
+        return next;
+      }),
+  };
+  const pickedList = [...picked.values()];
 
   const refreshAll = () => {
     list.reload({ silent: true });
@@ -369,10 +434,19 @@ export default function Orders() {
           )
         ) : (
           <div className={clsx('transition-opacity', list.loading && 'opacity-60')}>
-            <OrdersTable items={items} onOpen={setSelected} />
+            <OrdersTable items={items} onOpen={setSelected} selection={selection} />
+            <div className="mb-2.5 flex lg:hidden">
+              <button
+                type="button"
+                onClick={() => selection.toggleAll(items)}
+                className="h-10 rounded-lg px-2 text-sm font-medium text-pumpkin-light hover:bg-white/5"
+              >
+                {items.every((o) => picked.has(o.id)) ? 'Quitar selección' : 'Seleccionar todo lo visible'}
+              </button>
+            </div>
             <ul className="flex flex-col gap-2.5 lg:hidden">
               {items.map((o) => (
-                <OrderCard key={o.id} o={o} onOpen={setSelected} />
+                <OrderCard key={o.id} o={o} onOpen={setSelected} selection={selection} />
               ))}
             </ul>
             <Pagination page={page} limit={PAGE_SIZE} total={total} onChange={(p) => updateParams({ pagina: p })} />
@@ -383,6 +457,35 @@ export default function Orders() {
       {selected && (
         <OrderDetailModal orderId={selected.id} initialOrder={selected} onClose={() => setSelected(null)} onChanged={refreshAll} />
       )}
+      {pickedList.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-danger/30 bg-ink/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+            <p className="text-sm text-fog">
+              <strong className="font-semibold tabular-nums text-bone">{pickedList.length}</strong> {pickedList.length === 1 ? 'seleccionada' : 'seleccionadas'}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" onClick={() => setPicked(new Map())}>
+                <X className="h-4 w-4" />
+                Quitar
+              </Button>
+              <Button variant="danger" onClick={() => setDeleting(true)}>
+                <Trash2 className="h-4 w-4" />
+                Eliminar seleccionadas ({pickedList.length})
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      <DeleteOrdersDialog
+        open={deleting}
+        orders={pickedList}
+        onClose={() => setDeleting(false)}
+        onDone={() => {
+          setDeleting(false);
+          setPicked(new Map());
+          refreshAll();
+        }}
+      />
       {manualOpen && <ManualSaleModal onClose={() => setManualOpen(false)} onCreated={refreshAll} />}
     </div>
   );

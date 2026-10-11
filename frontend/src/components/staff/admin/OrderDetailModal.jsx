@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   Receipt,
   Ticket,
+  Trash2,
   TriangleAlert,
   User,
   Users,
@@ -33,6 +34,7 @@ import {
   TICKET_STATUS_TONE,
 } from '../../../lib/labels';
 import ConfirmDialog from './ConfirmDialog';
+import DeleteOrdersDialog from './DeleteOrdersDialog';
 import CopyButton from './CopyButton';
 import ErrorState from './ErrorState';
 import ReceiptImage from './ReceiptImage';
@@ -246,7 +248,16 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
   const isPaid = status === 'paid';
   const ticketsToCreate = order?.kind === 'room' ? order?.room?.capacity || 1 : 1;
 
-  const footer = order ? (
+  const deleteButton = order ? (
+    <div className="mt-3 border-t border-white/10 pt-3 sm:mt-0 sm:border-0 sm:pt-0">
+      <Button variant="danger" className="w-full sm:w-auto" onClick={() => setConfirm('delete')}>
+        <Trash2 className="h-4 w-4" />
+        Eliminar compra
+      </Button>
+    </div>
+  ) : null;
+
+  const mainActions = order ? (
     isPaid ? (
       <div className="grid grid-cols-[auto_1fr] gap-2 sm:flex sm:justify-end">
         <CopyButton text={orderUrl(order.token)} label="Copiar enlace" copiedLabel="Copiado" />
@@ -266,6 +277,13 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
         </Button>
       </div>
     ) : null
+  ) : null;
+
+  const footer = order ? (
+    <div className="flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between sm:gap-3">
+      {mainActions}
+      {deleteButton}
+    </div>
   ) : null;
 
   return (
@@ -432,6 +450,16 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
 
       {order && (
         <>
+          <DeleteOrdersDialog
+            open={confirm === 'delete'}
+            orders={[{ id: order.id, name: order.buyer?.name || 'esta persona', tickets: order.tickets?.length ?? 0 }]}
+            onClose={() => setConfirm(null)}
+            onDone={() => {
+              setConfirm(null);
+              onChanged?.(null);
+              onClose?.();
+            }}
+          />
           <ConfirmDialog
             open={confirm === 'approve'}
             onClose={() => setConfirm(null)}

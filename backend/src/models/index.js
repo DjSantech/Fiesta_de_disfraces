@@ -234,3 +234,14 @@ export async function nextSequence(name) {
 }
 
 export const allModels = [Settings, Room, Order, Receipt, Ticket, Guest, Expense, User, DoorEntry, Product, Sale, Counter];
+
+// ---------- Auditoría (inmutable: sin rutas de edición ni borrado, sin TTL) ----------
+const auditSchema = new Schema({
+  at: { type: Date, required: true, default: () => new Date(), index: -1 },
+  actor: { type: sub({ id: String, username: String, name: String, role: String }), required: true },
+  action: { type: String, required: true, index: true },
+  target: { type: sub({ type: { type: String, enum: ['order', 'ticket', 'guest', 'expense', 'user'] }, id: String, summary: Schema.Types.Mixed }), required: true },
+  reason: { type: String, default: null },
+  meta: { type: Schema.Types.Mixed, default: {} },
+}, { versionKey: false, minimize: false });
+export const AuditLog = mongoose.model('AuditLog', auditSchema, 'auditlogs');

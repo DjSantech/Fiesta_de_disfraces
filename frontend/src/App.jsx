@@ -25,6 +25,7 @@ const Guests = lazy(() => import('./pages/staff/admin/Guests'));
 const Expenses = lazy(() => import('./pages/staff/admin/Expenses'));
 const Settings = lazy(() => import('./pages/staff/admin/Settings'));
 const Users = lazy(() => import('./pages/staff/admin/Users'));
+const Audit = lazy(() => import('./pages/staff/admin/Audit'));
 const Door = lazy(() => import('./pages/staff/door/Door'));
 const Bar = lazy(() => import('./pages/staff/bar/Bar'));
 
@@ -70,6 +71,7 @@ export default function App() {
               <Route path="gastos" element={<Expenses />} />
               <Route path="ajustes" element={<Settings />} />
               <Route path="usuarios" element={<Users />} />
+              <Route path="auditoria" element={<Audit />} />
             </Route>
             <Route
               path="puerta"

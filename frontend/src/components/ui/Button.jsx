@@ -7,6 +7,7 @@ const VARIANTS = {
     'bg-pumpkin text-white hover:bg-pumpkin-light active:bg-pumpkin-dark shadow-[0_0_28px_-8px_rgb(255_106_0/0.85)] disabled:shadow-none',
   secondary: 'border border-ash bg-white/[0.03] text-bone hover:border-bone/40 hover:bg-white/[0.07]',
   ghost: 'text-fog hover:bg-white/[0.06] hover:text-bone',
+  destructive: 'bg-danger text-white hover:brightness-110 shadow-[0_0_24px_-10px_rgb(229_72_77/0.8)]',
   danger: 'border border-danger/40 bg-danger/10 text-danger-light hover:bg-danger/20',
   success: 'bg-toxic text-ink hover:brightness-110',
   ember: 'bg-ember text-ink hover:brightness-110',

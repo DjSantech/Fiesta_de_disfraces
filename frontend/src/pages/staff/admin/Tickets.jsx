@@ -179,6 +179,10 @@ export default function Tickets() {
   };
 
   const handleChanged = (updated) => {
+    if (!updated) {
+      list.reload({ silent: true });
+      return;
+    }
     // Refleja el cambio al instante y luego sincroniza con el servidor.
     list.setData((d) => (d ? { ...d, items: d.items.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)) } : d));
     list.reload({ silent: true });
