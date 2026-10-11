@@ -1,0 +1,102 @@
+{
+  "name": "Fiesta - Pago en revision a WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fiesta-pago-en-revision",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "b2000000-0000-4000-8000-000000000001",
+      "credentials": { "httpHeaderAuth": { "id": "", "name": "Fiesta x-fd-secret" } }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true } }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Responder rapido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [240, -140]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "c3000000-0000-4000-8000-000000000001",
+              "leftValue": "={{ $json.body.phase }}",
+              "rightValue": "preventa",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "Solo preventa?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, 60]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Arma el texto del WhatsApp a partir del JSON que envia el backend.\nconst d = $input.first().json.body;\nconst TELEFONO = 'REEMPLAZA_CON_TU_TELEFONO'; // con indicativo, ej. +57300XXXXXXX (escribelo aqui en n8n, no en el repo)\nconst monto = '$' + Number(d.amount).toLocaleString('es-CO');\nconst que = d.kind === 'room'\n  ? `🛏️ Habitación ${d.roomNumber}${d.roomName ? ' (' + d.roomName + ')' : ''}`\n  : `🎟️ Entrada ${d.gender || ''}`.trim();\nconst texto = [\n  '🎭 *Pago en revisión*',\n  `👤 ${d.buyerName}${d.isGuest ? ' (invitado)' : ''}`,\n  que,\n  `💰 ${monto} · fase ${d.phase}`,\n  `👉 Revisar: ${d.adminUrl}`,\n].join('\n');\nreturn [{ json: { telefono: TELEFONO, texto } }];"
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Armar mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.callmebot.com/whatsapp.php",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "phone", "value": "={{ $json.telefono }}" },
+            { "name": "text", "value": "={{ $json.texto }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Enviar WhatsApp (CallMeBot)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 0],
+      "credentials": { "httpQueryAuth": { "id": "", "name": "CallMeBot apikey" } }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[
+        { "node": "Responder rapido", "type": "main", "index": 0 },
+        { "node": "Solo preventa?", "type": "main", "index": 0 }
+      ]]
+    },
+    "Solo preventa?": {
+      "main": [[{ "node": "Armar mensaje", "type": "main", "index": 0 }], []]
+    },
+    "Armar mensaje": {
+      "main": [[{ "node": "Enviar WhatsApp (CallMeBot)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

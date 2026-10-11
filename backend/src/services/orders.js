@@ -13,6 +13,7 @@ import {
   getSettings, ticketBreakdown, roomBreakdown, findGuestMatch, isSoldOut, assertCanBuy, findActiveTicketByCedula,
   claimRoom, holdForReview, releaseRoom, roomStatus, finalizePaidOrder, ticketsOf,
 } from './core.js';
+import { notifyOrderInReview } from './notify.js';
 import { orderPublic, orderAdmin } from './serializers.js';
 
 const STATUS_LABEL = {
@@ -204,7 +205,7 @@ export async function changePaymentMethod(ctx, token, paymentMethod) {
   return { order: updated, checkoutUrl };
 }
 
-export async function attachReceipt(token, file, reference) {
+export async function attachReceipt(token, file, reference, ctx = null) {
   const order = await getOrderByToken(token);
   if (order.paymentMethod !== 'transferencia') {
     throw invalidState('Esta compra no es por transferencia. Cambia el método de pago a transferencia antes de subir el comprobante.');
@@ -240,6 +241,8 @@ export async function attachReceipt(token, file, reference) {
       { $set: { status: 'conflict', notes: appendNote(before.notes, 'Conflicto: al subir el comprobante la habitación ya no estaba disponible.') } },
     );
   }
+  // Avisa (n8n) solo en la primera transición pending_payment -> in_review; reemplazar el comprobante no repite el aviso.
+  if (ctx && before.status === 'pending_payment') void notifyOrderInReview(order, ctx);
   return order._id;
 }
 

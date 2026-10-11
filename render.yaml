@@ -29,3 +29,7 @@ services:
         sync: false
       - key: MP_WEBHOOK_SECRET
         sync: false
+      - key: N8N_WEBHOOK_URL
+        sync: false
+      - key: N8N_WEBHOOK_SECRET
+        sync: false

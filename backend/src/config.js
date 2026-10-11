@@ -45,6 +45,20 @@ export function loadConfig(env = process.env) {
   if (mpAccessToken && !mpWebhookSecret) warnings.push('Sin MP_WEBHOOK_SECRET: no se valida la firma del webhook (igual se re-consulta cada pago).');
   if (mpAccessToken && !backendPublicUrl.startsWith('https://')) warnings.push('BACKEND_PUBLIC_URL no es https: Mercado Pago no enviará webhooks (se usa verify-mp y la conciliación periódica).');
 
+  let n8nWebhookUrl = (env.N8N_WEBHOOK_URL || '').trim();
+  if (n8nWebhookUrl) {
+    try {
+      const u = new URL(n8nWebhookUrl);
+      if (!/^https?:$/.test(u.protocol)) throw new Error();
+      if (isProd && u.protocol !== 'https:') throw new Error();
+    } catch {
+      warnings.push(`N8N_WEBHOOK_URL inválida${isProd ? ' (en producción debe ser https)' : ''}: los avisos de WhatsApp quedan desactivados.`);
+      n8nWebhookUrl = '';
+    }
+  }
+  const n8nWebhookSecret = (env.N8N_WEBHOOK_SECRET || '').trim();
+  if (n8nWebhookUrl && !n8nWebhookSecret) warnings.push('Sin N8N_WEBHOOK_SECRET: el webhook de n8n no se autentica (cualquiera con la URL podría llamarlo).');
+
   if (errors.length) {
     const e = new Error(`Configuración inválida:\n - ${errors.join('\n - ')}`);
     e.configErrors = errors;
@@ -57,6 +71,7 @@ export function loadConfig(env = process.env) {
     adminUsername: (env.ADMIN_USERNAME || 'admin').trim().toLowerCase(),
     adminPassword: env.ADMIN_PASSWORD || '',
     mpAccessToken, mpWebhookSecret, mpMock,
+    n8nWebhookUrl, n8nWebhookSecret,
     warnings,
   });
 }

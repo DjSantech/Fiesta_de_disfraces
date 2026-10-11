@@ -104,7 +104,7 @@ export function publicRouter(ctx, limits) {
   r.post('/orders/:token/receipt', limits.receipt, validate({ params: tokenParam }), receiptUpload,
     validate({ body: z.object({ reference: z.preprocess((v) => (v == null ? '' : v), z.string().trim().max(60)) }) }),
     async (req, res) => {
-      const id = await attachReceipt(req.valid.params.token, req.file, req.valid.body.reference);
+      const id = await attachReceipt(req.valid.params.token, req.file, req.valid.body.reference, ctx);
       res.json({ order: await presentOrder(id) });
     });
 
