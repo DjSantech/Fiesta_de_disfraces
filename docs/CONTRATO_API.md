@@ -25,7 +25,7 @@ Fuente de verdad entre `frontend/` y `backend/`. Si algo no está aquí, no exis
 | 403 | `SALES_CLOSED` | Ventas en línea cerradas |
 | 404 | `NOT_FOUND` | Recurso no existe (o token inválido) |
 | 409 | `ALREADY_HAS_TICKET` | Esa cédula ya tiene entrada o una compra en revisión |
-| 409 | `SOLD_OUT` | Aforo completo |
+| 409 | `SOLD_OUT` | Obsoleto: el aforo es una meta y ya no se devuelve (se conserva el código por compatibilidad) |
 | 409 | `ROOM_UNAVAILABLE` | Habitación apartada, reservada o bloqueada |
 | 409 | `INVALID_STATE` | Transición no permitida (ej. aprobar una orden ya pagada) |
 | 409 | `TICKET_ALREADY_USED` | Check-in de un ticket ya usado. `details: { checkedInAt, checkedInByName }` |
@@ -63,7 +63,7 @@ Etiquetas en español para todos los enums: `frontend/src/lib/labels.js`.
 
 **Breakdown** (desglose de precio)
 ```json
-{ "phase": "preventa", "base": 35000, "isGuest": true, "discountPercent": 14, "discount": 5000, "total": 30000 }
+{ "phase": "preventa", "base": 30000, "isGuest": true, "discountPercent": 17, "discount": 5000, "total": 25000 }
 ```
 En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountPercent: 0`, `discount: 0`.
 
@@ -126,12 +126,13 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
     "presaleEndsAt": "2026-10-25T04:59:59.000Z",
     "phase": "preventa",
     "salesOpen": true,
-    "soldOut": false
+    "soldOut": false,
+    "goalReached": false
   },
   "prices": {
-    "preventa": { "mujer": 20000, "hombre": 35000 },
+    "preventa": { "mujer": 20000, "hombre": 30000 },
     "puerta": { "mujer": 25000, "hombre": 40000 },
-    "current": { "mujer": 20000, "hombre": 35000 }
+    "current": { "mujer": 20000, "hombre": 30000 }
   },
   "guest": { "presaleDiscount": 5000, "generalDiscount": 0 },
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
@@ -150,7 +151,7 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
   "counter": null
 }
 ```
-- `counter`: `null` salvo que el admin active `publicCounter` → `{ "capacity": 100, "sold": 37, "remaining": 63 }`.
+- `counter`: `null` salvo que el admin active `publicCounter` → `{ "capacity": 120, "sold": 37, "remaining": 83, "over": 0 }` (`remaining = max(0, capacity − sold)`; `over` = cuántos pasan de la meta, 0 si no). `event.soldOut` es siempre `false`; `event.goalReached` = vendidas ≥ meta. El aforo es una meta: no bloquea ventas.
 - `mercadoPago.enabled`: hay credenciales o está en modo simulado. `mock`: modo simulado activo.
 
 ### `POST /api/public/quote`
@@ -160,7 +161,7 @@ Calcula el precio antes de comprar (muestra el descuento de invitado). Rate limi
 { "kind": "room", "roomNumber": 3 }
 ```
 `200 { "breakdown": Breakdown, "available": true, "reason": null }`. Para habitaciones el `base` es `presalePrice` en fase `preventa` y `price` en `general`.
-Si no se puede comprar: `available: false` y `reason` ∈ `SOLD_OUT`, `ROOM_UNAVAILABLE`, `SALES_CLOSED` (igual devuelve breakdown).
+Si no se puede comprar: `available: false` y `reason` ∈ `ROOM_UNAVAILABLE`, `SALES_CLOSED` (igual devuelve breakdown).
 
 ### `POST /api/public/orders`
 Crea la compra. Rate limit 10/min/IP.
@@ -184,7 +185,7 @@ Validación: `name` 3–80; `cedula` y `phone` obligatorios, `instagram` opciona
 ```
 `checkoutUrl` solo si `paymentMethod = "mercadopago"` (en modo simulado: `http://localhost:5173/pago/simulado?orden=<token>`). En transferencia es `null`.
 
-Errores: `VALIDATION_ERROR`, `SALES_CLOSED`, `SOLD_OUT`, `ROOM_UNAVAILABLE`, `ALREADY_HAS_TICKET`, `PAYMENT_PROVIDER_ERROR`.
+Errores: `VALIDATION_ERROR`, `SALES_CLOSED`, `ROOM_UNAVAILABLE`, `ALREADY_HAS_TICKET`, `PAYMENT_PROVIDER_ERROR`.
 
 ### `GET /api/public/orders/:token`
 `200 { "order": OrderPublic }` · `404` si no existe.
@@ -258,7 +259,7 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
 ```json
 {
   "tickets": {
-    "sold": 37, "capacity": 100,
+    "sold": 37, "capacity": 120, "goalReached": false,
     "byGender": { "mujer": 20, "hombre": 15 },
     "byPhase": { "preventa": 30, "general": 5 },
     "guests": 2, "courtesy": 2,
@@ -326,7 +327,7 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
   "notes": "Pagó en la U"
 }
 ```
-`instagram` opcional aquí. `amount` entero ≥ 0 (si se omite: precio actual). `manualMethod: "cortesia"` → `amount` 0 y tickets `kind: "cortesia"` (si `kind = ticket`). Respeta una-entrada-por-cédula y disponibilidad de habitación (`ROOM_UNAVAILABLE`), pero no `SOLD_OUT` (el admin decide).
+`instagram` opcional aquí. `amount` entero ≥ 0 (si se omite: precio actual). `manualMethod: "cortesia"` → `amount` 0 y tickets `kind: "cortesia"` (si `kind = ticket`). Respeta una-entrada-por-cédula y disponibilidad de habitación (`ROOM_UNAVAILABLE`), y nunca bloquea por la meta de aforo.
 
 ### Tickets
 
@@ -379,8 +380,8 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
   "eventStartsAt": "2026-11-01T02:00:00.000Z",
   "presaleEndsAt": "2026-10-25T04:59:59.000Z",
   "salesOpen": true,
-  "capacity": 100,
-  "prices": { "preventa": { "mujer": 20000, "hombre": 35000 }, "puerta": { "mujer": 25000, "hombre": 40000 } },
+  "capacity": 120,
+  "prices": { "preventa": { "mujer": 20000, "hombre": 30000 }, "puerta": { "mujer": 25000, "hombre": 40000 } },
   "guestPresaleDiscount": 5000,
   "guestGeneralDiscount": 0,
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
@@ -459,7 +460,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 
 | Método | Ruta | Body / Query | Respuesta |
 |---|---|---|---|
-| GET | `/api/door/config` | — | `{ "prices": { "mujer": 25000, "hombre": 40000 }, "presalePrices": { "mujer": 20000, "hombre": 30000 }, "guest": { "presaleDiscount": 5000, "generalDiscount": 0 }, "parking": { "carro", "moto", "casco" }, "capacity": 100, "roomsCapacity": 18 }` |
+| GET | `/api/door/config` | — | `{ "prices": { "mujer": 25000, "hombre": 40000 }, "presalePrices": { "mujer": 20000, "hombre": 30000 }, "guest": { "presaleDiscount": 5000, "generalDiscount": 0 }, "parking": { "carro", "moto", "casco" }, "capacity": 120, "roomsCapacity": 18 }` |
 | GET | `/api/door/stats` | — | ver abajo |
 | POST | `/api/door/scan` | `{ "value": "<texto del QR o código tecleado>" }` | `{ "result": "valid"\|"used"\|"void"\|"not_found", "ticket": TicketDoor\|null, "entry": DoorEntry\|null }` — no consume; `entry` = la entrada que lo usó (si `used`) |
 | POST | `/api/door/checkin` | `{ "ticketId", "vehicle"?: { type, plate }, "helmet"?: { "stored": true, "tag"? }, "paymentMethod"?: posMethod (para parqueadero/casco; defecto `efectivo`), "notes"? }` | `201 { "entry": DoorEntry, "ticket": TicketDoor }` · `409 TICKET_ALREADY_USED` / `TICKET_VOID` |
@@ -490,7 +491,7 @@ Categoría en entradas con QR: habitación → `habitacion`; cortesía → `cort
 `GET /api/door/stats`
 ```json
 {
-  "inside": 47, "capacity": 100,
+  "inside": 47, "capacity": 120, "goalReached": false,
   "roomsInside": 9, "roomsCapacity": 18,
   "byCategory": { "mujer": 20, "hombre": 22, "invitado": 3, "cortesia": 2, "habitacion": 9 },
   "tickets": { "sold": 80, "checkedIn": 40, "pending": 40 },

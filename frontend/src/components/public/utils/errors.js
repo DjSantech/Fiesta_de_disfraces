@@ -8,8 +8,8 @@ const MESSAGES = {
     action: { to: '/recuperar', label: 'Recuperar mi entrada' },
   },
   SOLD_OUT: {
-    title: 'Entradas agotadas',
-    message: 'Se llenó el aforo. Escríbele a DJ Santech por si se libera algún cupo.',
+    title: 'No se pudo completar la compra',
+    message: 'Inténtalo de nuevo en un momento o escríbele a DJ Santech.',
   },
   ROOM_UNAVAILABLE: {
     title: 'Esa habitación ya no está libre',

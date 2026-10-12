@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowRight, Menu, Ticket, X } from 'lucide-react';
 import { Wordmark } from './ui';
-import { roomsAvailable, salesState, usePublicConfig } from './usePublicConfig';
+import { salesState, usePublicConfig } from './usePublicConfig';
 
 export const HOME_LINKS = [
   { id: 'la-noche', label: 'La noche' },
@@ -40,7 +40,6 @@ function useHeaderCta() {
   const { config } = usePublicConfig();
   const state = salesState(config);
   if (state === 'preventa' || state === 'general') return { to: '/comprar', label: 'Comprar', long: 'Comprar entrada' };
-  if (state === 'soldout' && roomsAvailable(config)) return { to: '/comprar?tipo=habitacion', label: 'Habitaciones', long: 'Ver habitaciones' };
   return null;
 }
 

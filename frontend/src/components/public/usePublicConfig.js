@@ -142,11 +142,10 @@ export function usePublicConfig({ refreshInterval } = {}) {
   return { ...snap, live: snap.source === 'live', refresh: () => loadPublicConfig({ force: true }) };
 }
 
-/** Estado comercial para CTAs: 'preventa' | 'general' | 'soldout' | 'closed' */
+/** Estado comercial para CTAs: 'preventa' | 'general' | 'closed' (el aforo es una meta: nunca agota). */
 export function salesState(config) {
   const ev = config?.event || {};
   if (ev.salesOpen === false) return 'closed';
-  if (ev.soldOut) return 'soldout';
   return ev.phase === 'general' ? 'general' : 'preventa';
 }
 

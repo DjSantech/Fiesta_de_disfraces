@@ -144,7 +144,7 @@ export default function PricesSection({ config }) {
 
         {!canBuy && (
           <p className="mt-4 text-center text-sm text-fog">
-            {state === 'soldout' ? 'Entradas agotadas en línea.' : 'Las ventas en línea están cerradas; aún puedes comprar en la puerta.'}
+            Las ventas en línea están cerradas; aún puedes comprar en la puerta.
           </p>
         )}
       </div>

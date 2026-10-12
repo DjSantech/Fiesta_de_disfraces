@@ -244,7 +244,7 @@ export default function Buy() {
                   disabled={!ticketsOpen}
                   icon={Ticket}
                   title="Entrada"
-                  hint={state === 'soldout' ? 'Agotadas' : `${config.event.phase === 'preventa' ? 'Preventa' : 'Venta general'} · desde ${formatCOP(Math.min(config.prices.current.mujer, config.prices.current.hombre))}`}
+                  hint={`${config.event.phase === 'preventa' ? 'Preventa' : 'Venta general'} · desde ${formatCOP(Math.min(config.prices.current.mujer, config.prices.current.hombre))}`}
                 />
                 <OptionCard active={kind === 'room'} onClick={() => setKind('room')} disabled={!salesOpen} icon={BedDouble} title="Habitación" hint="Incluye la entrada · grupo completo, no por cama" />
               </div>

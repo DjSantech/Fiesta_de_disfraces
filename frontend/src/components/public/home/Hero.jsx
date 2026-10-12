@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowRight, BedDouble, CalendarDays, Clock3, Disc3, MapPin, TicketX, Ticket } from 'lucide-react';
+import { ArrowRight, CalendarDays, Clock3, Disc3, MapPin, TicketX, Ticket } from 'lucide-react';
 import { EVENT } from '../../../config/event';
 import { formatCOP, formatTime, whatsappLink } from '../../../lib/format';
 import Countdown from '../Countdown';
 import { Embers } from '../ui';
 import WhatsAppButton from '../WhatsAppButton';
 import { Bat, Cobweb, Neon, Pumpkin, Skull } from '../decor';
-import { roomsAvailable, salesState } from '../usePublicConfig';
+import { salesState } from '../usePublicConfig';
 import { dayMonth } from '../utils/dates';
 
 /** Clases de entrada escalonada: solo animan cuando la intro ya salió (`ready`). */
@@ -21,18 +21,19 @@ function enter(ready, delay) {
 function Counter({ counter }) {
   if (!counter || !counter.capacity) return null;
   const pct = Math.min(100, Math.round((counter.sold / counter.capacity) * 100));
+  const over = counter.over ?? Math.max(0, counter.sold - counter.capacity);
   return (
     <div className="mx-auto mt-5 w-full max-w-sm">
       <div className="flex items-baseline justify-between text-xs">
-        <span className="font-semibold uppercase tracking-[0.2em] text-fog">Cupos</span>
+        <span className="font-semibold uppercase tracking-[0.2em] text-fog">Asistentes</span>
         <span className="font-semibold text-bone">
-          {counter.remaining > 0 ? `Quedan ${counter.remaining} de ${counter.capacity}` : 'Sin cupos'}
+          {over > 0 ? '¡Meta superada!' : `Meta ${counter.capacity} · van ${counter.sold}`}
         </span>
       </div>
       <div
         className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]"
         role="progressbar"
-        aria-label="Cupos vendidos"
+        aria-label="Asistentes frente a la meta"
         aria-valuemin={0}
         aria-valuemax={counter.capacity}
         aria-valuenow={counter.sold}
@@ -78,35 +79,19 @@ export function HeroCta({ config, size = 'hero', className }) {
     );
   }
 
-  const rooms = roomsAvailable(config);
   return (
     <div className={clsx('mx-auto flex w-full max-w-xl flex-col items-center', className)}>
       <div className="w-full rounded-2xl border border-white/12 bg-white/[0.035] px-5 py-5 text-center backdrop-blur-sm">
         <p className="flex items-center justify-center gap-2 font-display text-[1.6rem] uppercase tracking-[0.05em] text-bone">
           <TicketX className="h-6 w-6 text-pumpkin-light" strokeWidth={1.75} />
-          {state === 'soldout' ? 'Entradas agotadas' : 'Ventas en línea cerradas'}
+          Ventas en línea cerradas
         </p>
         <p className="mt-2 text-sm leading-relaxed text-fog">
-          {state === 'soldout' ? (
-            'Se llenó el aforo. Escríbele a DJ Santech por si se libera algún cupo.'
-          ) : (
-            <>
-              Aún puedes comprar en la puerta el 31: Mujeres <span className="text-bone">{formatCOP(door.mujer)}</span> · Hombres{' '}
-              <span className="text-bone">{formatCOP(door.hombre)}</span>.
-            </>
-          )}
+          Aún puedes comprar en la puerta el 31: Mujeres <span className="text-bone">{formatCOP(door.mujer)}</span> · Hombres{' '}
+          <span className="text-bone">{formatCOP(door.hombre)}</span>.
         </p>
       </div>
       <div className="mt-3 flex w-full flex-col gap-2 sm:flex-row">
-        {state === 'soldout' && rooms && (
-          <Link
-            to="/comprar?tipo=habitacion"
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-pumpkin text-sm font-semibold text-white transition hover:bg-pumpkin-light"
-          >
-            <BedDouble className="h-4 w-4" />
-            Aún hay habitaciones
-          </Link>
-        )}
         <a
           href={whatsappLink(config.contact.whatsapp, 'Hola DJ Santech, quiero saber si hay cupos para la Fiesta de Disfraces.')}
           target="_blank"

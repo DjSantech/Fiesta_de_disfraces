@@ -38,12 +38,13 @@ export const FALLBACK_CONFIG = {
     presaleEndsAt: '2026-10-25T04:59:59.000Z', // sábado 24 de octubre, 11:59 p. m. (Colombia)
     phase: 'preventa',
     salesOpen: true,
-    soldOut: false,
+    soldOut: false, // siempre false: el aforo es una meta, no un límite
+    goalReached: false,
   },
   prices: {
-    preventa: { mujer: 20000, hombre: 35000 },
+    preventa: { mujer: 20000, hombre: 30000 },
     puerta: { mujer: 25000, hombre: 40000 },
-    current: { mujer: 20000, hombre: 35000 },
+    current: { mujer: 20000, hombre: 30000 },
   },
   guest: { presaleDiscount: 5000, generalDiscount: 0 },
   parking: { carro: 10000, moto: 5000, casco: 5000 },
