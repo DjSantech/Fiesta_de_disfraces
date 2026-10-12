@@ -12,6 +12,7 @@ frontend/dist/
 
 # Datos locales
 .mongo-data/
+backups/
 *.log
 npm-debug.log*
 
