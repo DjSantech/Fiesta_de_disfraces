@@ -105,6 +105,14 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
                     </a>
                   </li>
                 ))}
+                <li>
+                  <Link
+                    to="/staff/login"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-fog transition hover:bg-white/[0.05] hover:text-bone"
+                  >
+                    Staff
+                  </Link>
+                </li>
               </ul>
             </nav>
           )}
@@ -185,6 +193,13 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
               className="flex h-12 items-center justify-center rounded-xl border border-white/12 text-sm font-semibold text-bone"
             >
               Ver mi entrada
+            </Link>
+            <Link
+              to="/staff/login"
+              onClick={() => setOpen(false)}
+              className="flex h-11 items-center justify-center rounded-xl text-sm font-semibold text-fog transition hover:text-bone"
+            >
+              Staff
             </Link>
             {cta && (
               <Link
