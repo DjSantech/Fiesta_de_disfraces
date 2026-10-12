@@ -22,10 +22,10 @@ test('redondeo a 500 y descuento', () => {
 
 test('quote: preventa, general y descuento de invitado', async () => {
   let r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre' });
-  assert.deepEqual(r.body, { breakdown: { phase: 'preventa', base: 35000, isGuest: false, discountPercent: 0, discount: 0, total: 35000 }, available: true, reason: null });
+  assert.deepEqual(r.body, { breakdown: { phase: 'preventa', base: 30000, isGuest: false, discountPercent: 0, discount: 0, total: 30000 }, available: true, reason: null });
   await Guest.create({ name: 'Juan', instagram: 'juan' });
   r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'hombre', instagram: '@JUAN' });
-  assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 35000, isGuest: true, discountPercent: 14, discount: 5000, total: 30000 });
+  assert.deepEqual(r.body.breakdown, { phase: 'preventa', base: 30000, isGuest: true, discountPercent: 17, discount: 5000, total: 25000 });
   r = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 3 });
   assert.equal(r.body.breakdown.total, 500000);
   r = await api.get('/api/public/config');
@@ -170,29 +170,52 @@ test('habitación: apartado, ROOM_UNAVAILABLE, N tickets, expiración y conflict
   assert.equal(r.body.income.rooms, 500000);
 });
 
-test('venta manual cortesía y SOLD_OUT', async () => {
+test('venta manual cortesía; la meta (aforo) no bloquea y se puede superar', async () => {
   await Settings.updateOne({ _id: 'main' }, { $set: { capacity: 1 } });
   let r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
     .send({ kind: 'ticket', gender: 'hombre', roomNumber: null, buyer: buyer({ instagram: '' }), companions: [], manualMethod: 'cortesia', notes: '' });
   assert.equal(r.status, 201);
   assert.equal(r.body.order.amount, 0);
   assert.equal(r.body.order.tickets[0].kind, 'cortesia');
+  // Meta = 1 ya alcanzada: la venta en línea sigue funcionando (sin 409).
+  r = await api.post('/api/public/quote').send({ kind: 'ticket', gender: 'mujer' });
+  assert.equal(r.body.available, true);
   r = await api.post('/api/public/orders').send(ticketOrder());
-  assert.equal(r.body.error.code, 'SOLD_OUT');
+  assert.equal(r.status, 201);
+  r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'mujer', roomNumber: null, buyer: buyer({ instagram: '' }), companions: [], manualMethod: 'efectivo', notes: '' });
+  assert.equal(r.status, 201);
+  await Settings.updateOne({ _id: 'main' }, { $set: { publicCounter: true } });
   r = await api.get('/api/public/config');
-  assert.equal(r.body.event.soldOut, true);
+  assert.equal(r.body.event.soldOut, false);
+  assert.equal(r.body.event.goalReached, true);
+  assert.deepEqual(r.body.counter, { capacity: 1, sold: 2, remaining: 0, over: 1 });
+  r = await api.get('/api/admin/dashboard').set('Authorization', admin);
+  assert.equal(r.body.tickets.sold, 2);
+  assert.equal(r.body.tickets.goalReached, true);
+});
+
+test('migración: capacity 100 pasa a 120 una sola vez; otros valores se respetan', async () => {
+  const { ensureBaseData } = await import('../src/services/bootstrap.js');
+  assert.equal((await Settings.findById('main').lean()).capacity, 120);
+  await Settings.updateOne({ _id: 'main' }, { $set: { capacity: 100 } });
+  await ensureBaseData(ctx.config, ctx.logger);
+  assert.equal((await Settings.findById('main').lean()).capacity, 120);
+  await Settings.updateOne({ _id: 'main' }, { $set: { capacity: 150 } });
+  await ensureBaseData(ctx.config, ctx.logger);
+  assert.equal((await Settings.findById('main').lean()).capacity, 150);
 });
 
 test('reglas de invitados: preventa, general, extra, % propio y cortesía', async () => {
   const q = (g, ig) => api.post('/api/public/quote').send({ kind: 'ticket', gender: g, instagram: ig }).then((r) => r.body.breakdown);
   await Guest.create([{ name: 'Mujer', instagram: 'inv1' }, { name: 'Medio', instagram: 'inv50', discountPercent: 50 }, { name: 'Cort', instagram: 'inv100', discountPercent: 100 }]);
   assert.equal((await q('mujer', 'inv1')).total, 15000);
-  assert.equal((await q('hombre', 'inv1')).total, 30000);
-  assert.equal((await q('hombre', 'inv50')).total, 17500);
+  assert.equal((await q('hombre', 'inv1')).total, 25000);
+  assert.equal((await q('hombre', 'inv50')).total, 15000);
   assert.equal((await q('hombre', 'inv100')).total, 0);
   await Settings.updateOne({ _id: 'main' }, { $set: { presaleEndsAt: new Date(Date.now() - 1000) } });
   assert.equal((await q('mujer', 'inv1')).total, 20000);
-  assert.equal((await q('hombre', 'inv1')).total, 35000);
+  assert.equal((await q('hombre', 'inv1')).total, 30000);
   assert.equal((await q('hombre', 'inv1')).base, 40000);
   await Settings.updateOne({ _id: 'main' }, { $set: { guestGeneralDiscount: 5000 } });
   assert.equal((await q('mujer', 'inv1')).total, 15000);

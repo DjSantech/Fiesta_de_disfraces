@@ -7,7 +7,7 @@ import {
   validate, z, tokenParam, text, cedula, phone, instagramOrEmpty, optCedula, email, spanishErrorMap,
 } from '../middleware/validate.js';
 import { receiptUpload } from '../middleware/http.js';
-import { getSettings, phaseAt, currentPrices, ticketsTaken, roomPublic } from '../services/core.js';
+import { getSettings, phaseAt, currentPrices, ticketsTaken, goalReached, roomPublic } from '../services/core.js';
 import {
   quote, createPublicOrder, presentOrder, getOrderByToken, changePaymentMethod, attachReceipt, verifyMercadoPago,
   mockPay, processPaymentNotification,
@@ -63,7 +63,7 @@ export function publicRouter(ctx, limits) {
     res.json({
       event: {
         startsAt: iso(settings.eventStartsAt), presaleEndsAt: iso(settings.presaleEndsAt), phase,
-        salesOpen: !!settings.salesOpen, soldOut: taken >= settings.capacity,
+        salesOpen: !!settings.salesOpen, soldOut: false, goalReached: goalReached(settings, taken),
       },
       prices: { preventa: { ...settings.prices.preventa }, puerta: { ...settings.prices.puerta }, current: { ...currentPrices(settings, phase) } },
       guest: { presaleDiscount: settings.guestPresaleDiscount, generalDiscount: settings.guestGeneralDiscount },
@@ -74,7 +74,7 @@ export function publicRouter(ctx, limits) {
       contact: { ...settings.contact },
       mercadoPago: { enabled: ctx.mp.enabled, mock: ctx.mp.mock },
       counter: settings.publicCounter
-        ? { capacity: settings.capacity, sold: taken, remaining: Math.max(0, settings.capacity - taken) }
+        ? { capacity: settings.capacity, sold: taken, remaining: Math.max(0, settings.capacity - taken), over: Math.max(0, taken - settings.capacity) }
         : null,
     });
   });

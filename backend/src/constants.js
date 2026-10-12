@@ -38,9 +38,9 @@ export const DEFAULT_SETTINGS = Object.freeze({
   eventStartsAt: new Date('2026-10-31T21:00:00-05:00'),
   presaleEndsAt: new Date('2026-10-24T23:59:59-05:00'),
   salesOpen: true,
-  capacity: 100,
+  capacity: 120, // META de asistentes (no limita ventas ni ingresos)
   prices: {
-    preventa: { mujer: 20000, hombre: 35000 },
+    preventa: { mujer: 20000, hombre: 30000 },
     puerta: { mujer: 25000, hombre: 40000 },
   },
   guestPresaleDiscount: 5000,

@@ -4,13 +4,13 @@ import mongoose from 'mongoose';
 import { Order, Room, Receipt } from '../models/index.js';
 import { ROOM_HOLD_MINUTES, TICKET_ORDER_EXPIRY_HOURS, MP_RECONCILE_EVERY_MS } from '../constants.js';
 import {
-  AppError, notFound, invalidState, salesClosed, soldOut, roomUnavailable, randomToken, addMinutes,
+  AppError, notFound, invalidState, salesClosed, roomUnavailable, randomToken, addMinutes,
   appendNote, isDuplicateKey, OBJECT_ID_RE,
 } from '../lib/util.js';
 import { fieldError } from '../middleware/validate.js';
 import { detectImageType } from '../middleware/http.js';
 import {
-  getSettings, ticketBreakdown, roomBreakdown, findGuestMatch, isSoldOut, assertCanBuy, findActiveTicketByCedula,
+  getSettings, ticketBreakdown, roomBreakdown, findGuestMatch, assertCanBuy, findActiveTicketByCedula,
   claimRoom, holdForReview, releaseRoom, roomStatus, finalizePaidOrder, ticketsOf,
 } from './core.js';
 import { notifyOrderInReview } from './notify.js';
@@ -97,7 +97,6 @@ export async function quote(ctx, input) {
     const breakdown = ticketBreakdown(settings, { gender: input.gender, guest });
     let reason = null;
     if (!settings.salesOpen) reason = 'SALES_CLOSED';
-    else if (await isSoldOut(settings)) reason = 'SOLD_OUT';
     return { breakdown, available: !reason, reason };
   }
   const room = await Room.findOne({ number: input.roomNumber }).lean();
@@ -123,7 +122,6 @@ export async function createPublicOrder(ctx, input) {
     }
   }
   await assertCanBuy(input.buyer.cedula);
-  if (input.kind === 'ticket' && (await isSoldOut(settings))) throw soldOut();
 
   let breakdown;
   let guest = null;
@@ -182,7 +180,6 @@ export async function changePaymentMethod(ctx, token, paymentMethod) {
   } else if (order.status === 'expired' && order.kind === 'ticket') {
     const settings = await getSettings();
     if (!settings.salesOpen) throw salesClosed();
-    if (await isSoldOut(settings)) throw soldOut();
     await assertCanBuy(order.buyer.cedula, order._id);
     const guest = await findGuestMatch(order.buyer);
     const breakdown = ticketBreakdown(settings, { gender: order.gender, guest, now });

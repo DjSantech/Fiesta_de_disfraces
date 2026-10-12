@@ -94,7 +94,8 @@ export async function ticketsTaken() {
   ]);
   return tickets + review;
 }
-export const isSoldOut = async (settings) => (await ticketsTaken()) >= settings.capacity;
+// El aforo es una META, no un límite: nunca bloquea ventas ni ingresos.
+export const goalReached = (settings, taken) => taken >= settings.capacity;
 
 // ---------- Una entrada por cédula ----------
 export function findActiveTicketByCedula(cedula, excludeOrderId) {

@@ -50,6 +50,7 @@ export async function dashboard() {
   return {
     tickets: {
       sold: (kinds.general || 0) + (kinds.cortesia || 0), capacity: settings.capacity,
+      goalReached: (kinds.general || 0) + (kinds.cortesia || 0) >= settings.capacity,
       byGender: { mujer: g.mujer || 0, hombre: g.hombre || 0 }, byPhase: { preventa: p.preventa || 0, general: p.general || 0 },
       guests, courtesy: kinds.cortesia || 0, pendingReview: oc('in_review', 'ticket'), pendingPayment: oc('pending_payment', 'ticket'),
     },
@@ -87,6 +88,7 @@ export async function doorStats() {
   const hs = helm.reduce((a, r) => a + r.n, 0);
   return {
     inside: c.mujer + c.hombre + c.invitado + c.cortesia, capacity: settings.capacity,
+    goalReached: c.mujer + c.hombre + c.invitado + c.cortesia >= settings.capacity,
     roomsInside: c.habitacion, roomsCapacity: rooms.reduce((a, r) => a + r.capacity, 0),
     byCategory: { mujer: c.mujer, hombre: c.hombre, invitado: c.invitado, cortesia: c.cortesia, habitacion: c.habitacion },
     tickets: { sold: (t.valid || 0) + (t.used || 0), checkedIn: t.used || 0, pending: t.valid || 0 },

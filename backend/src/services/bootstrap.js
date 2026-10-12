@@ -23,6 +23,8 @@ export async function ensureBaseData(config, logger) {
     { _id: SETTINGS_ID, transferInstructions: /daviplata/i },
     { $set: { transferInstructions: DEFAULT_SETTINGS.transferInstructions } },
   );
+  // Migración: la meta de asistentes pasó de 100 a 120 (solo si sigue en el valor viejo; otros valores se respetan).
+  await Settings.updateOne({ _id: SETTINGS_ID, capacity: 100 }, { $set: { capacity: 120 } });
   for (const r of DEFAULT_ROOMS) {
     await Room.updateOne({ number: r.number }, { $setOnInsert: r }, { upsert: true });
     // Migración: habitaciones legacy (sin presalePrice) pasan a los nuevos datos; no toca reserva/apartado.
