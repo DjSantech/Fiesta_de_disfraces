@@ -315,7 +315,7 @@ export default function Orders() {
           <>
             <Button onClick={() => setManualOpen(true)}>
               <Plus className="h-4 w-4" />
-              Registrar venta manual
+              Crear entrada (venta por WhatsApp)
             </Button>
             <ExportMenu
               options={[
@@ -426,7 +426,7 @@ export default function Orders() {
                 ) : estado === 'all' ? (
                   <Button onClick={() => setManualOpen(true)}>
                     <Plus className="h-4 w-4" />
-                    Registrar venta manual
+                    Crear entrada (venta por WhatsApp)
                   </Button>
                 ) : null
               }

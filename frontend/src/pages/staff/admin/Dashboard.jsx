@@ -119,10 +119,10 @@ function Alerts({ alerts, tickets }) {
 
 function CapacityCard({ t }) {
   const left = Math.max(0, t.capacity - t.sold);
-  const full = t.capacity > 0 && t.sold >= t.capacity;
+  const over = Math.max(0, t.sold - t.capacity);
   return (
     <Card className="flex flex-col gap-5 sm:p-6">
-      <SectionTitle icon={Ticket} action={<span className="text-xs text-fog">Meta: <strong className="text-bone">{formatNumber(t.capacity)}</strong></span>}>
+      <SectionTitle icon={Ticket} action={<span className="text-xs text-fog">Meta: <strong className="text-bone">{formatNumber(t.capacity)}</strong> · no limita ventas</span>}>
         Entradas vendidas
       </SectionTitle>
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
@@ -131,20 +131,20 @@ function CapacityCard({ t }) {
           <span className="text-3xl text-smoke sm:text-4xl"> / {formatNumber(t.capacity)}</span>
         </p>
         <div className="pb-1 text-right text-sm text-fog">
-          {full ? (
-            <Badge tone="amber">Aforo completo</Badge>
+          {over > 0 ? (
+            <Badge tone="green">Meta superada +{formatNumber(over)}</Badge>
           ) : (
             <>
-              <strong className="text-lg text-bone tabular-nums">{formatNumber(left)}</strong> {left === 1 ? 'cupo libre' : 'cupos libres'}
+              <strong className="text-lg text-bone tabular-nums">{formatNumber(left)}</strong> {left === 1 ? 'para la meta' : 'para llegar a la meta'}
             </>
           )}
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <ProgressBar value={t.sold} max={t.capacity} size="lg" tone="red" markers glow label="Entradas vendidas sobre el aforo" />
+        <ProgressBar value={t.sold} max={t.capacity} size="lg" tone={over > 0 ? 'green' : 'red'} markers glow label="Entradas vendidas frente a la meta" />
         <p className="text-xs text-smoke">
           Generales y cortesías (válidas o ya usadas).
-          {t.pendingReview > 0 && ` Las ${t.pendingReview} en revisión también apartan cupo.`} Las habitaciones van aparte.
+          {t.pendingReview > 0 && ` Hay ${t.pendingReview} en revisión.`} Las habitaciones van aparte. La meta no limita ventas ni ingresos.
         </p>
       </div>
       <div className="grid gap-5 sm:grid-cols-2">

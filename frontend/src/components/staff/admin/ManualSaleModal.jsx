@@ -1,16 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { BedDouble, CircleCheck, Plus, ShowerHead, Ticket, Trash2, UserRoundPlus } from 'lucide-react';
+import { BedDouble, CircleCheck, Download, Plus, ShowerHead, Ticket, Trash2, UserRoundPlus } from 'lucide-react';
 import { Badge, Button, Input, Modal, PageSpinner, Segmented, Textarea, useToast } from '../../ui';
-import { staffApi } from '../../../lib/api';
+import { api, staffApi } from '../../../lib/api';
 import { useFetch } from '../../../lib/useFetch';
 import { formatCOP } from '../../../lib/format';
 import { GENDER_LABEL, MANUAL_METHOD_LABEL, PHASE_LABEL, ROOM_STATUS_LABEL, TICKET_STATUS_LABEL, toOptions } from '../../../lib/labels';
-import CopyButton from './CopyButton';
 import ErrorState from './ErrorState';
 import { MoneyInput } from './NumberInput';
-import { WhatsAppButton } from './Contact';
-import { currentTicketPrice, orderUrl, orderWhatsappText, plural } from './utils';
+import TicketQrCard, { downloadTicketArt } from './TicketQrCard';
+import { currentTicketPrice, plural } from './utils';
 
 const KIND_OPTIONS = [
   { value: 'ticket', label: 'Entrada', icon: Ticket },
@@ -90,41 +89,72 @@ function RoomChoice({ rooms, value, onChange, error }) {
   );
 }
 
-function SuccessView({ order }) {
-  const n = order.tickets?.length || 0;
+function SuccessView({ order, startsAt }) {
+  const tickets = order.tickets || [];
+  const n = tickets.length;
+  const [index, setIndex] = useState(0);
+  const [downloading, setDownloading] = useState(false);
+  const current = tickets[Math.min(index, Math.max(0, n - 1))];
+  const buyer = { name: order.buyer?.name, phone: order.buyer?.phone };
+
+  const downloadAll = async () => {
+    setDownloading(true);
+    try {
+      for (const t of tickets) {
+        await downloadTicketArt(t, startsAt);
+        await new Promise((r) => setTimeout(r, 400)); // el navegador acepta varias descargas seguidas
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 py-2 text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-toxic/10 text-toxic ring-1 ring-toxic/30">
         <CircleCheck className="h-7 w-7" strokeWidth={1.75} />
       </span>
       <div>
-        <p className="text-lg font-semibold text-bone">Venta registrada</p>
+        <p className="text-lg font-semibold text-bone">Entrada creada</p>
         <p className="mt-1 text-sm text-fog">
           {order.buyer?.name} · {order.kind === 'room' ? order.room?.name : `Entrada ${GENDER_LABEL[order.gender]?.toLowerCase() || ''}`} ·{' '}
           {formatCOP(order.amount)}
         </p>
       </div>
       <p className="max-w-sm text-sm text-fog">
-        {n ? `Se ${n === 1 ? 'generó' : 'generaron'} ${plural(n, 'entrada')} con QR.` : 'La compra quedó pagada.'} Envíale el enlace para que tenga sus QR a la mano.
+        {n ? `Se ${n === 1 ? 'generó' : 'generaron'} ${plural(n, 'entrada')} con QR.` : 'La compra quedó pagada.'} Descárgala y envíasela al comprador.
       </p>
-      {n > 0 && (
-        <ul className="w-full max-w-sm divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-white/[0.08] text-left">
-          {order.tickets.slice(0, 8).map((t) => (
-            <li key={t.token || t.code} className="flex items-center justify-between gap-3 px-3.5 py-2">
-              <span className="min-w-0 truncate text-sm text-bone">{t.holderName}</span>
-              <span className="flex items-center gap-2">
-                <span className="font-mono text-xs text-fog">{t.code}</span>
-                <Badge tone="green">{TICKET_STATUS_LABEL[t.status] || t.status}</Badge>
-              </span>
-            </li>
-          ))}
-        </ul>
+      {n > 1 && (
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex flex-wrap justify-center gap-1.5" role="tablist" aria-label="Entradas de la compra">
+            {tickets.map((t, i) => (
+              <button
+                key={t.token || t.code}
+                type="button"
+                role="tab"
+                aria-selected={i === index}
+                onClick={() => setIndex(i)}
+                className={clsx(
+                  'max-w-[11rem] truncate rounded-lg border px-2.5 py-1.5 text-xs font-medium transition',
+                  i === index ? 'border-pumpkin bg-pumpkin/15 text-bone' : 'border-white/10 text-fog hover:border-white/25',
+                )}
+              >
+                {i + 1}. {t.holderName}
+              </button>
+            ))}
+          </div>
+          <Button variant="secondary" onClick={downloadAll} loading={downloading} className="self-center">
+            <Download className="h-4 w-4" />
+            Descargar todas ({n})
+          </Button>
+        </div>
       )}
+      {current && <TicketQrCard key={current.token || current.code} ticket={current} buyer={buyer} className="w-full max-w-sm" />}
     </div>
   );
 }
 
-/** "Registrar venta manual": efectivo, DM, cortesía… Crea la orden ya pagada con sus tickets. */
+/** "Crear entrada (venta por WhatsApp)": efectivo, DM, cortesía… Crea la orden ya pagada con sus tickets y muestra su QR. */
 export default function ManualSaleModal({ onClose, onCreated }) {
   const toast = useToast();
   const config = useFetch(async (signal) => {
@@ -146,6 +176,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [created, setCreated] = useState(null);
+  const [guestQuote, setGuestQuote] = useState(null);
 
   const settings = config.data?.settings;
   const rooms = useMemo(() => config.data?.rooms || [], [config.data]);
@@ -153,17 +184,48 @@ export default function ManualSaleModal({ onClose, onCreated }) {
   const room = rooms.find((r) => r.number === roomNumber) || null;
   const courtesy = form.manualMethod === 'cortesia';
 
+  // Si el comprador está en la lista de invitados, sugiere el precio con descuento (misma regla de la web).
+  const isTicket = form.kind === 'ticket';
+  const formGender = form.gender;
+  const { instagram: fIg, cedula: fCed, phone: fPhone } = form.buyer;
+  useEffect(() => {
+    const ig = fIg.trim().replace(/^@/, '');
+    const ced = fCed.trim();
+    const ph = normalizePhone(fPhone);
+    if (!isTicket || (!ig && ced.length < 5 && ph.length < 10)) {
+      setGuestQuote(null);
+      return undefined;
+    }
+    const ctrl = new AbortController();
+    const id = setTimeout(() => {
+      const body = { kind: 'ticket', gender: formGender };
+      if (ig) body.instagram = ig;
+      if (ced.length >= 5) body.cedula = ced;
+      if (ph.length >= 10) body.phone = ph;
+      api('/api/public/quote', { method: 'POST', body, signal: ctrl.signal })
+        .then((r) => setGuestQuote(r.breakdown?.isGuest ? r.breakdown : null))
+        .catch(() => setGuestQuote(null));
+    }, 600);
+    return () => {
+      clearTimeout(id);
+      ctrl.abort();
+    };
+  }, [isTicket, formGender, fIg, fCed, fPhone]);
+
   const suggestion = useMemo(() => {
     if (form.kind === 'room') {
       return room ? { amount: room.currentPrice ?? room.price, text: `Precio de la ${room.name} (${room.currentPrice != null && room.currentPrice !== room.price ? 'preventa' : 'normal'}): ${formatCOP(room.currentPrice ?? room.price)}` } : null;
     }
     if (!settings) return null;
     const { phase, price } = currentTicketPrice(settings, form.gender);
+    if (guestQuote) {
+      return { amount: guestQuote.total, text: `Invitado detectado (${PHASE_LABEL[guestQuote.phase]?.toLowerCase()}): ${formatCOP(guestQuote.total)} en vez de ${formatCOP(guestQuote.base)}` };
+    }
     return {
       amount: price,
       text: `Precio actual (${PHASE_LABEL[phase]?.toLowerCase()} · ${GENDER_LABEL[form.gender]?.toLowerCase()}): ${formatCOP(price)}`,
     };
-  }, [form.kind, form.gender, room, settings]);
+  }, [form.kind, form.gender, room, settings, guestQuote]);
 
   const amount = courtesy ? 0 : form.amountEdited ? form.amount : (suggestion?.amount ?? null);
   const maxCompanions = form.kind === 'room' && room ? Math.max(0, room.capacity - 1) : 0;
@@ -217,7 +279,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
     try {
       const res = await staffApi('/api/admin/orders/manual', { method: 'POST', body });
       setCreated(res.order);
-      toast.success('Venta registrada.');
+      toast.success('Entrada creada.');
       onCreated?.(res.order);
     } catch (err) {
       if (err.code === 'VALIDATION_ERROR') setErrors(err.details?.fields || {});
@@ -233,12 +295,13 @@ export default function ManualSaleModal({ onClose, onCreated }) {
   };
 
   const footer = created ? (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
-      <WhatsAppButton phone={created.buyer?.phone} text={orderWhatsappText(created)} className="col-span-2 sm:order-3" />
-      <CopyButton text={orderUrl(created.token)} label="Copiar enlace" copiedLabel="Copiado" className="sm:order-2" />
-      <Button variant="secondary" onClick={reset} className="sm:order-1">
+    <div className="flex justify-end gap-2">
+      <Button variant="secondary" onClick={onClose}>
+        Cerrar
+      </Button>
+      <Button onClick={reset}>
         <Plus className="h-4 w-4" />
-        Registrar otra
+        Crear otra
       </Button>
     </div>
   ) : config.data ? (
@@ -247,7 +310,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
         Cancelar
       </Button>
       <Button type="submit" form="manual-sale-form" loading={saving}>
-        Registrar venta
+        Crear entrada
       </Button>
     </div>
   ) : null;
@@ -257,12 +320,12 @@ export default function ManualSaleModal({ onClose, onCreated }) {
       open
       onClose={onClose}
       size="lg"
-      title={created ? 'Listo' : 'Registrar venta manual'}
-      description={created ? undefined : 'Para quien pagó en efectivo, por DM o como cortesía. La compra queda pagada con sus QR.'}
+      title={created ? 'Entrada creada' : 'Crear entrada (venta por WhatsApp)'}
+      description={created ? undefined : 'Para quien te compra por WhatsApp, en efectivo o como cortesía. La compra queda pagada y al terminar descargas el QR.'}
       footer={footer}
     >
       {created ? (
-        <SuccessView order={created} />
+        <SuccessView order={created} startsAt={settings?.eventStartsAt} />
       ) : config.loading && !config.data ? (
         <PageSpinner className="min-h-[30vh]" label="Cargando precios…" />
       ) : config.error && !config.data ? (
@@ -324,7 +387,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
             hint={
               courtesy
                 ? form.kind === 'ticket'
-                  ? 'Cortesía: $0 y la entrada queda como cortesía (cuenta en el aforo).'
+                  ? 'Cortesía: $0 y la entrada queda como cortesía (cuenta para la meta).'
                   : 'Cortesía: $0.'
                 : suggestion?.text
             }
@@ -356,6 +419,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
               <Input
                 label="Cédula"
                 required
+                hint="Se usa para validar en la puerta y evitar entradas duplicadas"
                 inputMode="text"
                 autoComplete="off"
                 value={form.buyer.cedula}

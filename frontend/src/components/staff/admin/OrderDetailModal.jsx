@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import {
   Ban,
   Check,
+  QrCode,
   CircleCheck,
   CircleX,
   Clock,
@@ -38,6 +39,7 @@ import DeleteOrdersDialog from './DeleteOrdersDialog';
 import CopyButton from './CopyButton';
 import ErrorState from './ErrorState';
 import ReceiptImage from './ReceiptImage';
+import TicketQrCard from './TicketQrCard';
 import { DetailGrid, DetailItem, DetailSection } from './Detail';
 import { InstagramLink, PhoneLink, WhatsAppButton } from './Contact';
 import { orderUrl, orderWhatsappText, plural, ticketUrl } from './utils';
@@ -246,6 +248,7 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
   const canApprove = ['pending_payment', 'in_review', 'conflict'].includes(status);
   const canReject = ['pending_payment', 'in_review', 'conflict'].includes(status);
   const isPaid = status === 'paid';
+  const [qrIndex, setQrIndex] = useState(null); // entrada cuyo QR se está viendo
   const ticketsToCreate = order?.kind === 'room' ? order?.room?.capacity || 1 : 1;
 
   const deleteButton = order ? (
@@ -401,7 +404,7 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
               {order.tickets?.length > 0 && (
                 <DetailSection title={`Entradas (${order.tickets.length})`} icon={Ticket}>
                   <ul className="divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-white/[0.08]">
-                    {order.tickets.map((t) => (
+                    {order.tickets.map((t, i) => (
                       <li key={t.token || t.code} className="flex items-center gap-3 py-1.5 pl-3.5 pr-1.5">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-bone">{t.holderName}</p>
@@ -411,10 +414,29 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
                           </p>
                         </div>
                         <Badge tone={TICKET_STATUS_TONE[t.status]}>{TICKET_STATUS_LABEL[t.status] || t.status}</Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-11 w-11"
+                          onClick={() => setQrIndex((cur) => (cur === i ? null : i))}
+                          aria-label={qrIndex === i ? 'Ocultar QR' : 'Ver y descargar QR'}
+                          title={qrIndex === i ? 'Ocultar QR' : 'Ver y descargar QR'}
+                          aria-pressed={qrIndex === i}
+                        >
+                          <QrCode className="h-4 w-4" />
+                        </Button>
                         <CopyButton iconOnly variant="ghost" text={ticketUrl(t.token)} label="Copiar enlace de esta entrada" />
                       </li>
                     ))}
                   </ul>
+                  {qrIndex !== null && order.tickets[qrIndex] && (
+                    <TicketQrCard
+                      key={order.tickets[qrIndex].token}
+                      ticket={order.tickets[qrIndex]}
+                      buyer={{ name: order.buyer?.name, phone: order.buyer?.phone }}
+                      className="mx-auto mt-3 w-full max-w-sm"
+                    />
+                  )}
                 </DetailSection>
               )}
 

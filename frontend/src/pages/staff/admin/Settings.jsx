@@ -190,8 +190,8 @@ export default function Settings() {
 
         <Section id="ventas" icon={Ticket} title="Ventas">
           <Switch label="Ventas en línea abiertas" description="Si las cierras, nadie puede comprar en la web (manual y puerta siguen)." checked={form.salesOpen} onChange={(v) => set('salesOpen', v)} />
-          <IntegerInput label="Aforo (entradas generales + cortesías)" value={form.capacity} onChange={(n) => set('capacity', n)} error={err('capacity')} hint="Las habitaciones van aparte." />
-          <Switch label="Mostrar contador de cupos en la web" checked={form.publicCounter} onChange={(v) => set('publicCounter', v)} />
+          <IntegerInput label="Meta de asistentes (no limita ventas ni ingresos)" value={form.capacity} onChange={(n) => set('capacity', n)} error={err('capacity')} hint="Solo es una meta: si se supera, se sigue vendiendo. Las habitaciones van aparte." />
+          <Switch label="Mostrar contador de la meta en la web" checked={form.publicCounter} onChange={(v) => set('publicCounter', v)} />
         </Section>
 
         <Section id="precios" icon={Tags} title="Precios">

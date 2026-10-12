@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import clsx from 'clsx';
-import { Ban, CircleCheck, DoorOpen, Receipt, RotateCcw, Save, Trash2, Undo2, UserRound } from 'lucide-react';
+import { Ban, CircleCheck, DoorOpen, QrCode, Receipt, RotateCcw, Save, Trash2, Undo2, UserRound } from 'lucide-react';
 import { Badge, Button, Input, Modal, useToast } from '../../ui';
 import { fieldError, staffApi } from '../../../lib/api';
 import { formatDateTime } from '../../../lib/format';
@@ -8,6 +8,7 @@ import { GENDER_LABEL, PHASE_LABEL, TICKET_KIND_LABEL, TICKET_STATUS_LABEL, TICK
 import ConfirmDialog from './ConfirmDialog';
 import DeleteOrdersDialog from './DeleteOrdersDialog';
 import CopyButton from './CopyButton';
+import TicketQrCard from './TicketQrCard';
 import { DetailGrid, DetailItem, DetailSection } from './Detail';
 import { InstagramLink, PhoneLink, WhatsAppButton } from './Contact';
 import { ticketUrl, ticketWhatsappText } from './utils';
@@ -160,6 +161,10 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
             )}
           </div>
 
+          <DetailSection title="QR de la entrada" icon={QrCode}>
+            <TicketQrCard ticket={ticket} buyer={buyer} className="mx-auto w-full max-w-sm" />
+          </DetailSection>
+
           <DetailSection title="Titular" icon={UserRound}>
             <form onSubmit={saveHolder} noValidate className="flex flex-col gap-3">
               {isCompanion && (
@@ -301,7 +306,7 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
         description={
           <>
             El QR de <strong className="text-bone">{ticket.holderName}</strong> ({ticket.code}) deja de funcionar en la puerta
-            {ticket.kind !== 'room' ? ' y libera su cupo en el aforo' : ''}. Puedes restaurarla después.
+            {ticket.kind !== 'room' ? ' y deja de contar para la meta' : ''}. Puedes restaurarla después.
           </>
         }
         reason={{ label: 'Motivo', placeholder: 'Ej.: Pidió devolución', minLength: 3, maxLength: 200, suggestions: VOID_SUGGESTIONS }}
@@ -334,7 +339,7 @@ export default function TicketModal({ ticket: initial, onClose, onChanged, onOpe
           ) : (
             <>
               La entrada de <strong className="text-bone">{ticket.holderName}</strong> vuelve a quedar válida y su QR funciona otra vez en la
-              puerta{ticket.kind !== 'room' ? ' (vuelve a contar en el aforo)' : ''}.
+              puerta{ticket.kind !== 'room' ? ' (vuelve a contar para la meta)' : ''}.
             </>
           )
         }

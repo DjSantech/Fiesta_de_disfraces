@@ -137,6 +137,7 @@ export const AUDIT_ACTION_LABEL = {
   'guest.delete': 'Invitado eliminado',
   'expense.delete': 'Gasto eliminado',
   'user.delete': 'Usuario eliminado',
+  'data.reset': 'Datos reiniciados',
 };
 
 /** Tono de Badge por acción de auditoría */
@@ -147,4 +148,5 @@ export const AUDIT_ACTION_TONE = {
   'guest.delete': 'red',
   'expense.delete': 'red',
   'user.delete': 'red',
+  'data.reset': 'red',
 };
