@@ -175,7 +175,7 @@ export const MAP_ZONES = {
   },
   casa: {
     name: 'La casa',
-    description: 'Aquí están las habitaciones en alquiler, la sala, la cocina y los baños.',
+    description: 'Aquí están las habitaciones en alquiler, la sala, los puestos de venta, la barra y los baños.',
   },
   room1: {
     name: 'Habitación 1',
@@ -205,9 +205,25 @@ export const MAP_ZONES = {
     name: 'Sala',
     description: 'Zona común de la casa para descansar un rato.',
   },
-  cocina: {
-    name: 'Cocina',
-    description: 'La cocina de la casa.',
+  pasillo: {
+    name: 'Pasillo',
+    description: 'Pasillo de acceso a las habitaciones.',
+  },
+  ventaPerfumes: {
+    name: 'Venta de perfumes',
+    description: 'Puesto de perfumes dentro de la casa.',
+  },
+  ventaVapes: {
+    name: 'Venta de vaporizadores',
+    description: 'Puesto de vaporizadores. Venta solo a mayores de edad.',
+  },
+  ventaCocteles: {
+    name: 'Venta de cócteles',
+    description: 'Puesto de venta de cócteles.',
+  },
+  barra: {
+    name: 'Barra',
+    description: 'La barra de la casa: cócteles, licores y hidratación (agua, Gatorade, Electrolit).',
   },
 };
 

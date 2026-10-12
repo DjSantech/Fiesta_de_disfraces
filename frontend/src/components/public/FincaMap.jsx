@@ -7,7 +7,6 @@ import {
   Bath,
   BedDouble,
   Car,
-  CookingPot,
   DoorOpen,
   HardHat,
   House,
@@ -19,18 +18,23 @@ import {
   Waves,
   Disc3,
   Droplets,
+  Footprints,
+  Martini,
+  SprayCan,
+  Wind,
+  Wine,
 } from 'lucide-react';
 import { MAP_ZONES } from '../../config/event';
 import { formatCOP } from '../../lib/format';
 import { ROOM_STATUS, RoomHelpNote, RoomPriceLine, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from './rooms';
 
-// Plano nocturno de la finca, fiel al boceto (docs/mapa-boceto.png):
-// Entrada arriba al centro → Parqueadero debajo; Salón arriba a la izquierda; Jacuzzi bajo el Salón;
-// Piscina grande abajo a la izquierda; la Casa a la derecha con la fila [X][1][2][X][3], Baño bajo la
-// primera X, baño privado junto a la 3, y Sala + Cocina adentro.
+// Plano nocturno de la finca, fiel al boceto (docs/mapa-boceto.png y docs/mapa-casa-boceto-2.png):
+// Entrada arriba al centro → Parqueadero debajo; Salón arriba a la izquierda; Piscina pequeña bajo el Salón;
+// la Casa ocupa todo el ancho: fila [X][1][2][Baño privado][3], pasillo (con Baño bajo la X), y abajo la
+// Sala (con un mueble) + tres puestos de venta + la Barra. La Piscina grande queda debajo de la casa.
 
 const W = 400;
-const H = 480;
+const H = 610;
 
 const BONE = '#f2ede4';
 const RED = '#ff8a3d';
@@ -41,17 +45,23 @@ const ZONES = [
   { id: 'parqueadero', info: 'parqueadero', shape: { t: 'rect', x: 158, y: 68, w: 150, h: 72, rx: 6 } },
   { id: 'salon', info: 'salon', shape: { t: 'rect', x: 22, y: 64, w: 118, h: 74, rx: 4 } },
   { id: 'jacuzzi', info: 'jacuzzi', shape: { t: 'circle', cx: 80, cy: 178, r: 24 }, water: true },
-  { id: 'piscina', info: 'piscina', shape: { t: 'circle', cx: 86, cy: 318, r: 70 }, water: true },
-  { id: 'casa', info: 'casa', shape: { t: 'rect', x: 238, y: 176, w: 80, h: 18, rx: 4 }, hit: true },
-  { id: 'x1', info: 'noDisponible', shape: { t: 'rect', x: 172, y: 196, w: 34, h: 54 }, blocked: true },
-  { id: 'room1', info: 'room1', room: 1, shape: { t: 'rect', x: 206, y: 196, w: 42, h: 54 } },
-  { id: 'room2', info: 'room2', room: 2, shape: { t: 'rect', x: 248, y: 196, w: 42, h: 54 } },
-  { id: 'x2', info: 'noDisponible', shape: { t: 'rect', x: 290, y: 196, w: 34, h: 54 }, blocked: true },
-  { id: 'room3', info: 'room3', room: 3, shape: { t: 'rect', x: 324, y: 196, w: 60, h: 54 } },
-  { id: 'bano3', info: 'bano3', shape: { t: 'rect', x: 344, y: 250, w: 40, h: 32 } },
-  { id: 'bano', info: 'bano', shape: { t: 'rect', x: 172, y: 250, w: 40, h: 32 } },
-  { id: 'sala', info: 'sala', shape: { t: 'rect', x: 172, y: 282, w: 106, h: 110 } },
-  { id: 'cocina', info: 'cocina', shape: { t: 'rect', x: 278, y: 282, w: 106, h: 110 } },
+  { id: 'piscina', info: 'piscina', shape: { t: 'circle', cx: 86, cy: 516, r: 70 }, water: true },
+  { id: 'casa', info: 'casa', shape: { t: 'rect', x: 240, y: 190, w: 84, h: 18, rx: 4 }, hit: true },
+  // Fila de cuartos
+  { id: 'x1', info: 'noDisponible', shape: { t: 'rect', x: 16, y: 212, w: 64, h: 56 }, blocked: true },
+  { id: 'room1', info: 'room1', room: 1, shape: { t: 'rect', x: 80, y: 212, w: 72, h: 56 } },
+  { id: 'room2', info: 'room2', room: 2, shape: { t: 'rect', x: 152, y: 212, w: 72, h: 56 } },
+  { id: 'bano3', info: 'bano3', shape: { t: 'rect', x: 224, y: 212, w: 68, h: 56 } },
+  { id: 'room3', info: 'room3', room: 3, shape: { t: 'rect', x: 292, y: 212, w: 92, h: 56 } },
+  // Pasillo
+  { id: 'bano', info: 'bano', shape: { t: 'rect', x: 16, y: 268, w: 64, h: 32 } },
+  { id: 'pasillo', info: 'pasillo', shape: { t: 'rect', x: 80, y: 268, w: 248, h: 32 } },
+  // Zona inferior
+  { id: 'sala', info: 'sala', shape: { t: 'rect', x: 16, y: 300, w: 206, h: 120 } },
+  { id: 'ventaPerfumes', info: 'ventaPerfumes', shape: { t: 'rect', x: 222, y: 300, w: 106, h: 40 } },
+  { id: 'ventaVapes', info: 'ventaVapes', shape: { t: 'rect', x: 222, y: 340, w: 106, h: 40 } },
+  { id: 'ventaCocteles', info: 'ventaCocteles', shape: { t: 'rect', x: 222, y: 380, w: 106, h: 40 } },
+  { id: 'barra', info: 'barra', shape: { t: 'rect', x: 328, y: 300, w: 56, h: 120 } },
 ];
 
 const ZONE_ICONS = {
@@ -67,9 +77,16 @@ const ZONE_ICONS = {
   room3: BedDouble,
   bano3: Bath,
   bano: Bath,
+  pasillo: Footprints,
   sala: Sofa,
-  cocina: CookingPot,
+  ventaPerfumes: SprayCan,
+  ventaVapes: Wind,
+  ventaCocteles: Martini,
+  barra: Wine,
 };
+
+/** Rótulo corto de los puestos de venta (el nombre completo va en el panel). */
+const STALL_LABELS = { ventaPerfumes: 'PERFUMES', ventaVapes: 'VAPORIZADORES', ventaCocteles: 'CÓCTELES' };
 
 function Shape({ shape, ...props }) {
   if (shape.t === 'circle') return <circle cx={shape.cx} cy={shape.cy} r={shape.r} {...props} />;
@@ -143,7 +160,7 @@ export default function FincaMap({ config, known = true, className }) {
           {/* Lindero de la finca con la portada de entrada */}
           <g aria-hidden="true" fill="none">
             <path
-              d="M196 40 H26 Q8 40 8 58 V454 Q8 472 26 472 H374 Q392 472 392 454 V58 Q392 40 374 40 H240"
+              d="M196 40 H26 Q8 40 8 58 V572 Q8 590 26 590 H374 Q392 590 392 572 V58 Q392 40 374 40 H240"
               stroke="rgb(242 237 228 / 0.16)"
               strokeWidth="1.2"
               strokeDasharray="5 5"
@@ -152,8 +169,9 @@ export default function FincaMap({ config, known = true, className }) {
             <rect x="240" y="34" width="6" height="12" fill="rgb(242 237 228 / 0.5)" />
             {/* Camino principal: entrada → parqueadero → casa */}
             <path d="M218 22 V68" stroke={RED} strokeOpacity="0.85" strokeWidth="1.6" strokeDasharray="3 5" className="fd-dash-flow" />
-            <path d="M233 140 V166 H160 V340 H172" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
-            <path d="M160 166 H140 V138" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
+            <path d="M233 140 V190" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
+            <path d="M233 166 H140 V138" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
+            <path d="M86 424 V446" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
             <circle cx="218" cy="14" r="2.5" fill={RED} />
             <circle cx="218" cy="14" r="2.5" fill={RED} className="fd-pulse-dot" />
           </g>
@@ -161,15 +179,15 @@ export default function FincaMap({ config, known = true, className }) {
           {/* Árboles y detalles de paisaje */}
           <g aria-hidden="true" fill="none" stroke="rgb(34 229 132 / 0.22)" strokeWidth="1">
             {[
-              [36, 420, 11],
-              [64, 446, 8],
-              [104, 428, 13],
-              [140, 452, 7],
               [356, 128, 10],
               [374, 156, 7],
-              [30, 222, 7],
-              [338, 452, 8],
-              [300, 446, 6],
+              [188, 452, 12],
+              [240, 438, 8],
+              [304, 446, 10],
+              [366, 456, 8],
+              [206, 582, 7],
+              [352, 580, 8],
+              [26, 440, 7],
             ].map(([x, y, r]) => (
               <g key={`${x}-${y}`}>
                 <circle cx={x} cy={y} r={r} />
@@ -190,29 +208,22 @@ export default function FincaMap({ config, known = true, className }) {
 
           {/* Estructura de la casa */}
           <g aria-hidden="true">
-            <rect x="172" y="196" width="212" height="196" fill={`url(#floor-${uid})`} stroke="rgb(242 237 228 / 0.55)" strokeWidth="1.6" />
-            {/* Pasillo */}
-            <path d="M212 266 H344" stroke="rgb(242 237 228 / 0.1)" strokeDasharray="2 4" />
+            <rect x="16" y="212" width="368" height="208" fill={`url(#floor-${uid})`} stroke="rgb(242 237 228 / 0.55)" strokeWidth="1.6" />
+            {/* Pasillo: línea central tenue */}
+            <path d="M104 284 H304" stroke="rgb(242 237 228 / 0.1)" strokeDasharray="2 4" />
+            {/* Espacio sin rótulo al final del pasillo */}
+            <rect x="328" y="268" width="56" height="32" fill="none" stroke="rgb(242 237 228 / 0.3)" strokeWidth="1" />
             {/* Puerta de la casa (lado de la piscina) */}
-            <path d="M172 330 V352" stroke="#08080d" strokeWidth="3" />
-            <path d="M172 330 A 22 22 0 0 0 150 352" fill="none" stroke="rgb(242 237 228 / 0.25)" strokeWidth="0.8" />
+            <path d="M70 420 H102" stroke="#08080d" strokeWidth="3" />
+            <path d="M70 420 A 22 22 0 0 1 92 442" fill="none" stroke="rgb(242 237 228 / 0.25)" strokeWidth="0.8" />
             {/* Puertas de las habitaciones al pasillo */}
-            {[
-              [210, 250],
-              [252, 250],
-              [328, 250],
-            ].map(([x, y]) => (
-              <path key={x} d={`M${x} ${y} A 11 11 0 0 0 ${x + 11} ${y + 11}`} fill="none" stroke="rgb(242 237 228 / 0.25)" strokeWidth="0.8" />
+            {[88, 160, 300].map((x) => (
+              <path key={x} d={`M${x} 268 A 11 11 0 0 0 ${x + 11} 279`} fill="none" stroke="rgb(242 237 228 / 0.25)" strokeWidth="0.8" />
             ))}
-            {/* Muebles: sala */}
-            <rect x="186" y="352" width="54" height="16" rx="5" fill="none" stroke="rgb(242 237 228 / 0.16)" />
-            <rect x="200" y="330" width="26" height="12" rx="2" fill="none" stroke="rgb(242 237 228 / 0.12)" />
-            {/* Muebles: cocina */}
-            <path d="M292 372 H372 V300" fill="none" stroke="rgb(242 237 228 / 0.16)" strokeWidth="6" strokeOpacity="0.5" />
-            <circle cx="352" cy="372" r="3" fill="none" stroke="rgb(242 237 228 / 0.25)" />
-            <circle cx="338" cy="372" r="3" fill="none" stroke="rgb(242 237 228 / 0.25)" />
-            {/* División sala / cocina */}
-            <path d="M278 296 V378" stroke="rgb(242 237 228 / 0.18)" strokeDasharray="4 4" />
+            {/* Mueble de la sala (sin rótulo) */}
+            <rect x="38" y="376" width="78" height="22" rx="3" fill="none" stroke="rgb(242 237 228 / 0.16)" strokeWidth="1" />
+            {/* Flecha: el baño privado es de la habitación 3 */}
+            <path d="M240 259 H280 M274 254 L281 259 L274 264" fill="none" stroke={RED} strokeOpacity="0.8" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
           </g>
 
           {/* Zonas interactivas */}
@@ -326,15 +337,15 @@ export default function FincaMap({ config, known = true, className }) {
                 )}
                 {z.id === 'piscina' && (
                   <g pointerEvents="none">
-                    <circle cx={86} cy={318} r={52} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" />
-                    <circle cx={86} cy={318} r={52} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" style={{ animationDelay: '-2.7s' }} />
-                    <text x={86} y={323} textAnchor="middle" className="fd-zone-label" fontSize="16" fontFamily="Anton, Impact, sans-serif" letterSpacing="2" fill={isSel ? '#fff' : BONE}>
+                    <circle cx={86} cy={516} r={52} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" />
+                    <circle cx={86} cy={516} r={52} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" style={{ animationDelay: '-2.7s' }} />
+                    <text x={86} y={521} textAnchor="middle" className="fd-zone-label" fontSize="16" fontFamily="Anton, Impact, sans-serif" letterSpacing="2" fill={isSel ? '#fff' : BONE}>
                       PISCINA
                     </text>
                   </g>
                 )}
                 {z.id === 'casa' && (
-                  <text x={278} y={189} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="2.4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.7)'}>
+                  <text x={282} y={203} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="2.4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.7)'}>
                     LA CASA
                   </text>
                 )}
@@ -354,28 +365,43 @@ export default function FincaMap({ config, known = true, className }) {
                     <circle cx={z.shape.x + z.shape.w - 7} cy={z.shape.y + 7} r={2.6} fill={statusColor(room, known)} />
                   </g>
                 )}
-                {(z.id === 'bano' || z.id === 'bano3') && (
-                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="9.5" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.6" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.8)'} pointerEvents="none">
+                {z.id === 'bano' && (
+                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.6" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.8)'} pointerEvents="none">
                     BAÑO
                   </text>
                 )}
-                {(z.id === 'sala' || z.id === 'cocina') && (
-                  <text x={c.x} y={z.shape.y + 40} textAnchor="middle" className="fd-zone-label" fontSize="13" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1.8" fill={isSel ? '#fff' : BONE} pointerEvents="none">
-                    {z.id === 'sala' ? 'SALA' : 'COCINA'}
+                {z.id === 'bano3' && (
+                  <g pointerEvents="none" className="fd-zone-label" fontSize="9.5" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.5" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.8)'} textAnchor="middle">
+                    <text x={c.x} y={c.y - 8}>BAÑO</text>
+                    <text x={c.x} y={c.y + 4}>PRIVADO</text>
+                  </g>
+                )}
+                {z.id === 'pasillo' && (
+                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.55)'} pointerEvents="none">
+                    PASILLO
+                  </text>
+                )}
+                {z.id === 'sala' && (
+                  <text x={c.x} y={z.shape.y + 44} textAnchor="middle" className="fd-zone-label" fontSize="22" fontFamily="Anton, Impact, sans-serif" letterSpacing="3" fill={isSel ? '#fff' : BONE} pointerEvents="none">
+                    SALA
+                  </text>
+                )}
+                {STALL_LABELS[z.id] && (
+                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.85)'} pointerEvents="none">
+                    {STALL_LABELS[z.id]}
+                  </text>
+                )}
+                {z.id === 'barra' && (
+                  <text x={c.x} y={c.y + 5} textAnchor="middle" className="fd-zone-label" fontSize="14" fontFamily="Anton, Impact, sans-serif" letterSpacing="1.2" fill={isSel ? '#fff' : BONE} pointerEvents="none">
+                    BARRA
                   </text>
                 )}
               </g>
             );
           })}
 
-          {/* Puerta entre la habitación 3 y su baño privado */}
-          <g aria-hidden="true" pointerEvents="none">
-            <path d="M352 250 H368" stroke="#08080d" strokeWidth="2.4" />
-            <path d="M352 250 A 16 16 0 0 0 368 266" fill="none" stroke="rgb(242 237 228 / 0.3)" strokeWidth="0.8" />
-          </g>
-
           {/* Cajetín del plano */}
-          <g aria-hidden="true" fontFamily="Inter, sans-serif">
+          <g aria-hidden="true" fontFamily="Inter, sans-serif" transform="translate(0 100)">
             <rect x="172" y="408" width="212" height="52" fill="rgb(7 7 10 / 0.6)" stroke="rgb(242 237 228 / 0.25)" />
             <path d="M172 428 H384 M300 428 V460" stroke="rgb(242 237 228 / 0.18)" />
             <text x="180" y="422" fontSize="10" fontFamily="Anton, Impact, sans-serif" letterSpacing="1.4" fill={BONE}>
