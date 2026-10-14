@@ -147,7 +147,7 @@ test('habitación: apartado, ROOM_UNAVAILABLE, N tickets, expiración y conflict
 
   r = await api.post(`/api/public/orders/${tokenA}/mock-pay`).send({ outcome: 'approved' });
   assert.equal(r.body.order.status, 'paid');
-  assert.equal(r.body.order.tickets.length, 7);
+  assert.equal(r.body.order.tickets.length, 8); // capacidad de la hab. 3 = 8
   assert.equal(r.body.order.tickets[1].holderName, 'Ana Ruiz');
   assert.equal(r.body.order.tickets[2].holderName, 'Acompañante 2 · Hab. 3');
   assert.equal((await Room.findOne({ number: 3 })).booked, true);

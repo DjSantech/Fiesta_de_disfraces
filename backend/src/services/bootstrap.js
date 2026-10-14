@@ -1,10 +1,26 @@
 // Datos base al arrancar (ajustes, habitaciones, admin) y job periódico.
 import bcrypt from 'bcryptjs';
 import { allModels, Settings, Room, User } from '../models/index.js';
-import { DEFAULT_SETTINGS, DEFAULT_ROOMS, SETTINGS_ID, JOB_INTERVAL_MS } from '../constants.js';
+import { DEFAULT_SETTINGS, DEFAULT_ROOMS, ROOM_LAYOUT_VERSION, SETTINGS_ID, JOB_INTERVAL_MS } from '../constants.js';
 import { runOrderMaintenance } from './orders.js';
 
 export const BCRYPT_ROUNDS = 12;
+
+/**
+ * Migración idempotente a la distribución de 4 habitaciones (layoutVersion 2) para bases ya existentes.
+ * Solo toca habitaciones SIN layoutVersion: hab. 2 y 3 reciben las camas/capacidad nuevas (sin tocar nombre, precios,
+ * bloqueo ni reserva por órdenes); la hab. 1 queda reservada (vendida fuera de la web). La hab. 4 la crea el bucle de
+ * DEFAULT_ROOMS. Las bases nuevas se crean con layoutVersion 2 y no se tocan.
+ */
+async function migrateRoomLayout() {
+  const pending = { layoutVersion: { $exists: false } };
+  await Room.updateOne({ number: 1, ...pending }, { $set: { reserved: true } });
+  for (const n of [2, 3]) {
+    const { beds, minPeople, capacity, privateBathroom } = DEFAULT_ROOMS.find((x) => x.number === n);
+    await Room.updateOne({ number: n, ...pending }, { $set: { beds, minPeople, capacity, privateBathroom } });
+  }
+  await Room.updateMany(pending, { $set: { layoutVersion: ROOM_LAYOUT_VERSION } });
+}
 
 export async function ensureBaseData(config, logger) {
   await Promise.all(allModels.map((m) => m.init())); // índices únicos listos antes de atender
@@ -26,10 +42,11 @@ export async function ensureBaseData(config, logger) {
   // Migración: la meta de asistentes pasó de 100 a 120 (solo si sigue en el valor viejo; otros valores se respetan).
   await Settings.updateOne({ _id: SETTINGS_ID, capacity: 100 }, { $set: { capacity: 120 } });
   for (const r of DEFAULT_ROOMS) {
-    await Room.updateOne({ number: r.number }, { $setOnInsert: r }, { upsert: true });
+    await Room.updateOne({ number: r.number }, { $setOnInsert: { ...r, reserved: false, layoutVersion: ROOM_LAYOUT_VERSION } }, { upsert: true });
     // Migración: habitaciones legacy (sin presalePrice) pasan a los nuevos datos; no toca reserva/apartado.
     await Room.updateOne({ number: r.number, presalePrice: null }, { $set: r });
   }
+  await migrateRoomLayout();
   if ((await User.countDocuments()) > 0) return;
   if (!config.adminPassword) {
     if (config.isProd) throw new Error('No hay usuarios: define ADMIN_PASSWORD para crear el administrador inicial.');

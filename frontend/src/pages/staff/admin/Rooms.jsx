@@ -80,7 +80,12 @@ function RoomCard({ room, now, onEdit, onOpenOrder }) {
       </div>
 
       <div className="flex-1 border-t border-white/[0.07] pt-4">
-        {room.blocked && !o ? (
+        {room.reserved && !o ? (
+          <p className="flex items-start gap-2 text-sm text-violet-200">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+            Reservada: vendida fuera de la web. No se puede comprar en la web.
+          </p>
+        ) : room.blocked && !o ? (
           <p className="flex items-start gap-2 text-sm text-fog">
             <Lock className="mt-0.5 h-4 w-4 shrink-0" />
             Bloqueada: no aparece disponible para comprar en la web.
@@ -137,6 +142,7 @@ function RoomEditModal({ room, onClose, onSaved }) {
     price: room.price ?? null,
     privateBathroom: Boolean(room.privateBathroom),
     blocked: Boolean(room.blocked),
+    reserved: Boolean(room.reserved),
   });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -169,6 +175,7 @@ function RoomEditModal({ room, onClose, onSaved }) {
     if (form.beds.trim() !== (room.beds || '')) body.beds = form.beds.trim();
     if (form.privateBathroom !== Boolean(room.privateBathroom)) body.privateBathroom = form.privateBathroom;
     if (form.blocked !== Boolean(room.blocked)) body.blocked = form.blocked;
+    if (form.reserved !== Boolean(room.reserved)) body.reserved = form.reserved;
     if (!Object.keys(body).length) {
       onClose();
       return;
@@ -240,6 +247,13 @@ function RoomEditModal({ room, onClose, onSaved }) {
             description="No se podrá comprar en la web mientras esté bloqueada."
             checked={form.blocked}
             onChange={(v) => set('blocked', v)}
+          />
+          <div className="h-px bg-white/[0.06]" />
+          <Switch
+            label="Marcada como reservada (vendida fuera de la web)"
+            description="Aparece como Reservada y no se puede comprar en la web. Se queda así hasta que la desmarques: liberar compras o reiniciar ventas no la toca."
+            checked={form.reserved}
+            onChange={(v) => set('reserved', v)}
           />
         </div>
         {hasOrder && (

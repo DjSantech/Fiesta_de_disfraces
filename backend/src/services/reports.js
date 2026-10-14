@@ -56,7 +56,7 @@ export async function dashboard() {
     },
     rooms: {
       booked: statuses.filter((s) => s === 'booked').length, held: statuses.filter((s) => s === 'held').length, total: rooms.length,
-      people: rooms.filter((r) => r.booked).reduce((a, r) => a + r.capacity, 0), peopleCapacity: rooms.reduce((a, r) => a + r.capacity, 0),
+      people: rooms.filter((r) => r.booked || r.reserved).reduce((a, r) => a + r.capacity, 0), peopleCapacity: rooms.reduce((a, r) => a + r.capacity, 0),
     },
     door: { inside: door.entries - door.roomsInside, roomsInside: door.roomsInside, entries: door.entries, doorSales: door.doorSales },
     income: {

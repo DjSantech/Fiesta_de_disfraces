@@ -340,8 +340,8 @@ export async function approveOrder(orderId, admin, notes) {
   }
   if (order.kind === 'room') {
     const room = await Room.findOne({ number: order.room.number }).lean();
-    const mine = room && String(room.orderId) === String(order._id);
-    const free = room && !room.booked && !room.blocked && (!room.orderId || (room.holdExpiresAt && room.holdExpiresAt < new Date()));
+    const mine = room && !room.reserved && String(room.orderId) === String(order._id);
+    const free = room && !room.reserved && !room.booked && !room.blocked && (!room.orderId || (room.holdExpiresAt && room.holdExpiresAt < new Date()));
     if (!mine && !free) throw roomUnavailable('La habitación la tiene otra compra. Recházala o libérala antes de aprobar esta.');
   }
   const now = new Date();

@@ -40,6 +40,8 @@ export const Room = mongoose.model('Room', new Schema({
   beds: { type: String, default: '' },
   privateBathroom: { type: Boolean, default: false },
   blocked: { type: Boolean, default: false },
+  reserved: { type: Boolean, default: false }, // marcada como reservada por el admin (vendida fuera de la web); nunca se libera sola
+  layoutVersion: { type: Number, default: 2 }, // 2 = distribución de 4 habitaciones; ausente en documentos legacy (los migra bootstrap)
   booked: { type: Boolean, default: false },
   orderId: { type: ObjectId, default: null }, // orden que la aparta o la reservó
   holdExpiresAt: { type: Date, default: null }, // null + orderId = apartada sin vencimiento (comprobante en revisión)

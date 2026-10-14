@@ -115,6 +115,7 @@ export async function assertCanBuy(cedula, excludeOrderId) {
 // ---------- Habitaciones ----------
 export function roomStatus(room, now = new Date()) {
   if (room.booked) return 'booked';
+  if (room.reserved && !room.blocked) return 'booked'; // reservada por el admin (vendida fuera de la web)
   if (room.orderId && (!room.holdExpiresAt || room.holdExpiresAt > now)) return 'held';
   if (room.blocked) return 'blocked';
   return 'available';
@@ -132,7 +133,7 @@ export function claimRoom(number, orderId, { until = null, book = false, takeove
   const or = [{ orderId: null }, { holdExpiresAt: { $lt: now } }];
   if (takeover.length) or.push({ orderId: { $in: takeover } });
   return Room.findOneAndUpdate(
-    { number, blocked: false, booked: false, $or: or },
+    { number, blocked: false, booked: false, reserved: { $ne: true }, $or: or },
     { $set: { orderId, holdExpiresAt: book ? null : until, booked: book } },
     { returnDocument: 'after' },
   ).lean();
@@ -140,7 +141,7 @@ export function claimRoom(number, orderId, { until = null, book = false, takeove
 /** Reserva definitiva al pagar (idempotente si ya es de esta orden; respeta bloqueos para habitaciones libres). */
 export function bookRoom(number, orderId, now = new Date()) {
   return Room.findOneAndUpdate(
-    { number, $or: [{ orderId }, { orderId: null, booked: false, blocked: false }, { booked: false, blocked: false, holdExpiresAt: { $lt: now } }] },
+    { number, reserved: { $ne: true }, $or: [{ orderId }, { orderId: null, booked: false, blocked: false }, { booked: false, blocked: false, holdExpiresAt: { $lt: now } }] },
     { $set: { orderId, booked: true, holdExpiresAt: null } },
     { returnDocument: 'after' },
   ).lean();
@@ -148,7 +149,7 @@ export function bookRoom(number, orderId, now = new Date()) {
 /** Apartado sin vencimiento mientras el admin revisa el comprobante. */
 export function holdForReview(number, orderId, now = new Date()) {
   return Room.findOneAndUpdate(
-    { number, booked: false, $or: [{ orderId }, { orderId: null, blocked: false }, { blocked: false, holdExpiresAt: { $lt: now } }] },
+    { number, booked: false, reserved: { $ne: true }, $or: [{ orderId }, { orderId: null, blocked: false }, { blocked: false, holdExpiresAt: { $lt: now } }] },
     { $set: { orderId, holdExpiresAt: null } },
     { returnDocument: 'after' },
   ).lean();

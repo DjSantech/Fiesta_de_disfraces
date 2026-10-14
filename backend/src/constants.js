@@ -57,8 +57,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   publicCounter: false,
 });
 
+export const ROOM_LAYOUT_VERSION = 2; // 2 = 4 habitaciones (hab. 1 reservada fuera de la web)
 export const DEFAULT_ROOMS = Object.freeze([
   { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, privateBathroom: false },
-  { number: 2, name: 'Habitación 2', beds: '2 camas king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, privateBathroom: false },
-  { number: 3, name: 'Habitación 3', beds: '1 cama doble + 2 sencillas', minPeople: 5, capacity: 7, presalePrice: 500000, price: 600000, privateBathroom: true },
+  { number: 2, name: 'Habitación 2', beds: 'Camarote de cama sencilla y cama king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, privateBathroom: false },
+  { number: 3, name: 'Habitación 3', beds: 'Camarote de cama sencilla y cama king + 2 colchonetas adicionales', minPeople: 6, capacity: 8, presalePrice: 500000, price: 600000, privateBathroom: false },
+  { number: 4, name: 'Habitación 4', beds: 'Camarote de cama sencilla + 2 camas sencillas', minPeople: 6, capacity: 8, presalePrice: 500000, price: 600000, privateBathroom: true },
 ]);

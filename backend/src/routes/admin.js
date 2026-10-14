@@ -316,7 +316,7 @@ export function adminRouter() {
     const o = room.orderId && ['held', 'booked'].includes(status) ? await Order.findById(room.orderId).lean() : null;
     return {
       number: room.number, name: room.name, capacity: room.capacity, minPeople: room.minPeople ?? 1, price: room.price, presalePrice: room.presalePrice ?? room.price, beds: room.beds || '', privateBathroom: !!room.privateBathroom,
-      blocked: !!room.blocked, status,
+      blocked: !!room.blocked, reserved: !!room.reserved, status,
       order: o ? { id: String(o._id), token: o.token, status: o.status, buyerName: o.buyer.name, buyerPhone: o.buyer.phone, holdExpiresAt: o.holdExpiresAt ? o.holdExpiresAt.toISOString() : null } : null,
     };
   };
@@ -326,7 +326,7 @@ export function adminRouter() {
   });
   r.put('/rooms/:number', validate({
     params: z.object({ number: z.coerce.number().int().min(1).max(99) }),
-    body: z.object({ name: text(2, 60).optional(), capacity: z.number().int().min(1).max(20).optional(), minPeople: z.number().int().min(1).max(20).optional(), price: money.optional(), presalePrice: money.optional(), beds: text(0, 80).optional(), privateBathroom: z.boolean().optional(), blocked: z.boolean().optional() }),
+    body: z.object({ name: text(2, 60).optional(), capacity: z.number().int().min(1).max(20).optional(), minPeople: z.number().int().min(1).max(20).optional(), price: money.optional(), presalePrice: money.optional(), beds: text(0, 80).optional(), privateBathroom: z.boolean().optional(), blocked: z.boolean().optional(), reserved: z.boolean().optional() }),
   }), async (req, res) => {
     const set = Object.fromEntries(Object.entries(req.valid.body).filter(([, v]) => v !== undefined));
     if (set.minPeople !== undefined || set.capacity !== undefined) {
