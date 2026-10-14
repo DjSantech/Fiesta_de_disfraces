@@ -11,6 +11,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
   const available = room.status === 'available';
   const canBook = salesOpen && (available || !known);
   const big = !!room.privateBathroom;
+  const taken = known && room.status === 'booked';
 
   return (
     <Reveal
@@ -25,7 +26,14 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
     >
       <Cobweb corner={index % 2 ? 'tl' : 'tr'} className={clsx('absolute top-0 h-20 w-20', index % 2 ? 'left-0' : 'right-0')} opacity={0.2} />
       <div className="-mx-6 -mt-6 mb-5 sm:-mx-7 sm:-mt-7">
-        <RoomThumb number={room.number} className="h-40 w-full" />
+        <div className="relative">
+          <RoomThumb number={room.number} className={clsx('h-44 w-full', taken && 'grayscale-[0.7] brightness-[0.65]')} />
+          {taken && (
+            <span className="absolute left-4 top-4 rounded-full border border-danger/50 bg-ink/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-danger-light backdrop-blur">
+              Ocupada
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex items-center justify-between gap-3">
         <RoomRowMini highlight={room.number} />
@@ -35,7 +43,12 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
       <div className="mt-6 flex items-baseline gap-3">
         <h3 className="font-display text-[2.4rem] uppercase leading-none text-bone">{room.name || `Habitación ${room.number}`}</h3>
       </div>
-      {big && <p className="mt-1 font-serif text-xl italic text-ember">La grande</p>}
+      {big && (
+        <p className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-ember/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-ember">
+          <Bath className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+          Baño privado
+        </p>
+      )}
 
       <ul className="mt-5 flex flex-col gap-2.5 text-sm text-fog">
         {room.beds && (
@@ -51,7 +64,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
         {room.privateBathroom && (
           <li className="flex items-center gap-2.5">
             <Bath className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
-            <span className="font-semibold text-bone">Baño privado</span> al lado
+            <span className="font-semibold text-bone">Baño privado</span> dentro de la habitación
           </li>
         )}
         <li className="flex items-center gap-2.5">
@@ -64,7 +77,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
         <RoomPriceLine room={room} phase={phase} />
       </div>
 
-      <div className="mt-6 flex flex-col gap-2">
+      <div className="mt-auto flex flex-col gap-2 pt-6">
         <button
           type="button"
           onClick={() => onView(room.number)}
@@ -120,7 +133,7 @@ export default function RoomsSection({ config, known }) {
           <RoomPerks variant="panel" />
         </Reveal>
 
-        <ul className="mt-6 grid gap-4 lg:grid-cols-3 lg:gap-5">
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:gap-5">
           {rooms.map((room, i) => (
             <RoomCard key={room.number} room={room} known={known} salesOpen={config.event.salesOpen !== false} index={i} phase={phase} onView={setViewing} />
           ))}

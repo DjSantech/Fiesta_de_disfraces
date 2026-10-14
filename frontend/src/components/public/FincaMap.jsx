@@ -3,90 +3,79 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ArrowRight,
-  Ban,
   Bath,
   BedDouble,
   Car,
-  DoorOpen,
+  Disc3,
+  Droplets,
+  Gamepad2,
   HardHat,
   House,
+  Martini,
   Motorbike,
   MousePointerClick,
   Sofa,
   SquareParking,
   Users,
+  Utensils,
   Waves,
-  Disc3,
-  Droplets,
-  Footprints,
-  Martini,
-  SprayCan,
-  Wind,
-  Wine,
 } from 'lucide-react';
 import { MAP_ZONES } from '../../config/event';
 import { formatCOP } from '../../lib/format';
 import { ROOM_STATUS, RoomHelpNote, RoomPriceLine, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from './rooms';
 
-// Plano nocturno de la finca, fiel al boceto (docs/mapa-boceto.png y docs/mapa-casa-boceto-2.png):
-// Entrada arriba al centro → Parqueadero debajo; Salón arriba a la izquierda; Piscina pequeña bajo el Salón;
-// la Casa ocupa todo el ancho: fila [X][1][2][Baño privado][3], pasillo (con Baño bajo la X), y abajo la
-// Sala (con un mueble) + tres puestos de venta + la Barra. La Piscina grande queda debajo de la casa.
+// Plano nocturno de la finca, fiel al boceto del organizador (docs/mapa-finca-v3.png), recompuesto en vertical
+// para celular conservando las adyacencias: [Barra de cócteles | DJ] sobre [Salón de juegos | Jacuzzi], la Piscina
+// al lado, el Parqueadero pegado a la casa y la Casa con sus dos filas (1·2·baño·3 / comedor·baño·4) y la sala al centro.
 
 const W = 400;
-const H = 610;
+const H = 556;
 
 const BONE = '#f2ede4';
 const RED = '#ff8a3d';
 
-/** Zonas tocables. `room` enlaza con config.rooms[].number. */
+/** Zonas tocables. `id` es la clave en MAP_ZONES; `room` enlaza con config.rooms[].number. */
 const ZONES = [
-  { id: 'entrada', info: 'entrada', shape: { t: 'rect', x: 176, y: 6, w: 84, h: 50, rx: 12 }, hit: true },
-  { id: 'parqueadero', info: 'parqueadero', shape: { t: 'rect', x: 158, y: 68, w: 150, h: 72, rx: 6 } },
-  { id: 'salon', info: 'salon', shape: { t: 'rect', x: 22, y: 64, w: 118, h: 74, rx: 4 } },
-  { id: 'jacuzzi', info: 'jacuzzi', shape: { t: 'circle', cx: 80, cy: 178, r: 24 }, water: true },
-  { id: 'piscina', info: 'piscina', shape: { t: 'circle', cx: 86, cy: 516, r: 70 }, water: true },
-  { id: 'casa', info: 'casa', shape: { t: 'rect', x: 240, y: 190, w: 84, h: 18, rx: 4 }, hit: true },
-  // Fila de cuartos
-  { id: 'x1', info: 'noDisponible', shape: { t: 'rect', x: 16, y: 212, w: 64, h: 56 }, blocked: true },
-  { id: 'room1', info: 'room1', room: 1, shape: { t: 'rect', x: 80, y: 212, w: 72, h: 56 } },
-  { id: 'room2', info: 'room2', room: 2, shape: { t: 'rect', x: 152, y: 212, w: 72, h: 56 } },
-  { id: 'bano3', info: 'bano3', shape: { t: 'rect', x: 224, y: 212, w: 68, h: 56 } },
-  { id: 'room3', info: 'room3', room: 3, shape: { t: 'rect', x: 292, y: 212, w: 92, h: 56 } },
-  // Pasillo
-  { id: 'bano', info: 'bano', shape: { t: 'rect', x: 16, y: 268, w: 64, h: 32 } },
-  { id: 'pasillo', info: 'pasillo', shape: { t: 'rect', x: 80, y: 268, w: 248, h: 32 } },
-  // Zona inferior
-  { id: 'sala', info: 'sala', shape: { t: 'rect', x: 16, y: 300, w: 206, h: 120 } },
-  { id: 'ventaPerfumes', info: 'ventaPerfumes', shape: { t: 'rect', x: 222, y: 300, w: 106, h: 40 } },
-  { id: 'ventaVapes', info: 'ventaVapes', shape: { t: 'rect', x: 222, y: 340, w: 106, h: 40 } },
-  { id: 'ventaCocteles', info: 'ventaCocteles', shape: { t: 'rect', x: 222, y: 380, w: 106, h: 40 } },
-  { id: 'barra', info: 'barra', shape: { t: 'rect', x: 328, y: 300, w: 56, h: 120 } },
+  { id: 'barraCocteles', shape: { t: 'rect', x: 16, y: 20, w: 84, h: 64, rx: 6 } },
+  { id: 'dj', shape: { t: 'rect', x: 100, y: 20, w: 150, h: 64, rx: 6 } },
+  { id: 'salonJuegos', shape: { t: 'rect', x: 16, y: 92, w: 112, h: 68, rx: 6 } },
+  { id: 'jacuzzi', shape: { t: 'rect', x: 128, y: 92, w: 122, h: 68, rx: 6 }, water: true },
+  { id: 'piscina', shape: { t: 'circle', cx: 323, cy: 118, r: 50 }, water: true },
+  { id: 'parqueadero', shape: { t: 'rect', x: 16, y: 176, w: 234, h: 56, rx: 4 } },
+  { id: 'casa', shape: { t: 'rect', x: 138, y: 241, w: 124, h: 19, rx: 9.5 } },
+  // Fila superior de la casa
+  { id: 'room1', room: 1, shape: { t: 'rect', x: 24, y: 260, w: 92, h: 74 } },
+  { id: 'room2', room: 2, shape: { t: 'rect', x: 116, y: 260, w: 88, h: 74 } },
+  { id: 'bano', shape: { t: 'rect', x: 204, y: 260, w: 46, h: 74 } },
+  { id: 'room3', room: 3, shape: { t: 'rect', x: 250, y: 260, w: 126, h: 74 } },
+  // Sala al centro
+  { id: 'sala', shape: { t: 'rect', x: 24, y: 334, w: 352, h: 52 } },
+  // Fila inferior de la casa
+  { id: 'comedorCocina', shape: { t: 'rect', x: 24, y: 386, w: 180, h: 80 } },
+  { id: 'bano2', shape: { t: 'rect', x: 204, y: 386, w: 44, h: 80 } },
+  { id: 'room4', room: 4, shape: { t: 'rect', x: 248, y: 386, w: 128, h: 80 } },
 ];
 
 const ZONE_ICONS = {
-  entrada: DoorOpen,
-  parqueadero: SquareParking,
-  salon: Disc3,
+  barraCocteles: Martini,
+  dj: Disc3,
+  salonJuegos: Gamepad2,
   jacuzzi: Droplets,
   piscina: Waves,
+  parqueadero: SquareParking,
   casa: House,
-  noDisponible: Ban,
   room1: BedDouble,
   room2: BedDouble,
   room3: BedDouble,
-  bano3: Bath,
+  room4: BedDouble,
   bano: Bath,
-  pasillo: Footprints,
+  bano2: Bath,
   sala: Sofa,
-  ventaPerfumes: SprayCan,
-  ventaVapes: Wind,
-  ventaCocteles: Martini,
-  barra: Wine,
+  comedorCocina: Utensils,
 };
 
-/** Rótulo corto de los puestos de venta (el nombre completo va en el panel). */
-const STALL_LABELS = { ventaPerfumes: 'PERFUMES', ventaVapes: 'VAPORIZADORES', ventaCocteles: 'CÓCTELES' };
+const SANS = 'Inter, sans-serif';
+const DISPLAY = 'Anton, Impact, sans-serif';
 
 function Shape({ shape, ...props }) {
   if (shape.t === 'circle') return <circle cx={shape.cx} cy={shape.cy} r={shape.r} {...props} />;
@@ -109,11 +98,143 @@ function statusColor(room, known) {
   return (ROOM_STATUS[room.status] || ROOM_STATUS.blocked).color;
 }
 
+/** Rótulo dentro del plano de cada zona (el texto es decorativo: el botón ya tiene aria-label). */
+function ZoneLabel({ z, sel, room, known, ink, soft }) {
+  const c = center(z.shape);
+  const common = { className: 'fd-zone-label', fontFamily: SANS, fontWeight: 700, pointerEvents: 'none' };
+  switch (z.id) {
+    case 'barraCocteles':
+      return (
+        <g textAnchor="middle" {...common} fontSize="10.5" letterSpacing="0.6" fill={ink}>
+          <text x={c.x} y={c.y - 2} className="fd-zone-label">BARRA DE</text>
+          <text x={c.x} y={c.y + 12} className="fd-zone-label">CÓCTELES</text>
+        </g>
+      );
+    case 'dj':
+      return (
+        <g pointerEvents="none">
+          <text x={150} y={63} textAnchor="middle" className="fd-zone-label" fontSize="34" fontFamily={DISPLAY} letterSpacing="2" fill={ink}>
+            DJ
+          </text>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <rect
+              key={i}
+              x={196 + i * 8}
+              y={38}
+              width={4.4}
+              height={26}
+              rx={1.2}
+              fill={i % 3 === 0 ? RED : i % 3 === 1 ? '#ffb340' : '#8b5cf6'}
+              fillOpacity="0.8"
+              className="fd-eq-bar"
+              style={{ animationDelay: `${(i * 137) % 900}ms`, animationDuration: `${700 + ((i * 211) % 500)}ms` }}
+            />
+          ))}
+        </g>
+      );
+    case 'salonJuegos':
+      return (
+        <g textAnchor="middle" {...common} fontSize="12" letterSpacing="0.8" fill={ink}>
+          <text x={c.x} y={c.y - 3} className="fd-zone-label">SALÓN DE</text>
+          <text x={c.x} y={c.y + 13} className="fd-zone-label">JUEGOS</text>
+        </g>
+      );
+    case 'jacuzzi':
+      return (
+        <g pointerEvents="none">
+          <circle cx={152} cy={126} r={13} fill="none" stroke="rgb(167 139 250 / 0.85)" strokeWidth="1.2" />
+          <circle cx={152} cy={126} r={13} fill="none" stroke="rgb(167 139 250 / 0.6)" className="fd-ripple" />
+          <text x={174} y={130.5} className="fd-zone-label" fontSize="12" fontFamily={SANS} fontWeight="700" letterSpacing="1" fill={ink}>
+            JACUZZI
+          </text>
+        </g>
+      );
+    case 'piscina':
+      return (
+        <g pointerEvents="none">
+          <circle cx={323} cy={118} r={38} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" />
+          <circle cx={323} cy={118} r={38} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" style={{ animationDelay: '-2.7s' }} />
+          <text x={323} y={124} textAnchor="middle" className="fd-zone-label" fontSize="18" fontFamily={DISPLAY} letterSpacing="2" fill={ink}>
+            PISCINA
+          </text>
+        </g>
+      );
+    case 'parqueadero':
+      return (
+        <g pointerEvents="none">
+          {Array.from({ length: 8 }, (_, i) => {
+            const x = 16 + (234 / 9) * (i + 1);
+            return <path key={i} d={`M${x} 176 v14 M${x} 232 v-14`} stroke="rgb(242 237 228 / 0.2)" />;
+          })}
+          <text x={c.x} y={c.y + 4.5} textAnchor="middle" className="fd-zone-label" fontSize="13" fontFamily={SANS} fontWeight="700" letterSpacing="2" fill={ink}>
+            PARQUEADERO
+          </text>
+        </g>
+      );
+    case 'casa':
+      return (
+        <text x={c.x} y={c.y + 4} textAnchor="middle" className="fd-zone-label" fontSize="11" fontFamily={SANS} fontWeight="700" letterSpacing="2.6" fill={sel ? '#fff' : soft} pointerEvents="none">
+          LA CASA
+        </text>
+      );
+    case 'bano':
+    case 'bano2':
+      return (
+        <text x={c.x} y={c.y + 4} textAnchor="middle" className="fd-zone-label" fontSize="10.5" fontFamily={SANS} fontWeight="700" letterSpacing="0.4" fill={soft} pointerEvents="none">
+          BAÑO
+        </text>
+      );
+    case 'sala':
+      return (
+        <text x={c.x} y={c.y + 8} textAnchor="middle" className="fd-zone-label" fontSize="24" fontFamily={DISPLAY} letterSpacing="4" fill={ink} pointerEvents="none">
+          SALA
+        </text>
+      );
+    case 'comedorCocina':
+      return (
+        <g textAnchor="middle" {...common} fontSize="12" letterSpacing="0.8" fill={ink}>
+          <text x={c.x} y={c.y - 3} className="fd-zone-label">COMEDOR</text>
+          <text x={c.x} y={c.y + 13} className="fd-zone-label">Y COCINA</text>
+        </g>
+      );
+    default:
+      break;
+  }
+  if (z.room) {
+    const { x, y, w } = z.shape;
+    const st = known ? room?.status : null;
+    const statusText = st === 'booked' ? 'OCUPADA' : st === 'held' ? 'APARTADA' : null;
+    const cx = x + w / 2;
+    return (
+      <g pointerEvents="none">
+        <text x={cx} y={y + 19} textAnchor="middle" className="fd-zone-label" fontSize="11" fontFamily={SANS} fontWeight="700" letterSpacing="1.6" fill={soft}>
+          HAB.
+        </text>
+        <text x={cx} y={y + (statusText ? 46 : 52)} textAnchor="middle" className="fd-zone-label" fontSize="28" fontFamily={DISPLAY} fill={ink}>
+          {z.room}
+        </text>
+        {statusText && (
+          <text x={cx} y={y + 65} textAnchor="middle" fontSize="10.5" fontFamily={SANS} fontWeight="700" letterSpacing="1.4" fill={statusColor(room, known)}>
+            {statusText}
+          </text>
+        )}
+        {known && room?.status === 'available' && <circle cx={x + w - 8} cy={y + 8} r={3} fill={statusColor(room, known)} className="fd-pulse-dot" />}
+        <circle cx={x + w - 8} cy={y + 8} r={3} fill={statusColor(room, known)} />
+        {room?.privateBathroom && (
+          <text x={cx} y={y + (statusText ? 65 : 66)} textAnchor="middle" fontSize="10" fontFamily={SANS} fontWeight="600" letterSpacing="0.3" fill="rgb(255 179 64 / 0.9)" display={statusText ? 'none' : undefined}>
+            BAÑO PRIVADO
+          </text>
+        )}
+      </g>
+    );
+  }
+  return null;
+}
+
 export default function FincaMap({ config, known = true, className }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const [selected, setSelected] = useState(null);
   const panelRef = useRef(null);
-  const firstSelect = useRef(true);
   const roomsByNumber = useMemo(() => Object.fromEntries((config.rooms || []).map((r) => [r.number, r])), [config.rooms]);
 
   const select = (id) => setSelected((cur) => (cur === id ? cur : id));
@@ -121,7 +242,6 @@ export default function FincaMap({ config, known = true, className }) {
   // En celular, si el panel quedó fuera de pantalla, lo acerca suavemente.
   useEffect(() => {
     if (!selected) return;
-    if (firstSelect.current) firstSelect.current = false;
     const el = panelRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -133,18 +253,18 @@ export default function FincaMap({ config, known = true, className }) {
   const zone = ZONES.find((z) => z.id === selected) || null;
 
   return (
-    <div className={clsx('grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-start lg:gap-8', className)}>
-      <div className="fd-blueprint noise-border relative overflow-hidden rounded-[28px] p-2 sm:p-4">
+    <div className={clsx('grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-8', className)}>
+      <div className="fd-blueprint noise-border relative mx-auto w-full max-w-[560px] overflow-hidden rounded-[28px] p-2 sm:p-4 lg:max-w-none">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_0%,rgb(255_106_0/0.12),transparent_70%)]" aria-hidden="true" />
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="relative block h-auto w-full select-none"
+          className="relative mx-auto block h-auto w-full max-w-[520px] select-none"
           role="group"
           aria-label="Mapa de la finca. Toca o selecciona una zona para ver su información."
         >
           <defs>
             <pattern id={`hatch-${uid}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="6" stroke="rgb(242 237 228 / 0.13)" strokeWidth="2" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="rgb(255 77 94 / 0.22)" strokeWidth="2" />
             </pattern>
             <radialGradient id={`water-${uid}`} cx="50%" cy="45%" r="60%">
               <stop offset="0%" stopColor="rgb(139 92 246 / 0.30)" />
@@ -152,87 +272,62 @@ export default function FincaMap({ config, known = true, className }) {
               <stop offset="100%" stopColor="rgb(139 92 246 / 0.04)" />
             </radialGradient>
             <linearGradient id={`floor-${uid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgb(242 237 228 / 0.035)" />
+              <stop offset="0%" stopColor="rgb(242 237 228 / 0.04)" />
               <stop offset="100%" stopColor="rgb(242 237 228 / 0.01)" />
             </linearGradient>
+            <radialGradient id={`lawn-${uid}`} cx="50%" cy="50%" r="65%">
+              <stop offset="0%" stopColor="rgb(34 229 132 / 0.14)" />
+              <stop offset="100%" stopColor="rgb(34 229 132 / 0.03)" />
+            </radialGradient>
           </defs>
 
-          {/* Lindero de la finca con la portada de entrada */}
-          <g aria-hidden="true" fill="none">
-            <path
-              d="M196 40 H26 Q8 40 8 58 V572 Q8 590 26 590 H374 Q392 590 392 572 V58 Q392 40 374 40 H240"
-              stroke="rgb(242 237 228 / 0.16)"
-              strokeWidth="1.2"
-              strokeDasharray="5 5"
-            />
-            <rect x="190" y="34" width="6" height="12" fill="rgb(242 237 228 / 0.5)" />
-            <rect x="240" y="34" width="6" height="12" fill="rgb(242 237 228 / 0.5)" />
-            {/* Camino principal: entrada → parqueadero → casa */}
-            <path d="M218 22 V68" stroke={RED} strokeOpacity="0.85" strokeWidth="1.6" strokeDasharray="3 5" className="fd-dash-flow" />
-            <path d="M233 140 V190" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
-            <path d="M233 166 H140 V138" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
-            <path d="M86 424 V446" stroke="rgb(242 237 228 / 0.22)" strokeWidth="1.2" strokeDasharray="3 5" />
-            <circle cx="218" cy="14" r="2.5" fill={RED} />
-            <circle cx="218" cy="14" r="2.5" fill={RED} className="fd-pulse-dot" />
-          </g>
+          {/* Lindero de la finca */}
+          <rect x="8" y="8" width="384" height="480" rx="18" fill="none" stroke="rgb(242 237 228 / 0.16)" strokeWidth="1.2" strokeDasharray="5 5" aria-hidden="true" />
 
-          {/* Árboles y detalles de paisaje */}
-          <g aria-hidden="true" fill="none" stroke="rgb(34 229 132 / 0.22)" strokeWidth="1">
+          {/* Anotaciones del paisaje (no son botones) */}
+          <g aria-hidden="true">
+            {/* Zona verde: césped suave junto al parqueadero */}
+            <path
+              d="M268 196 C266 182 286 176 308 180 C334 174 372 178 380 198 C388 216 372 232 346 230 C322 236 286 234 272 222 C264 214 266 204 268 196 Z"
+              fill={`url(#lawn-${uid})`}
+              stroke="rgb(34 229 132 / 0.35)"
+              strokeWidth="1"
+              strokeDasharray="3 4"
+            />
+            <text x="324" y="209" textAnchor="middle" fontSize="14" fontWeight="600" fontFamily="'Cormorant Garamond', Georgia, serif" fontStyle="italic" letterSpacing="0.4" fill="rgb(120 240 175 / 0.9)">
+              {MAP_ZONES.zonaVerde.name.toLowerCase()}
+            </text>
             {[
-              [356, 128, 10],
-              [374, 156, 7],
-              [188, 452, 12],
-              [240, 438, 8],
-              [304, 446, 10],
-              [366, 456, 8],
-              [206, 582, 7],
-              [352, 580, 8],
-              [26, 440, 7],
+              [282, 190, 5],
+              [372, 190, 5],
+              [356, 224, 6],
             ].map(([x, y, r]) => (
-              <g key={`${x}-${y}`}>
+              <g key={`${x}-${y}`} fill="none" stroke="rgb(34 229 132 / 0.4)" strokeWidth="1">
                 <circle cx={x} cy={y} r={r} />
                 <path d={`M${x - r * 0.45} ${y} H${x + r * 0.45} M${x} ${y - r * 0.45} V${y + r * 0.45}`} strokeOpacity="0.6" />
               </g>
             ))}
-          </g>
-
-          {/* Rosa de los vientos */}
-          <g aria-hidden="true" transform="translate(354 82)">
-            <circle r="15" fill="none" stroke="rgb(242 237 228 / 0.2)" />
-            <path d="M0 -12 L4 2 L0 -1 L-4 2 Z" fill={RED} />
-            <path d="M0 12 L4 -2 L0 1 L-4 -2 Z" fill="rgb(242 237 228 / 0.3)" />
-            <text y="-19" textAnchor="middle" fontSize="8" fontFamily="Inter, sans-serif" fontWeight="700" fill="rgb(242 237 228 / 0.55)">
-              N
-            </text>
+            {/* Vista a toda Pereira, inclinado como en el boceto */}
+            <g transform="translate(323 36) rotate(12)">
+              <text textAnchor="middle" fontSize="15" fontWeight="600" fontFamily="'Cormorant Garamond', Georgia, serif" fontStyle="italic" letterSpacing="0.3" fill="rgb(255 179 64 / 0.95)">
+                {MAP_ZONES.vista.name.toLowerCase()}
+              </text>
+              <path d="M-52 8 Q0 14 52 8" fill="none" stroke="rgb(255 179 64 / 0.35)" strokeWidth="1" strokeDasharray="2 4" />
+            </g>
           </g>
 
           {/* Estructura de la casa */}
           <g aria-hidden="true">
-            <rect x="16" y="212" width="368" height="208" fill={`url(#floor-${uid})`} stroke="rgb(242 237 228 / 0.55)" strokeWidth="1.6" />
-            {/* Pasillo: línea central tenue */}
-            <path d="M104 284 H304" stroke="rgb(242 237 228 / 0.1)" strokeDasharray="2 4" />
-            {/* Espacio sin rótulo al final del pasillo */}
-            <rect x="328" y="268" width="56" height="32" fill="none" stroke="rgb(242 237 228 / 0.3)" strokeWidth="1" />
-            {/* Puerta de la casa (lado de la piscina) */}
-            <path d="M70 420 H102" stroke="#08080d" strokeWidth="3" />
-            <path d="M70 420 A 22 22 0 0 1 92 442" fill="none" stroke="rgb(242 237 228 / 0.25)" strokeWidth="0.8" />
-            {/* Puertas de las habitaciones al pasillo */}
-            {[88, 160, 300].map((x) => (
-              <path key={x} d={`M${x} 268 A 11 11 0 0 0 ${x + 11} 279`} fill="none" stroke="rgb(242 237 228 / 0.25)" strokeWidth="0.8" />
-            ))}
-            {/* Mueble de la sala (sin rótulo) */}
-            <rect x="38" y="376" width="78" height="22" rx="3" fill="none" stroke="rgb(242 237 228 / 0.16)" strokeWidth="1" />
-            {/* Flecha: el baño privado es de la habitación 3 */}
-            <path d="M240 259 H280 M274 254 L281 259 L274 264" fill="none" stroke={RED} strokeOpacity="0.8" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M138 250 H34 Q16 250 16 268 V456 Q16 474 34 474 H366 Q384 474 384 456 V268 Q384 250 366 250 H262" fill={`url(#floor-${uid})`} stroke="rgb(242 237 228 / 0.55)" strokeWidth="1.6" />
           </g>
 
           {/* Zonas interactivas */}
           {ZONES.map((z) => {
-            const info = MAP_ZONES[z.info] || { name: z.id };
+            const info = MAP_ZONES[z.id] || { name: z.id };
             const room = z.room ? roomsByNumber[z.room] : null;
             const isSel = selected === z.id;
-            const c = center(z.shape);
             const label = room ? roomAriaLabel(room.name || info.name, room, known) : info.name;
+            const taken = !!room && known && room.status === 'booked';
             const onKeyDown = (e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -242,31 +337,24 @@ export default function FincaMap({ config, known = true, className }) {
 
             let fill = 'transparent';
             if (z.water) fill = `url(#water-${uid})`;
-            if (z.blocked) fill = `url(#hatch-${uid})`;
-            if (room && known) fill = `${statusColor(room, known)}14`;
+            if (z.id === 'casa') fill = 'rgb(8 8 13 / 0.9)';
+            if (room && known) fill = taken ? `url(#hatch-${uid})` : `${statusColor(room, known)}14`;
             if (isSel) fill = 'rgb(255 106 0 / 0.2)';
 
-            const baseStroke = z.hit
-              ? 'transparent'
-              : z.water
-                ? 'rgb(167 139 250 / 0.75)'
-                : z.id === 'parqueadero' || z.id === 'salon'
-                  ? 'rgb(242 237 228 / 0.55)'
-                  : 'rgb(242 237 228 / 0.38)';
+            let baseStroke = 'rgb(242 237 228 / 0.38)';
+            if (z.water) baseStroke = 'rgb(167 139 250 / 0.75)';
+            else if (['barraCocteles', 'dj', 'salonJuegos', 'parqueadero'].includes(z.id)) baseStroke = 'rgb(242 237 228 / 0.55)';
+            else if (z.id === 'casa') baseStroke = 'rgb(242 237 228 / 0.55)';
+            if (taken) baseStroke = 'rgb(255 77 94 / 0.7)';
+
+            const ink = isSel ? '#fff' : taken ? 'rgb(242 237 228 / 0.55)' : BONE;
+            const soft = isSel ? '#fff' : 'rgb(242 237 228 / 0.78)';
+            const focusShape = z.shape.t === 'circle' ? { ...z.shape, r: z.shape.r + 4 } : { ...z.shape, x: z.shape.x - 3, y: z.shape.y - 3, w: z.shape.w + 6, h: z.shape.h + 6, rx: (z.shape.rx || 0) + 3 };
 
             return (
-              <g
-                key={z.id}
-                className="fd-zone"
-                role="button"
-                tabIndex={0}
-                aria-label={label}
-                aria-pressed={isSel}
-                onClick={() => select(z.id)}
-                onKeyDown={onKeyDown}
-              >
+              <g key={z.id} className="fd-zone" role="button" tabIndex={0} aria-label={label} aria-pressed={isSel} onClick={() => select(z.id)} onKeyDown={onKeyDown}>
                 {/* Halo de neón cuando está seleccionada */}
-                {isSel && !z.hit && <Shape shape={z.shape} fill="none" stroke={RED} strokeOpacity="0.28" strokeWidth="7" />}
+                {isSel && <Shape shape={z.shape} fill="none" stroke={RED} strokeOpacity="0.28" strokeWidth="7" />}
                 {z.water && !isSel && <Shape shape={z.shape} fill="none" stroke="rgb(139 92 246 / 0.25)" strokeWidth="5" />}
                 <Shape
                   shape={z.shape}
@@ -277,146 +365,37 @@ export default function FincaMap({ config, known = true, className }) {
                   strokeWidth={isSel ? 1.8 : z.water ? 1.4 : 1.1}
                   pointerEvents="all"
                 />
-                <Shape
-                  shape={{ ...z.shape, ...(z.shape.t === 'circle' ? { r: z.shape.r + 4 } : { x: z.shape.x - 3, y: z.shape.y - 3, w: z.shape.w + 6, h: z.shape.h + 6, rx: (z.shape.rx || 0) + 3 }) }}
-                  className="fd-zone-focus"
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 3"
-                />
-
-                {/* Rótulos */}
-                {z.id === 'entrada' && (
-                  <text x={218} y={30} textAnchor="middle" className="fd-zone-label" fontSize="11" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="2.2" fill={isSel ? '#fff' : BONE}>
-                    ENTRADA
-                  </text>
-                )}
-                {z.id === 'parqueadero' && (
-                  <g pointerEvents="none">
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <path key={i} d={`M${158 + 18.75 * (i + 1)} 68 v20 M${158 + 18.75 * (i + 1)} 140 v-20`} stroke="rgb(242 237 228 / 0.2)" />
-                    ))}
-                    <path d="M166 104 H300" stroke="rgb(245 192 74 / 0.35)" strokeDasharray="6 5" />
-                    <text x={233} y={108} textAnchor="middle" className="fd-zone-label" fontSize="11" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1.6" fill={isSel ? '#fff' : BONE}>
-                      PARQUEADERO
-                    </text>
-                  </g>
-                )}
-                {z.id === 'salon' && (
-                  <g pointerEvents="none">
-                    <text x={81} y={96} textAnchor="middle" className="fd-zone-label" fontSize="15" fontFamily="Anton, Impact, sans-serif" letterSpacing="1.5" fill={isSel ? '#fff' : BONE}>
-                      SALÓN
-                    </text>
-                    <text x={81} y={110} textAnchor="middle" fontSize="7.5" fontFamily="Inter, sans-serif" fontWeight="600" letterSpacing="1.2" fill="rgb(255 179 64 / 0.85)">
-                      DJS · PISTA
-                    </text>
-                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                      <rect
-                        key={i}
-                        x={57 + i * 6.4}
-                        y={116}
-                        width={3.4}
-                        height={14}
-                        rx={1}
-                        fill={i % 3 === 0 ? RED : i % 3 === 1 ? '#ffb340' : '#8b5cf6'}
-                        fillOpacity="0.75"
-                        className="fd-eq-bar"
-                        style={{ animationDelay: `${(i * 137) % 900}ms`, animationDuration: `${700 + ((i * 211) % 500)}ms` }}
-                      />
-                    ))}
-                  </g>
-                )}
-                {z.id === 'jacuzzi' && (
-                  <g pointerEvents="none">
-                    <circle cx={80} cy={178} r={14} fill="none" stroke="rgb(167 139 250 / 0.6)" className="fd-ripple" />
-                    <text x={110} y={182} className="fd-zone-label" fontSize="10.5" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="1.4" fill={isSel ? '#fff' : BONE}>
-                      PISCINA PEQUEÑA
-                    </text>
-                  </g>
-                )}
-                {z.id === 'piscina' && (
-                  <g pointerEvents="none">
-                    <circle cx={86} cy={516} r={52} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" />
-                    <circle cx={86} cy={516} r={52} fill="none" stroke="rgb(167 139 250 / 0.5)" className="fd-ripple" style={{ animationDelay: '-2.7s' }} />
-                    <text x={86} y={521} textAnchor="middle" className="fd-zone-label" fontSize="16" fontFamily="Anton, Impact, sans-serif" letterSpacing="2" fill={isSel ? '#fff' : BONE}>
-                      PISCINA
-                    </text>
-                  </g>
-                )}
-                {z.id === 'casa' && (
-                  <text x={282} y={203} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="2.4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.7)'}>
-                    LA CASA
-                  </text>
-                )}
-                {z.blocked && (
-                  <text x={c.x} y={c.y + 6} textAnchor="middle" fontSize="18" fontFamily="Inter, sans-serif" fontWeight="300" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.4)'} pointerEvents="none">
-                    ×
-                  </text>
-                )}
-                {z.room && (
-                  <g pointerEvents="none">
-                    <text x={c.x} y={c.y + 8} textAnchor="middle" className="fd-zone-label" fontSize="22" fontFamily="Anton, Impact, sans-serif" fill={isSel ? '#fff' : BONE}>
-                      {z.room}
-                    </text>
-                    {known && room?.status === 'available' && (
-                      <circle cx={z.shape.x + z.shape.w - 7} cy={z.shape.y + 7} r={2.6} fill={statusColor(room, known)} className="fd-pulse-dot" />
-                    )}
-                    <circle cx={z.shape.x + z.shape.w - 7} cy={z.shape.y + 7} r={2.6} fill={statusColor(room, known)} />
-                  </g>
-                )}
-                {z.id === 'bano' && (
-                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.6" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.8)'} pointerEvents="none">
-                    BAÑO
-                  </text>
-                )}
-                {z.id === 'bano3' && (
-                  <g pointerEvents="none" className="fd-zone-label" fontSize="9.5" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.5" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.8)'} textAnchor="middle">
-                    <text x={c.x} y={c.y - 8}>BAÑO</text>
-                    <text x={c.x} y={c.y + 4}>PRIVADO</text>
-                  </g>
-                )}
-                {z.id === 'pasillo' && (
-                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.55)'} pointerEvents="none">
-                    PASILLO
-                  </text>
-                )}
-                {z.id === 'sala' && (
-                  <text x={c.x} y={z.shape.y + 44} textAnchor="middle" className="fd-zone-label" fontSize="22" fontFamily="Anton, Impact, sans-serif" letterSpacing="3" fill={isSel ? '#fff' : BONE} pointerEvents="none">
-                    SALA
-                  </text>
-                )}
-                {STALL_LABELS[z.id] && (
-                  <text x={c.x} y={c.y + 3.5} textAnchor="middle" className="fd-zone-label" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="0.4" fill={isSel ? '#fff' : 'rgb(242 237 228 / 0.85)'} pointerEvents="none">
-                    {STALL_LABELS[z.id]}
-                  </text>
-                )}
-                {z.id === 'barra' && (
-                  <text x={c.x} y={c.y + 5} textAnchor="middle" className="fd-zone-label" fontSize="14" fontFamily="Anton, Impact, sans-serif" letterSpacing="1.2" fill={isSel ? '#fff' : BONE} pointerEvents="none">
-                    BARRA
-                  </text>
-                )}
+                <Shape shape={focusShape} className="fd-zone-focus" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeDasharray="4 3" />
+                <ZoneLabel z={z} sel={isSel} room={room} known={known} ink={ink} soft={soft} />
               </g>
             );
           })}
 
           {/* Cajetín del plano */}
-          <g aria-hidden="true" fontFamily="Inter, sans-serif" transform="translate(0 100)">
-            <rect x="172" y="408" width="212" height="52" fill="rgb(7 7 10 / 0.6)" stroke="rgb(242 237 228 / 0.25)" />
-            <path d="M172 428 H384 M300 428 V460" stroke="rgb(242 237 228 / 0.18)" />
-            <text x="180" y="422" fontSize="10" fontFamily="Anton, Impact, sans-serif" letterSpacing="1.4" fill={BONE}>
+          <g aria-hidden="true" fontFamily={SANS}>
+            <g transform="translate(62 520)">
+              <circle r="16" fill="none" stroke="rgb(242 237 228 / 0.2)" />
+              <path d="M0 -13 L4 2 L0 -1 L-4 2 Z" fill={RED} />
+              <path d="M0 13 L4 -2 L0 1 L-4 -2 Z" fill="rgb(242 237 228 / 0.3)" />
+              <text y="-20" textAnchor="middle" fontSize="9" fontWeight="700" fill="rgb(242 237 228 / 0.55)">
+                N
+              </text>
+            </g>
+            <rect x="172" y="496" width="212" height="52" fill="rgb(7 7 10 / 0.6)" stroke="rgb(242 237 228 / 0.25)" />
+            <path d="M172 516 H384 M300 516 V548" stroke="rgb(242 237 228 / 0.18)" />
+            <text x="180" y="510" fontSize="10" fontFamily={DISPLAY} letterSpacing="1.4" fill={BONE}>
               FINCA · PEREIRA · PLANO DE LA NOCHE
             </text>
-            <text x="180" y="442" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(242 237 228 / 0.6)">
+            <text x="180" y="530" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(242 237 228 / 0.6)">
               FIESTA DE DISFRACES
             </text>
-            <text x="180" y="453" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(255 77 94 / 0.85)">
+            <text x="180" y="541" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(255 77 94 / 0.85)">
               31 · 10 · 2026
             </text>
-            <text x="342" y="442" textAnchor="middle" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(242 237 228 / 0.6)">
+            <text x="342" y="530" textAnchor="middle" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(242 237 228 / 0.6)">
               SIN ESCALA
             </text>
-            <text x="342" y="453" textAnchor="middle" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(242 237 228 / 0.45)">
+            <text x="342" y="541" textAnchor="middle" fontSize="7.5" fontWeight="600" letterSpacing="1" fill="rgb(242 237 228 / 0.45)">
               HOJA 01
             </text>
           </g>
@@ -435,27 +414,23 @@ function Legend() {
   const items = [
     { color: ROOM_STATUS.available.color, label: 'Disponible' },
     { color: ROOM_STATUS.held.color, label: 'Apartada' },
-    { color: ROOM_STATUS.booked.color, label: 'Reservada' },
+    { color: ROOM_STATUS.booked.color, label: 'Ocupada' },
   ];
   return (
-    <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-fog" aria-label="Convenciones del mapa">
+    <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-fog" aria-label="Estado de las habitaciones">
       {items.map((i) => (
         <li key={i.label} className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: i.color }} aria-hidden="true" />
           {i.label}
         </li>
       ))}
-      <li className="flex items-center gap-2">
-        <span className="text-base leading-none text-fog/80" aria-hidden="true">
-          ×
-        </span>
-        No se alquila
-      </li>
     </ul>
   );
 }
 
 function ZonePanel({ zone, config, roomsByNumber, known }) {
+  const [viewing, setViewing] = useState(false);
+
   if (!zone) {
     return (
       <div className="rounded-3xl border border-white/[0.08] bg-crypt/70 p-6" aria-live="polite">
@@ -464,19 +439,19 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
         </span>
         <h3 className="mt-5 font-display text-3xl uppercase leading-none text-bone">Toca una zona</h3>
         <p className="mt-3 text-[15px] leading-relaxed text-fog">
-          Explora la finca: el salón con los DJs, las piscinas y la casa con las habitaciones en alquiler, con su disponibilidad en vivo.
+          Explora la finca: la barra y el DJ, el salón de juegos, el jacuzzi, la piscina y la casa con las habitaciones en alquiler, con su disponibilidad en vivo.
         </p>
       </div>
     );
   }
 
-  const info = MAP_ZONES[zone.info] || { name: zone.id, description: '' };
-  const Icon = ZONE_ICONS[zone.info] || House;
+  const info = MAP_ZONES[zone.id] || { name: zone.id, description: '' };
+  const Icon = ZONE_ICONS[zone.id] || House;
   const room = zone.room ? roomsByNumber[zone.room] : null;
   const salesOpen = config.event?.salesOpen !== false;
   const parking = config.parking || {};
   const phase = config.event?.phase;
-  const [viewing, setViewing] = useState(false);
+  const taken = !!room && known && room.status === 'booked';
 
   return (
     <div className="animate-fade-up rounded-3xl border border-pumpkin/30 bg-[linear-gradient(160deg,rgb(255_106_0/0.12),rgb(21_21_28/0.9)_50%)] p-6" aria-live="polite" key={zone.id}>
@@ -507,7 +482,7 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
 
       {room && (
         <>
-          <RoomThumb number={room.number} className="mt-5 h-36 w-full rounded-2xl border border-white/10" />
+          <RoomThumb number={room.number} className={clsx('mt-5 h-36 w-full rounded-2xl border border-white/10', taken && 'grayscale-[0.7] brightness-[0.65]')} />
           <dl className="mt-4 grid grid-cols-1 gap-2">
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
               <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-fog">
@@ -535,7 +510,7 @@ function ZonePanel({ zone, config, roomsByNumber, known }) {
           >
             Ver habitación
           </button>
-          <RoomHelpNote contact={config.contact} room={room} className="mt-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3" />
+          {!taken && <RoomHelpNote contact={config.contact} room={room} className="mt-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3" />}
           <RoomViewModal
             room={room}
             phase={phase}

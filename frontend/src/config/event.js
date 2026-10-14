@@ -49,9 +49,10 @@ export const FALLBACK_CONFIG = {
   guest: { presaleDiscount: 5000, generalDiscount: 0 },
   parking: { carro: 10000, moto: 5000, casco: 5000 },
   rooms: [
-    { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, currentPrice: 250000, privateBathroom: false, status: 'available' },
-    { number: 2, name: 'Habitación 2', beds: '2 camas king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, currentPrice: 350000, privateBathroom: false, status: 'available' },
-    { number: 3, name: 'Habitación 3', beds: '1 cama doble + 2 sencillas', minPeople: 5, capacity: 7, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: true, status: 'available' },
+    { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, currentPrice: 250000, privateBathroom: false, status: 'booked' },
+    { number: 2, name: 'Habitación 2', beds: 'Camarote de cama sencilla y cama king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, currentPrice: 350000, privateBathroom: false, status: 'available' },
+    { number: 3, name: 'Habitación 3', beds: 'Camarote de cama sencilla y cama king + 2 colchonetas adicionales', minPeople: 6, capacity: 8, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: false, status: 'available' },
+    { number: 4, name: 'Habitación 4', beds: 'Camarote de cama sencilla + 2 camas sencillas', minPeople: 6, capacity: 8, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: true, status: 'available' },
   ],
   paymentAccounts: [
     { label: 'Bre-B (llave)', number: '3135995612', holder: '' },
@@ -111,10 +112,11 @@ export const ROOMS_COPY = {
 /** Fotos por número de habitación (public/habitaciones). */
 export const ROOM_PHOTOS = {
   1: [{ src: '/habitaciones/hab-1-cama-doble-y-sencilla.jpg', alt: 'Habitación 1: una cama doble y una cama sencilla' }],
-  2: [{ src: '/habitaciones/hab-2-dos-camas-king.jpg', alt: 'Habitación 2: dos camas king' }],
-  3: [
-    { src: '/habitaciones/hab-3-grande.jpg', alt: 'Habitación grande: una cama doble y dos camas sencillas' },
-    { src: '/habitaciones/hab-3-bano.jpg', alt: 'Baño privado de la habitación grande' },
+  2: [{ src: '/habitaciones/hab-2.jpg', alt: 'Habitación 2: camarote de cama sencilla y cama king' }],
+  3: [{ src: '/habitaciones/hab-3.jpg', alt: 'Habitación 3: camarote de cama sencilla y cama king, con colchonetas adicionales' }],
+  4: [
+    { src: '/habitaciones/hab-4.jpg', alt: 'Habitación 4: camarote de cama sencilla y dos camas sencillas' },
+    { src: '/habitaciones/hab-4-bano.jpg', alt: 'Baño privado de la habitación 4' },
   ],
 };
 
@@ -141,63 +143,68 @@ export const ROOM_PERKS = {
     {
       icon: 'bath',
       title: 'Baño privado',
-      text: 'Dentro de la habitación, solo para tu grupo, y aún más privacidad.',
+      text: 'Dentro de la habitación, solo para tu grupo.',
       highlight: true,
-      badge: 'Solo la grande',
+      badge: 'Solo la habitación 4',
     },
   ],
 };
 
 /**
- * Zonas del mapa de la finca (components/public/FincaMap.jsx).
- * Las habitaciones 1, 2 y 3 toman capacidad, precio y estado en vivo de la API; aquí solo va su texto.
+ * Zonas del mapa de la finca (components/public/FincaMap.jsx), según el boceto del organizador.
+ * Las habitaciones 1 a 4 toman camas, personas, precio y estado en vivo de la API; aquí solo va su texto.
+ * `zonaVerde` y `vista` son anotaciones del paisaje (no son botones).
  */
 export const MAP_ZONES = {
-  entrada: {
-    name: 'Entrada',
-    description: 'Aquí empieza la noche. Ten listo tu QR y tu cédula: seguridad escanea tu entrada y la compara con tu documento.',
+  barraCocteles: {
+    name: 'Barra de cócteles',
+    description: 'Barra de cócteles de la fiesta.',
   },
-  parqueadero: {
-    name: 'Parqueadero',
-    description: 'Justo al entrar. Se paga al llegar, en la portería. Cupos limitados: llega temprano.',
+  dj: {
+    name: 'DJ',
+    description: 'La cabina: tres DJs diferentes durante la noche.',
   },
-  salon: {
-    name: 'Salón',
-    description: 'La pista principal: 3 DJs diferentes, luces y sonido de club.',
+  salonJuegos: {
+    name: 'Salón de juegos',
+    description: 'Salón de juegos de la finca.',
   },
   jacuzzi: {
-    name: 'Piscina pequeña',
-    description: 'Junto a la piscina grande, para bajarle al ritmo un rato entre set y set.',
+    name: 'Jacuzzi',
+    description: 'El jacuzzi de la finca, junto al salón de juegos. Disfrútalo con responsabilidad.',
   },
   piscina: {
     name: 'Piscina',
-    description: 'La piscina de la finca, el punto más fotogénico de la noche. Disfrútala con responsabilidad.',
+    description: 'La piscina de la finca. Disfrútala con responsabilidad.',
+  },
+  parqueadero: {
+    name: 'Parqueadero',
+    description: 'Se paga al llegar, en la portería. Cupos limitados: llega temprano.',
   },
   casa: {
     name: 'La casa',
-    description: 'Aquí están las habitaciones en alquiler, la sala, los puestos de venta, la barra y los baños.',
+    description: 'Aquí están las habitaciones en alquiler, la sala, el comedor con cocina y los baños.',
   },
   room1: {
     name: 'Habitación 1',
-    description: '1 cama doble + 1 sencilla. De 3 a 5 personas, dentro de la casa. Incluye la entrada de todo el grupo.',
+    description: 'Dentro de la casa. Incluye la entrada de todo el grupo.',
   },
   room2: {
     name: 'Habitación 2',
-    description: '2 camas king. De 4 a 6 personas, dentro de la casa. Incluye la entrada de todo el grupo.',
+    description: 'Dentro de la casa. Incluye la entrada de todo el grupo.',
   },
   room3: {
     name: 'Habitación 3',
-    description: 'La grande: 1 cama doble + 2 sencillas, de 5 a 7 personas y con baño privado. Incluye la entrada de todo el grupo.',
+    description: 'Dentro de la casa. Incluye la entrada de todo el grupo.',
   },
-  bano3: {
-    name: 'Baño privado',
-    description: 'Baño privado de la Habitación 3, solo para ese grupo.',
-  },
-  noDisponible: {
-    name: 'No disponible',
-    description: 'Esta habitación no se alquila para la fiesta.',
+  room4: {
+    name: 'Habitación 4',
+    description: 'Dentro de la casa, con baño privado. Incluye la entrada de todo el grupo.',
   },
   bano: {
+    name: 'Baño',
+    description: 'Baño de la casa.',
+  },
+  bano2: {
     name: 'Baño',
     description: 'Baño de la casa.',
   },
@@ -205,25 +212,17 @@ export const MAP_ZONES = {
     name: 'Sala',
     description: 'Zona común de la casa para descansar un rato.',
   },
-  pasillo: {
-    name: 'Pasillo',
-    description: 'Pasillo de acceso a las habitaciones.',
+  comedorCocina: {
+    name: 'Comedor y cocina',
+    description: 'El comedor con cocina de la casa.',
   },
-  ventaPerfumes: {
-    name: 'Venta de perfumes',
-    description: 'Puesto de perfumes dentro de la casa.',
+  zonaVerde: {
+    name: 'Zona verde',
+    description: 'Zona verde de la finca.',
   },
-  ventaVapes: {
-    name: 'Venta de vaporizadores',
-    description: 'Puesto de vaporizadores. Venta solo a mayores de edad.',
-  },
-  ventaCocteles: {
-    name: 'Venta de cócteles',
-    description: 'Puesto de venta de cócteles.',
-  },
-  barra: {
-    name: 'Barra',
-    description: 'La barra de la casa: cócteles, licores y hidratación (agua, Gatorade, Electrolit).',
+  vista: {
+    name: 'Vista a toda Pereira',
+    description: 'Desde la finca se ve toda Pereira.',
   },
 };
 

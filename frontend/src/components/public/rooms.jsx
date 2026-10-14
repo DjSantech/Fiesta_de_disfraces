@@ -9,7 +9,7 @@ import { WhatsAppIcon } from './icons';
 export const ROOM_STATUS = {
   available: { label: 'Disponible', short: 'Libre', tone: 'toxic', color: '#22e584' },
   held: { label: 'Apartada · pago en curso', short: 'Apartada', tone: 'gold', color: '#f5c04a' },
-  booked: { label: 'Reservada', short: 'Reservada', tone: 'pumpkin', color: '#ff8a3d' },
+  booked: { label: 'Ocupada', short: 'Ocupada', tone: 'danger', color: '#ff4d5e' },
   blocked: { label: 'No disponible', short: 'No disponible', tone: 'neutral', color: '#6e6b78' },
 };
 
@@ -17,6 +17,7 @@ const TONES = {
   toxic: 'border-toxic/35 bg-toxic/10 text-toxic',
   gold: 'border-gold/35 bg-gold/10 text-gold',
   pumpkin: 'border-pumpkin/40 bg-pumpkin/12 text-pumpkin-light',
+  danger: 'border-danger/40 bg-danger/12 text-danger-light',
   neutral: 'border-white/12 bg-white/[0.05] text-fog',
 };
 
@@ -42,45 +43,38 @@ export function RoomStatusBadge({ status, known = true, short = false, className
   );
 }
 
-/** Mini plano de la fila de cuartos [X][1][2][X][3] con una habitación resaltada. */
+/** Mini plano de la casa (filas 1·2·baño·3 y comedor·baño·4) con una habitación resaltada. */
 export function RoomRowMini({ highlight, className }) {
   const cells = [
-    { key: 'x1', w: 18, label: '×' },
-    { key: 1, w: 22, label: '1' },
-    { key: 2, w: 22, label: '2' },
-    { key: 'x2', w: 18, label: '×' },
-    { key: 3, w: 34, label: '3' },
+    { key: 1, x: 1, y: 1, w: 28, h: 18, label: '1' },
+    { key: 2, x: 29, y: 1, w: 28, h: 18, label: '2' },
+    { key: 'b1', x: 57, y: 1, w: 12, h: 18 },
+    { key: 3, x: 69, y: 1, w: 34, h: 18, label: '3' },
+    { key: 'c', x: 1, y: 19, w: 44, h: 18 },
+    { key: 'b2', x: 45, y: 19, w: 12, h: 18 },
+    { key: 4, x: 57, y: 19, w: 46, h: 18, label: '4' },
   ];
-  let x = 1;
   return (
-    <svg viewBox="0 0 118 26" className={clsx('h-6 w-auto', className)} aria-hidden="true">
+    <svg viewBox="0 0 104 38" className={clsx('h-9 w-auto', className)} aria-hidden="true">
       {cells.map((c) => {
-        const cx = x;
-        x += c.w;
         const on = c.key === highlight;
-        const isX = typeof c.key === 'string';
         return (
           <g key={c.key}>
             <rect
-              x={cx}
-              y={1}
+              x={c.x}
+              y={c.y}
               width={c.w}
-              height={24}
+              height={c.h}
               rx={2}
               fill={on ? 'rgb(255 106 0 / 0.28)' : 'transparent'}
               stroke={on ? '#ff8a3d' : 'rgb(242 237 228 / 0.22)'}
               strokeWidth={on ? 1.4 : 1}
             />
-            <text
-              x={cx + c.w / 2}
-              y={17.5}
-              textAnchor="middle"
-              fontSize={isX ? 11 : 11}
-              fontFamily="Anton, Impact, sans-serif"
-              fill={on ? '#fff' : isX ? 'rgb(242 237 228 / 0.25)' : 'rgb(242 237 228 / 0.55)'}
-            >
-              {c.label}
-            </text>
+            {c.label && (
+              <text x={c.x + c.w / 2} y={c.y + 13} textAnchor="middle" fontSize="11" fontFamily="Anton, Impact, sans-serif" fill={on ? '#fff' : 'rgb(242 237 228 / 0.55)'}>
+                {c.label}
+              </text>
+            )}
           </g>
         );
       })}
@@ -150,7 +144,7 @@ function PerkCard({ perk, large = false }) {
 
 /**
  * Ventajas de reservar habitación.
- * variant="panel": bloque grande y llamativo (Home), muestra también el extra de la habitación grande.
+ * variant="panel": bloque grande y llamativo (Home), muestra también el extra del baño privado.
  * variant="compact": lista para el modal "Ver habitación" y la compra; suma el baño solo si la habitación lo tiene.
  */
 export function RoomPerks({ room, variant = 'compact', className }) {
