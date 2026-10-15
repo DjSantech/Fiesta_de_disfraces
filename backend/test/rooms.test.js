@@ -1,4 +1,4 @@
-// Habitaciones: 4 habitaciones, `reserved` (vendida fuera de la web) y migración de layout (layoutVersion 2).
+// Habitaciones: 4 habitaciones, `reserved` (vendida fuera de la web) y migración de layout (layoutVersion 2 y 3).
 import { test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { startDb, stopDb, setup, login, ticketOrder, buyer } from './helpers.js';
@@ -29,16 +29,17 @@ async function makeLegacy() {
   await Room.collection.updateOne({ number: 1 }, { $set: { price: 310000, presalePrice: 260000 } });
 }
 
-test('base nueva: 4 habitaciones con specs, layoutVersion 2 y sin reservar', async () => {
+test('base nueva: 4 habitaciones con specs, layoutVersion 3 y sin reservar', async () => {
   const r = await rooms();
   assert.deepEqual(Object.keys(r), ['1', '2', '3', '4']);
-  for (const x of Object.values(r)) { assert.equal(x.layoutVersion, 2); assert.equal(!!x.reserved, false); }
+  for (const x of Object.values(r)) { assert.equal(x.layoutVersion, 3); assert.equal(!!x.reserved, false); }
+  assert.equal(r[2].beds, 'Camarote de cama sencilla y dos camas king');
   assert.deepEqual([r[2].minPeople, r[2].capacity, r[2].privateBathroom], [4, 6, false]);
   assert.deepEqual([r[3].minPeople, r[3].capacity, r[3].privateBathroom], [6, 8, false]);
   assert.deepEqual([r[4].minPeople, r[4].capacity, r[4].privateBathroom, r[4].presalePrice, r[4].price], [6, 8, true, 500000, 600000]);
   const cfg = await api.get('/api/public/config');
   assert.equal(cfg.body.rooms.length, 4);
-  assert.ok(cfg.body.rooms.every((x) => x.status === 'available'));
+  assert.ok(cfg.body.rooms.every((x) => x.status === 'available' && x.reserved === false));
   const d = await A(api.get('/api/admin/dashboard'));
   assert.equal(d.body.rooms.total, 4);
   assert.equal(d.body.rooms.peopleCapacity, 5 + 6 + 8 + 8);
@@ -50,12 +51,12 @@ test('migración: base existente sin layoutVersion -> hab. 1 reservada, 2/3 con 
   const r = await rooms();
   assert.equal(r[1].reserved, true);
   assert.deepEqual([r[1].beds, r[1].capacity, r[1].price, r[1].presalePrice], ['1 cama doble + 1 sencilla', 5, 310000, 260000]);
-  assert.deepEqual([r[2].beds, r[2].minPeople, r[2].capacity, r[2].privateBathroom], ['Camarote de cama sencilla y cama king', 4, 6, false]);
+  assert.deepEqual([r[2].beds, r[2].minPeople, r[2].capacity, r[2].privateBathroom], ['Camarote de cama sencilla y dos camas king', 4, 6, false]);
   assert.deepEqual([r[2].name, r[2].price, r[2].presalePrice, r[2].blocked], ['Suite Dos', 430000, 360000, true]);
   assert.deepEqual([r[3].beds, r[3].minPeople, r[3].capacity, r[3].privateBathroom], ['Camarote de cama sencilla y cama king + 2 colchonetas adicionales', 6, 8, false]);
   assert.deepEqual([r[3].price, r[3].presalePrice], [610000, 510000]);
   assert.deepEqual([r[4].capacity, r[4].privateBathroom, r[4].reserved], [8, true, false]);
-  for (const x of Object.values(r)) assert.equal(x.layoutVersion, 2);
+  for (const x of Object.values(r)) assert.equal(x.layoutVersion, 3);
 
   // Hab. 1 no se puede comprar (quote, orden pública, venta manual).
   let res = await api.post('/api/public/quote').send({ kind: 'room', roomNumber: 1 });
@@ -65,10 +66,28 @@ test('migración: base existente sin layoutVersion -> hab. 1 reservada, 2/3 con 
   assert.equal(res.body.error.code, 'ROOM_UNAVAILABLE');
   res = await A(api.post('/api/admin/orders/manual')).send({ kind: 'room', gender: null, roomNumber: 1, buyer: buyer(), companions: [], manualMethod: 'efectivo', notes: '' });
   assert.equal(res.body.error.code, 'ROOM_UNAVAILABLE');
-  assert.equal((await api.get('/api/public/config')).body.rooms.find((x) => x.number === 1).status, 'booked');
+  const pub1 = (await api.get('/api/public/config')).body.rooms.find((x) => x.number === 1);
+  assert.deepEqual([pub1.status, pub1.reserved], ['booked', true]);
   // La hab. 4 sí se vende.
   res = await api.post('/api/public/orders').send(roomOrder({ roomNumber: 4 }));
   assert.equal(res.status, 201);
+});
+
+test('migración v3: desde layoutVersion 2 la hab. 2 cambia SOLO beds y conserva precios/nombre/bloqueo', async () => {
+  await Room.collection.updateMany({}, { $set: { layoutVersion: 2 } });
+  await Room.collection.updateOne({ number: 2 }, { $set: { name: 'Suite Dos', beds: 'Camarote de cama sencilla y cama king', price: 430000, presalePrice: 360000, blocked: true, capacity: 6, minPeople: 4 } });
+  await Room.collection.updateOne({ number: 1 }, { $set: { reserved: true } });
+  const before = await rooms();
+  await ensureBaseData(ctx.config, ctx.logger);
+  const r = await rooms();
+  assert.equal(r[2].beds, 'Camarote de cama sencilla y dos camas king');
+  assert.deepEqual([r[2].name, r[2].price, r[2].presalePrice, r[2].blocked, r[2].capacity, r[2].minPeople], ['Suite Dos', 430000, 360000, true, 6, 4]);
+  for (const n of [1, 2, 3, 4]) { assert.equal(r[n].layoutVersion, 3); assert.deepEqual({ ...r[n], beds: 0, layoutVersion: 0 }, { ...before[n], beds: 0, layoutVersion: 0 }); }
+  assert.equal(r[1].reserved, true);
+  // Idempotente: una edición posterior del admin no se pisa.
+  await A(api.put('/api/admin/rooms/2')).send({ beds: 'Otra cosa' });
+  await ensureBaseData(ctx.config, ctx.logger);
+  assert.equal((await rooms())[2].beds, 'Otra cosa');
 });
 
 test('migración idempotente: correrla otra vez no cambia nada (ni pisa lo que edite el admin)', async () => {

@@ -122,7 +122,7 @@ export function roomStatus(room, now = new Date()) {
 }
 export const roomPublic = (r, settings) => ({
   number: r.number, name: r.name, capacity: r.capacity, minPeople: r.minPeople ?? 1, price: r.price,
-  presalePrice: r.presalePrice ?? r.price, currentPrice: settings ? roomPriceAt(settings, r) : r.price, beds: r.beds || '', privateBathroom: !!r.privateBathroom, status: roomStatus(r),
+  presalePrice: r.presalePrice ?? r.price, currentPrice: settings ? roomPriceAt(settings, r) : r.price, beds: r.beds || '', privateBathroom: !!r.privateBathroom, reserved: !!r.reserved, status: roomStatus(r),
 });
 
 /**

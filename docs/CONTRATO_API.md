@@ -137,10 +137,10 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
   "guest": { "presaleDiscount": 5000, "generalDiscount": 0 },
   "parking": { "carro": 10000, "moto": 5000, "casco": 5000 },
   "rooms": [
-    { "number": 1, "name": "Habitación 1", "capacity": 5, "minPeople": 3, "price": 300000, "presalePrice": 250000, "currentPrice": 250000, "beds": "1 cama doble + 1 sencilla", "privateBathroom": false, "status": "booked" },
-    { "number": 2, "name": "Habitación 2", "capacity": 6, "minPeople": 4, "price": 420000, "presalePrice": 350000, "currentPrice": 350000, "beds": "Camarote de cama sencilla y cama king", "privateBathroom": false, "status": "available" },
-    { "number": 3, "name": "Habitación 3", "capacity": 8, "minPeople": 6, "price": 600000, "presalePrice": 500000, "currentPrice": 500000, "beds": "Camarote de cama sencilla y cama king + 2 colchonetas adicionales", "privateBathroom": false, "status": "available" },
-    { "number": 4, "name": "Habitación 4", "capacity": 8, "minPeople": 6, "price": 600000, "presalePrice": 500000, "currentPrice": 500000, "beds": "Camarote de cama sencilla + 2 camas sencillas", "privateBathroom": true, "status": "available" }
+    { "number": 1, "name": "Habitación 1", "capacity": 5, "minPeople": 3, "price": 300000, "presalePrice": 250000, "currentPrice": 250000, "beds": "1 cama doble + 1 sencilla", "privateBathroom": false, "reserved": false, "status": "booked" },
+    { "number": 2, "name": "Habitación 2", "capacity": 6, "minPeople": 4, "price": 420000, "presalePrice": 350000, "currentPrice": 350000, "beds": "Camarote de cama sencilla y dos camas king", "privateBathroom": false, "reserved": false, "status": "available" },
+    { "number": 3, "name": "Habitación 3", "capacity": 8, "minPeople": 6, "price": 600000, "presalePrice": 500000, "currentPrice": 500000, "beds": "Camarote de cama sencilla y cama king + 2 colchonetas adicionales", "privateBathroom": false, "reserved": false, "status": "available" },
+    { "number": 4, "name": "Habitación 4", "capacity": 8, "minPeople": 6, "price": 600000, "presalePrice": 500000, "currentPrice": 500000, "beds": "Camarote de cama sencilla + 2 camas sencillas", "privateBathroom": true, "reserved": false, "status": "available" }
   ],
   "paymentAccounts": [
     { "label": "Bre-B (llave)", "number": "3135995612", "holder": "" },
@@ -153,6 +153,8 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
 }
 ```
 - `counter`: `null` salvo que el admin active `publicCounter` → `{ "capacity": 120, "sold": 37, "remaining": 83, "over": 0 }` (`remaining = max(0, capacity − sold)`; `over` = cuántos pasan de la meta, 0 si no). `event.soldOut` es siempre `false`; `event.goalReached` = vendidas ≥ meta. El aforo es una meta: no bloquea ventas.
+- `rooms[].reserved` (boolean): `true` si el admin la marcó como vendida fuera de la web (su `status` es `booked`). El frontend la oculta de la lista pública de habitaciones pero el mapa la muestra ocupada. No se expone nada más de la reserva.
+- Migración de habitaciones `layoutVersion` 3 (idempotente, en el arranque): a toda habitación con `layoutVersion` < 3 (aplicando antes v2 si venía sin versión: hab. 1 `reserved`, specs de 2 y 3, crea la 4) se le fija SOLO `beds` de la hab. 2 a 'Camarote de cama sencilla y dos camas king' y `layoutVersion = 3`; precios, capacidad, nombre, bloqueos y reservas no cambian. Las bases nuevas nacen en v3.
 - `mercadoPago.enabled`: hay credenciales o está en modo simulado. `mock`: modo simulado activo.
 
 ### `POST /api/public/quote`
