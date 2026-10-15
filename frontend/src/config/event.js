@@ -18,6 +18,12 @@ export const EVENT = {
     'Ven disfrazado y vive la noche más terrorífica del año: finca, buena música, luces y el mejor ambiente.',
 };
 
+// Grupo de WhatsApp de la fiesta (enlace de invitación). Cámbialo aquí si el grupo cambia.
+export const WHATSAPP_GROUP = {
+  url: 'https://chat.whatsapp.com/C8mWDRiquy367nJTrAweSc',
+  label: 'Únete al grupo de WhatsApp',
+};
+
 // Patrocinadores: cuando lleguen los logos, ponlos en frontend/public/sponsors/ y llena `logo`
 // con la ruta pública, ej. logo: '/sponsors/powermix.png' (ver public/sponsors/LEEME.txt).
 export const SPONSORS = [

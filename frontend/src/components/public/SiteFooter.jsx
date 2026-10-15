@@ -4,6 +4,7 @@ import { ArrowUpRight, KeyRound, TicketCheck } from 'lucide-react';
 import { EVENT } from '../../config/event';
 import { whatsappLink } from '../../lib/format';
 import { InstagramIcon, WhatsAppIcon } from './icons';
+import { WHATSAPP_GROUP } from '../../config/event';
 import { Candelabra, Cobweb, Pumpkin } from './decor';
 import { usePublicConfig } from './usePublicConfig';
 
@@ -62,6 +63,15 @@ export default function SiteFooter({ compact = false }) {
                 <WhatsAppIcon className="h-5 w-5 text-toxic" />
                 WhatsApp · {prettyWhatsapp(contact.whatsapp)}
               </a>
+              <a
+                href={WHATSAPP_GROUP.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#2f7d55]/60 bg-[#12372a] px-4 text-sm font-semibold text-[#d6f5e3] transition hover:bg-[#17452f]"
+              >
+                <WhatsAppIcon className="h-5 w-5 text-[#4fd18b]" />
+                Grupo de WhatsApp
+              </a>
               {ig && (
                 <a
                   href={`https://instagram.com/${encodeURIComponent(ig)}`}
@@ -104,9 +114,12 @@ export default function SiteFooter({ compact = false }) {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/[0.07] py-6 text-xs text-fog/80 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {EVENT.year} {EVENT.name} · {EVENT.city}. Hecho para la noche más terrorífica del año.
-          </p>
+          <div className="flex flex-col gap-1.5">
+            <p>
+              © {EVENT.year} {EVENT.name} · {EVENT.city}. Hecho para la noche más terrorífica del año.
+            </p>
+            <p className="text-[11px] text-smoke">Medimos las visitas de forma anónima, sin guardar datos personales.</p>
+          </div>
           <Link to="/staff/login" className="inline-flex items-center gap-1 self-start text-smoke transition hover:text-fog sm:self-auto">
             Staff
             <ArrowUpRight className="h-3 w-3" />

@@ -5,6 +5,7 @@ import { formatCOP } from '../../../lib/format';
 import FincaMap from '../FincaMap';
 import { Reveal, SectionHeading } from '../ui';
 import { HeroCta } from './Hero';
+import WhatsAppLinks from '../WhatsAppLinks';
 
 const wrap = 'relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
 
@@ -154,6 +155,10 @@ export function FinalCta({ config }) {
         </p>
         <p className="mt-4 font-serif text-2xl italic text-fog">Ven disfrazado. El resto lo pone la noche.</p>
         <HeroCta config={config} className="mt-10" />
+        <div className="mt-8">
+          <p className="mb-3 text-sm text-fog">¿Dudas o quieres enterarte de todo? Entra al grupo o escríbele al admin.</p>
+          <WhatsAppLinks contact={config.contact} />
+        </div>
       </div>
     </section>
   );
