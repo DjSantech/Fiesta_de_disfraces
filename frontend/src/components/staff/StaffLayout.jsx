@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   BedDouble,
+  Eye,
   DoorOpen,
   LayoutDashboard,
   ListChecks,
@@ -25,6 +26,7 @@ const ADMIN_LINKS = [
   { to: '/staff/admin/habitaciones', label: 'Habitaciones', icon: BedDouble },
   { to: '/staff/admin/invitados', label: 'Invitados', icon: ListChecks },
   { to: '/staff/admin/gastos', label: 'Gastos', icon: Wallet },
+  { to: '/staff/admin/visitas', label: 'Visitas', icon: Eye },
   { to: '/staff/admin/ajustes', label: 'Ajustes', icon: Settings },
   { to: '/staff/admin/usuarios', label: 'Usuarios', icon: UserCog },
   { to: '/staff/admin/auditoria', label: 'Auditoría', icon: ScrollText },

@@ -16,6 +16,7 @@ import {
 } from '../middleware/validate.js';
 import { getSettings, updateSettings, roomStatus } from '../services/core.js';
 import { presentOrder, approveOrder, rejectOrder, createManualOrder } from '../services/orders.js';
+import { visitStats } from '../services/visits.js';
 import { dashboard, exportCsv, EXPORT_DATASETS, expenseTotals } from '../services/reports.js';
 import { voidEntry } from '../services/ops.js';
 import { orderAdmin, ticketAdmin, guestOut, expenseOut, userOut, settingsOut } from '../services/serializers.js';
@@ -33,6 +34,11 @@ export function adminRouter() {
   const r = express.Router();
 
   r.get('/dashboard', async (req, res) => res.json(await dashboard()));
+
+  // ---------- Visitas (analítica anónima) ----------
+  r.get('/visits', validate({
+    query: z.object({ days: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().min(1).max(90).default(14)) }),
+  }), async (req, res) => res.json(await visitStats(req.valid.query.days)));
 
   // ---------- Órdenes ----------
   r.get('/orders', validate({

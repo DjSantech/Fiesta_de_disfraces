@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { PageSpinner } from './components/ui';
 import RequireRole from './components/staff/RequireRole';
 import StaffLayout from './components/staff/StaffLayout';
+import useTrackVisit from './components/public/useTrackVisit';
 
 // Web pública
 const Home = lazy(() => import('./pages/public/Home'));
@@ -26,6 +27,7 @@ const Expenses = lazy(() => import('./pages/staff/admin/Expenses'));
 const Settings = lazy(() => import('./pages/staff/admin/Settings'));
 const Users = lazy(() => import('./pages/staff/admin/Users'));
 const Audit = lazy(() => import('./pages/staff/admin/Audit'));
+const Visits = lazy(() => import('./pages/staff/admin/Visits'));
 const Door = lazy(() => import('./pages/staff/door/Door'));
 const Bar = lazy(() => import('./pages/staff/bar/Bar'));
 
@@ -38,10 +40,17 @@ function ScrollToTop() {
   return null;
 }
 
+// Medidor de visitas anónimo: un evento por cambio de ruta pública.
+function VisitTracker() {
+  useTrackVisit();
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <VisitTracker />
       <Suspense fallback={<PageSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -71,6 +80,7 @@ export default function App() {
               <Route path="gastos" element={<Expenses />} />
               <Route path="ajustes" element={<Settings />} />
               <Route path="usuarios" element={<Users />} />
+              <Route path="visitas" element={<Visits />} />
               <Route path="auditoria" element={<Audit />} />
             </Route>
             <Route

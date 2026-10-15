@@ -7,6 +7,7 @@ import {
   ChevronRight,
   CircleCheck,
   DoorOpen,
+  Eye,
   Gift,
   Hourglass,
   Receipt,
@@ -23,6 +24,7 @@ import PageHeader, { SectionTitle } from '../../../components/staff/admin/PageHe
 import ErrorState from '../../../components/staff/admin/ErrorState';
 import CoverageCard from '../../../components/staff/admin/CoverageCard';
 import { BarList, ProgressBar, StackedBar } from '../../../components/staff/admin/Charts';
+import { DayBars, LivePulse } from '../../../components/staff/admin/VisitWidgets';
 import { useNow } from '../../../components/staff/admin/hooks';
 import { plural } from '../../../components/staff/admin/utils';
 
@@ -114,6 +116,43 @@ function Alerts({ alerts, tickets }) {
         );
       })}
     </div>
+  );
+}
+
+/** Medidor de visitantes (analítica anónima). Carga aparte: si falla no afecta al resto del resumen. */
+function VisitorsCard() {
+  const { data, error, loading } = useFetch((signal) => staffApi('/api/admin/visits?days=7', { signal }), [], { interval: REFRESH_MS });
+  const live = (data?.now.visitors5m || 0) > 0;
+  return (
+    <Card className={clsx('flex flex-col gap-4 sm:p-6', live && 'border-toxic/25')}>
+      <SectionTitle icon={Eye} action={<CardLink to="/staff/admin/visitas">Ver detalle</CardLink>}>
+        Visitantes
+      </SectionTitle>
+      {!data ? (
+        <p className="py-6 text-center text-sm text-smoke">{loading ? 'Cargando visitas…' : error ? 'No pudimos cargar las visitas ahora.' : 'Sin datos'}</p>
+      ) : (
+        <div className="grid items-end gap-5 sm:grid-cols-[auto_1fr] sm:gap-8">
+          <div className="flex items-end gap-5 sm:gap-7">
+            <div className="flex items-center gap-3">
+              <LivePulse active={live} />
+              <div>
+                <p className="text-4xl font-bold tabular-nums leading-none text-bone">{formatNumber(data.now.visitors5m)}</p>
+                <p className="mt-1.5 text-xs text-fog">ahora mismo</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-2xl font-bold tabular-nums leading-none text-bone">{formatNumber(data.today.visitors)}</p>
+              <p className="mt-1.5 text-xs text-fog">hoy</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold tabular-nums leading-none text-bone">{formatNumber(data.range.visitors)}</p>
+              <p className="mt-1.5 text-xs text-fog">7 días</p>
+            </div>
+          </div>
+          <DayBars days={data.byDay} height="h-16" />
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -376,6 +415,7 @@ export default function Dashboard() {
       {header}
       <div className="flex flex-col gap-4">
         <Alerts alerts={data.alerts} tickets={data.tickets} />
+        <VisitorsCard />
         {live && door}
         <div className="grid gap-4 lg:grid-cols-12">
           <div className="lg:col-span-7">

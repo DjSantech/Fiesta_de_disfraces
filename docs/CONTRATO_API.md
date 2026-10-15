@@ -242,6 +242,13 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
 
 `200` siempre con la misma forma: `{ "found": true, "ambiguous": false, "kind": "cortesia"|"descuento"|null, "discountPercent": null, "phase": "preventa", "presaleDiscount": 5000, "generalDiscount": 0, "redeemed": false, "firstName": "Juan" }`. `kind="cortesia"` si `guest.discountPercent` es 100; `discountPercent` solo viene si es % propio < 100, si no `null`. Si varios invitados coinciden por nombre: `found:false, ambiguous:true`. Sin coincidencia: `found:false`, resto `null`/`false`. Nunca devuelve cédula, celular, Instagram ni apellidos. `400 VALIDATION_ERROR` si `query` es inválido.
 
+### `POST /api/public/track`
+Medidor de visitas anónimo (ver ARQUITECTURA §11). Sin auth. Rate limit 120/min por IP (`429 RATE_LIMITED`). Acepta `application/json` o `text/plain` con el JSON (para `sendBeacon`/`fetch` sin preflight).
+```json
+{ "vid": "3f9a1c2b7d4e4f60a1b2c3d4e5f60718", "path": "/comprar", "referrer": "https://l.instagram.com/", "utm": "instagram" }
+```
+`vid`: 16–40 caracteres `[A-Za-z0-9_-]` (id aleatorio del navegador). `path` ≤ 120 (se normaliza: sin query/hash, `/orden/<token>` → `/orden`, `/entrada/<token>` → `/entrada`; `/staff*` se ignora). `referrer` ≤ 300 y `utm` ≤ 40 (valor de `?utm_source` o `?src`) solo sirven para derivar `source` y no se guardan. El servidor deriva `device` y descarta bots a partir del header `User-Agent` (no se guarda). **Responde `204` siempre**, también si el evento se ignora (bot, ruta de staff, body inválido o duplicado: mismo `vid`+`path` en menos de 30 s). Se guarda solo `{ at, day, vid, path, source, device }`.
+
 ---
 
 ## 2. Auth de staff
@@ -285,6 +292,25 @@ Consulta si alguien está en la lista de invitados. Rate limit 8/min y 40/hora p
 - `tickets.sold` = tickets `valid`+`used` de tipo `general` y `cortesia` (no cuenta habitaciones).
 - `income.*` solo cuenta órdenes `paid`, entradas de puerta no anuladas y ventas de barra no anuladas (cortesías valen $0).
 - `balance.net = income.total − expenses.total`; `coveredPercent = min(100, income.total / expenses.total × 100)` (100 si no hay gastos), 1 decimal.
+
+### Visitas
+#### `GET /api/admin/visits?days=14`
+`days` entero 1–90 (defecto 14; fuera de rango → `400 VALIDATION_ERROR`). Días en zona America/Bogota; el rango incluye hoy.
+```json
+{
+  "now": { "visitors5m": 2, "visitors30m": 5 },
+  "today": { "visitors": 31, "pageviews": 80 },
+  "range": { "days": 14, "visitors": 210, "pageviews": 590, "returning": 40 },
+  "byDay": [ { "day": "2026-10-01", "visitors": 12, "pageviews": 30 } ],
+  "byPage": [ { "path": "/", "visitors": 190, "pageviews": 260 } ],
+  "bySource": [ { "source": "instagram", "visitors": 120 } ],
+  "byDevice": [ { "device": "movil", "visitors": 170 } ],
+  "funnel": { "visitors": 210, "visitedBuy": 80, "orders": 22, "paid": 15, "conversionPercent": 10.5 }
+}
+```
+- `visitors` = ids `vid` distintos; `pageviews` = eventos guardados. `returning` = visitantes que aparecen en más de un día del rango.
+- `byDay`: todos los días del rango, en orden ascendente, con ceros. `byPage`: top 8 por páginas vistas. `bySource`/`byDevice`: visitantes únicos atribuidos a la primera visita del rango, orden descendente.
+- `funnel.orders` = órdenes creadas en el rango con estado distinto de `cancelled` (las compras eliminadas ya no existen); `paid` = órdenes creadas en el rango con estado `paid`; `conversionPercent = orders / visitors × 100`, 1 decimal (0 sin visitantes).
 
 ### Órdenes (personas registradas)
 

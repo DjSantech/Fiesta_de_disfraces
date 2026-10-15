@@ -205,3 +205,17 @@ Login con usuario/contraseña → JWT (12 h) en `localStorage` (`fd_staff_token`
 | Orquestador / QA | compartidos: `App.jsx`, `main.jsx`, `index.css`, `lib/**`, `components/ui/**`, `components/staff/*.jsx`, `pages/staff/Login.jsx`, `pages/staff/StaffHome.jsx`, `package.json` | — |
 
 Si un agente necesita cambiar un archivo compartido o agregar una dependencia, no lo hace: lo crea dentro de su carpeta o lo reporta en su informe final.
+
+## 11. Analítica anónima (medidor de visitas)
+
+Medidor propio para que el admin vea cuánta gente visita la web, sin servicios externos ni cookies de terceros.
+
+**Qué se guarda** (colección `visits`, un documento por página vista): `at` (fecha/hora), `day` (`YYYY-MM-DD` en America/Bogota), `vid` (id aleatorio de 16–40 caracteres generado en el navegador y guardado en `localStorage` `fd_vid`; no identifica a una persona, solo a un navegador), `path` (ruta normalizada: sin query ni hash; `/orden/<token>` → `/orden`, `/entrada/<token>` → `/entrada`), `source` (`instagram|whatsapp|facebook|tiktok|google|directo|otro`, derivada de `?utm_source`/`?src` o del dominio del referrer) y `device` (`movil|escritorio|tablet`, derivado del user-agent).
+
+**Qué NO se guarda:** IP, user-agent, referrer (solo se usa su dominio en memoria para derivar `source` y se descarta), query strings, tokens de órdenes/entradas, cédula, nombre, celular ni correo. La IP solo se usa en memoria para el rate limit (120/min por IP). Los bots (user-agent con bot/crawl/spider/preview/whatsapp/headless/lighthouse/monitor/uptime…) se ignoran.
+
+**Minimización y retención (Ley 1581 de 2012):** solo los datos estrictamente necesarios para estadísticas agregadas, sin datos personales ni identificadores entre sitios; índice TTL de **180 días** sobre `at` (Mongo borra solo). La web lo informa en el pie ("Medimos las visitas de forma anónima, sin guardar datos personales").
+
+**Cliente** (`components/public/useTrackVisit.js`, montado en `App.jsx`): un evento por cambio de ruta pública con `fetch` `keepalive` (`text/plain`, sin cookies; usa `navigator.sendBeacon` si no hay fetch). No envía nada si hay sesión de staff (`fd_staff_token`), `navigator.doNotTrack === '1'`, la ruta empieza por `/staff`, o el usuario pidió `?notrack=1` (se recuerda en `fd_notrack`). El referrer solo va en la primera página de la sesión. Cualquier fallo se ignora en silencio.
+
+**Servidor:** `POST /api/public/track` responde siempre 204; el mismo `vid`+`path` no se cuenta más de una vez cada 30 s (en memoria). Estadísticas en `GET /api/admin/visits` (ver CONTRATO_API "Visitas"); panel en `/staff/admin/visitas` y tarjeta "Visitantes" en el Resumen. La fuente de cada visitante en las estadísticas es la de su primera visita del rango, así la suma de fuentes = visitantes únicos.

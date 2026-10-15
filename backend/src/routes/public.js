@@ -15,6 +15,7 @@ import {
 import { verifyWebhookSignature } from '../services/mercadopago.js';
 import { guestCheck } from '../services/guestcheck.js';
 import { ticketPublic } from '../services/serializers.js';
+import { createTracker } from '../services/visits.js';
 
 const crossChecks = (v, ctx) => {
   if (v?.kind === 'ticket' && !v.gender) ctx.addIssue({ code: 'custom', path: ['gender'], message: 'Elige mujer u hombre.' });
@@ -53,8 +54,29 @@ const webhookBody = z.looseObject({
   data: z.looseObject({ id: idLike }).optional(), id: idLike,
 });
 
+const trackBody = z.object({
+  vid: z.string().regex(/^[A-Za-z0-9_-]{16,40}$/),
+  path: z.string().max(120),
+  referrer: z.string().max(300).optional(),
+  utm: z.string().max(40).optional(),
+});
+
 export function publicRouter(ctx, limits) {
   const r = express.Router();
+  const track = createTracker(ctx);
+
+  // Analítica anónima. Siempre 204 (aunque se ignore). Acepta JSON o text/plain (sendBeacon/fetch sin preflight).
+  r.post('/track', limits.track, express.text({ type: 'text/plain', limit: '4kb' }), async (req, res) => {
+    try {
+      let body = req.body;
+      if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = null; } }
+      const parsed = trackBody.safeParse(body || {});
+      if (parsed.success) await track(parsed.data, req.get('user-agent'));
+    } catch (err) {
+      ctx.logger.warn?.(`track: ${err.message}`);
+    }
+    res.status(204).end();
+  });
 
   r.get('/config', async (req, res) => {
     const settings = await getSettings();

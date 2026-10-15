@@ -247,3 +247,22 @@ const auditSchema = new Schema({
   meta: { type: Schema.Types.Mixed, default: {} },
 }, { versionKey: false, minimize: false });
 export const AuditLog = mongoose.model('AuditLog', auditSchema, 'auditlogs');
+
+// ---------- Visitas (analítica anónima; ver ARQUITECTURA §Analítica anónima) ----------
+// Sin IP, sin user-agent, sin referrer completo: solo id aleatorio del navegador, ruta normalizada, fuente y tipo de dispositivo.
+export const VISIT_SOURCES = ['instagram', 'whatsapp', 'facebook', 'tiktok', 'google', 'directo', 'otro'];
+export const VISIT_DEVICES = ['movil', 'escritorio', 'tablet'];
+const visitSchema = new Schema({
+  at: { type: Date, required: true, default: () => new Date() },
+  day: { type: String, required: true }, // YYYY-MM-DD en America/Bogota
+  vid: { type: String, required: true },
+  path: { type: String, required: true },
+  source: { type: String, enum: VISIT_SOURCES, default: 'directo' },
+  device: { type: String, enum: VISIT_DEVICES, default: 'escritorio' },
+}, { versionKey: false });
+visitSchema.index({ at: -1 });
+visitSchema.index({ at: 1 }, { expireAfterSeconds: 180 * 86400 }); // TTL 180 días
+visitSchema.index({ day: 1 });
+visitSchema.index({ day: 1, vid: 1 });
+export const Visit = mongoose.model('Visit', visitSchema, 'visits');
+allModels.push(Visit);

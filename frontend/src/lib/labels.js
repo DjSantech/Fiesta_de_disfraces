@@ -125,6 +125,34 @@ export const ROLE_LABEL = {
   barra: 'Barra',
 };
 
+export const VISIT_SOURCE_LABEL = {
+  instagram: 'Instagram',
+  whatsapp: 'WhatsApp',
+  facebook: 'Facebook',
+  tiktok: 'TikTok',
+  google: 'Google',
+  directo: 'Directo',
+  otro: 'Otro',
+};
+
+export const VISIT_DEVICE_LABEL = {
+  movil: 'Móvil',
+  escritorio: 'Escritorio',
+  tablet: 'Tablet',
+};
+
+export const VISIT_PATH_LABEL = {
+  '/': 'Inicio',
+  '/comprar': 'Comprar',
+  '/recuperar': 'Recuperar entrada',
+  '/pago/resultado': 'Resultado de pago',
+  '/pago/simulado': 'Pago simulado',
+  '/orden': 'Estado de la compra',
+  '/entrada': 'Mi entrada',
+};
+
+export const visitPathLabel = (path) => VISIT_PATH_LABEL[path] || path;
+
 /** Convierte un mapa de etiquetas en opciones [{ value, label }] para Select/Segmented */
 export function toOptions(labelMap) {
   return Object.entries(labelMap).map(([value, label]) => ({ value, label }));
