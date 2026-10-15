@@ -204,11 +204,37 @@ export function RoomHelpNote({ contact = {}, room, className }) {
   );
 }
 
-/** Miniatura de la primera foto de la habitación. */
-export function RoomThumb({ number, className }) {
-  const photo = ROOM_PHOTOS[number]?.[0];
+/** Habitaciones que se ofrecen en la web: las vendidas fuera de ella (`reserved: true`) no se listan. */
+export const publicRooms = (rooms) => (rooms || []).filter((r) => r.reserved !== true);
+
+/** ¿Tiene fotos para mostrar? (la habitación 1 no tiene.) */
+export const roomHasPhotos = (number) => (ROOM_PHOTOS[number]?.length || 0) > 0;
+
+/**
+ * Foto principal de la habitación. Si hay una segunda foto con `label` (el baño privado de la 4) y se pasa
+ * `onOpen`, la sobrepone como miniatura con su etiqueta; al tocarla se abre el modal con ambas fotos.
+ */
+export function RoomThumb({ number, className, taken = false, onOpen }) {
+  const photos = ROOM_PHOTOS[number] || [];
+  const photo = photos[0];
   if (!photo) return null;
-  return <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className={clsx('object-cover', className)} />;
+  const extra = photos[1];
+  return (
+    <div className={clsx('relative overflow-hidden', className)}>
+      <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className={clsx('h-full w-full object-cover', taken && 'grayscale-[0.7] brightness-[0.65]')} />
+      {extra && onOpen && (
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-label={`${extra.label || 'Ver otra foto'}: abrir las fotos de la habitación`}
+          className="absolute bottom-2.5 right-2.5 w-[5.5rem] overflow-hidden rounded-xl border-2 border-white/80 bg-black/80 shadow-[0_6px_20px_-4px_rgb(0_0_0/0.8)] transition hover:border-pumpkin focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <img src={extra.src} alt="" loading="lazy" decoding="async" className="h-14 w-full object-cover" />
+          <span className="block bg-black/85 px-1 py-1 text-center text-[11px] font-semibold leading-none text-bone">{extra.label || 'Ver más'}</span>
+        </button>
+      )}
+    </div>
+  );
 }
 
 /** Galería accesible: flechas, miniaturas y teclado. */

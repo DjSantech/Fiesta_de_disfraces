@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowRight, Bath, BedDouble, Eye, Map as MapIcon, TicketCheck, Users } from 'lucide-react';
 import { ROOMS_COPY } from '../../../config/event';
-import { ROOM_STATUS, RoomHelpNote, RoomPerks, RoomPriceLine, RoomRowMini, RoomStatusBadge, RoomThumb, RoomViewModal, roomPeopleText } from '../rooms';
+import { ROOM_STATUS, RoomHelpNote, RoomPerks, RoomPriceLine, RoomRowMini, RoomStatusBadge, RoomThumb, RoomViewModal, publicRooms, roomPeopleText } from '../rooms';
 import { Cobweb } from '../decor';
 import { Reveal, SectionHeading } from '../ui';
 
@@ -27,7 +27,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
       <Cobweb corner={index % 2 ? 'tl' : 'tr'} className={clsx('absolute top-0 h-20 w-20', index % 2 ? 'left-0' : 'right-0')} opacity={0.2} />
       <div className="-mx-6 -mt-6 mb-5 sm:-mx-7 sm:-mt-7">
         <div className="relative">
-          <RoomThumb number={room.number} className={clsx('h-44 w-full', taken && 'grayscale-[0.7] brightness-[0.65]')} />
+          <RoomThumb number={room.number} taken={taken} onOpen={() => onView(room.number)} className="h-44 w-full" />
           {taken && (
             <span className="absolute left-4 top-4 rounded-full border border-danger/50 bg-ink/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-danger-light backdrop-blur">
               Ocupada
@@ -108,7 +108,7 @@ function RoomCard({ room, known, salesOpen, index, phase, onView }) {
 }
 
 export default function RoomsSection({ config, known }) {
-  const rooms = config.rooms || [];
+  const rooms = publicRooms(config.rooms);
   const [includes, perGroup] = ROOMS_COPY.includes.split(' · ');
   const contact = config.contact || {};
   const phase = config.event?.phase;
@@ -133,7 +133,7 @@ export default function RoomsSection({ config, known }) {
           <RoomPerks variant="panel" />
         </Reveal>
 
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:gap-5">
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
           {rooms.map((room, i) => (
             <RoomCard key={room.number} room={room} known={known} salesOpen={config.event.salesOpen !== false} index={i} phase={phase} onView={setViewing} />
           ))}

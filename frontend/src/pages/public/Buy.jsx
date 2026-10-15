@@ -8,7 +8,7 @@ import { formatCOP } from '../../lib/format';
 import { LEGAL } from '../../config/event';
 import PublicLayout, { PageAtmosphere, PageContainer } from '../../components/public/PublicLayout';
 import { PolicyModal, PriceBreakdown, TransferPanel } from '../../components/public/payment';
-import { RoomHelpNote, RoomPerks, RoomStatusBadge, roomPeopleText, roomPricing } from '../../components/public/rooms';
+import { RoomHelpNote, RoomPerks, RoomStatusBadge, publicRooms, roomPeopleText, roomPricing } from '../../components/public/rooms';
 import WhatsAppButton from '../../components/public/WhatsAppButton';
 import { Notice } from '../../components/public/ui';
 import { salesState, usePublicConfig, loadPublicConfig } from '../../components/public/usePublicConfig';
@@ -107,7 +107,8 @@ export default function Buy() {
   const topRef = useRef(null);
 
   const state = salesState(config);
-  const room = config.rooms.find((r) => r.number === roomNumber) || null;
+  const sellableRooms = publicRooms(config.rooms);
+  const room = sellableRooms.find((r) => r.number === roomNumber) || null;
   const maxCompanions = room ? room.capacity - 1 : 0;
   useEffect(() => {
     if (kind === 'room' && room && companions.length > maxCompanions) setCompanions((l) => l.slice(0, maxCompanions));
@@ -271,7 +272,7 @@ export default function Buy() {
 
               {kind === 'room' && salesOpen && (
                 <div role="radiogroup" aria-label="Habitación" className="grid gap-3">
-                  {config.rooms.map((r) => {
+                  {sellableRooms.map((r) => {
                     const free = r.status === 'available' || !live;
                     return (
                       <OptionCard

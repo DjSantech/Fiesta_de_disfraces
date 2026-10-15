@@ -150,5 +150,5 @@ export function salesState(config) {
 }
 
 export function roomsAvailable(config) {
-  return (config?.rooms || []).some((r) => r.status === 'available');
+  return (config?.rooms || []).some((r) => r.reserved !== true && r.status === 'available');
 }

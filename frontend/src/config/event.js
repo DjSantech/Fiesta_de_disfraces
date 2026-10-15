@@ -49,8 +49,8 @@ export const FALLBACK_CONFIG = {
   guest: { presaleDiscount: 5000, generalDiscount: 0 },
   parking: { carro: 10000, moto: 5000, casco: 5000 },
   rooms: [
-    { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, currentPrice: 250000, privateBathroom: false, status: 'booked' },
-    { number: 2, name: 'Habitación 2', beds: 'Camarote de cama sencilla y cama king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, currentPrice: 350000, privateBathroom: false, status: 'available' },
+    { number: 1, name: 'Habitación 1', beds: '1 cama doble + 1 sencilla', minPeople: 3, capacity: 5, presalePrice: 250000, price: 300000, currentPrice: 250000, privateBathroom: false, status: 'booked', reserved: true },
+    { number: 2, name: 'Habitación 2', beds: 'Camarote de cama sencilla y dos camas king', minPeople: 4, capacity: 6, presalePrice: 350000, price: 420000, currentPrice: 350000, privateBathroom: false, status: 'available' },
     { number: 3, name: 'Habitación 3', beds: 'Camarote de cama sencilla y cama king + 2 colchonetas adicionales', minPeople: 6, capacity: 8, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: false, status: 'available' },
     { number: 4, name: 'Habitación 4', beds: 'Camarote de cama sencilla + 2 camas sencillas', minPeople: 6, capacity: 8, presalePrice: 500000, price: 600000, currentPrice: 500000, privateBathroom: true, status: 'available' },
   ],
@@ -111,12 +111,12 @@ export const ROOMS_COPY = {
 
 /** Fotos por número de habitación (public/habitaciones). */
 export const ROOM_PHOTOS = {
-  1: [{ src: '/habitaciones/hab-1-cama-doble-y-sencilla.jpg', alt: 'Habitación 1: una cama doble y una cama sencilla' }],
-  2: [{ src: '/habitaciones/hab-2.jpg', alt: 'Habitación 2: camarote de cama sencilla y cama king' }],
+  1: [], // sin foto: vendida fuera de la web, solo aparece en el mapa como ocupada
+  2: [{ src: '/habitaciones/hab-2.jpg', alt: 'Habitación 2: camarote de cama sencilla y dos camas king' }],
   3: [{ src: '/habitaciones/hab-3.jpg', alt: 'Habitación 3: camarote de cama sencilla y cama king, con colchonetas adicionales' }],
   4: [
     { src: '/habitaciones/hab-4.jpg', alt: 'Habitación 4: camarote de cama sencilla y dos camas sencillas' },
-    { src: '/habitaciones/hab-4-bano.jpg', alt: 'Baño privado de la habitación 4' },
+    { src: '/habitaciones/hab-4-bano.jpg', alt: 'Baño privado de la habitación 4', label: 'Baño privado' },
   ],
 };
 
@@ -186,7 +186,7 @@ export const MAP_ZONES = {
   },
   room1: {
     name: 'Habitación 1',
-    description: 'Dentro de la casa. Incluye la entrada de todo el grupo.',
+    description: 'Dentro de la casa. Ya está ocupada.',
   },
   room2: {
     name: 'Habitación 2',
