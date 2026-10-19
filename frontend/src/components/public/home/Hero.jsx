@@ -109,7 +109,7 @@ export default function Hero({ config, ready }) {
   const time = formatTime(config.event.startsAt);
   const meta = [
     { icon: CalendarDays, text: `${EVENT.dateLabel}${time ? ` · ${time}` : ''}` },
-    { icon: MapPin, text: `${EVENT.venue} · ${EVENT.zone} · ubicación exacta el 31` },
+    { icon: MapPin, text: `${EVENT.venue} · ubicación exacta el 31` },
     { icon: Disc3, text: '3 DJs diferentes' },
   ];
 
