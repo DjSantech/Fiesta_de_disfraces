@@ -27,6 +27,7 @@ export const Settings = mongoose.model('Settings', new Schema({
   contact: { whatsapp: String, instagram: String, adminName: String },
   location: { revealed: Boolean, name: String, mapsUrl: String, notes: String },
   publicCounter: Boolean,
+  jumpscare: Boolean,
 }, { ...opts, minimize: false, collection: 'settings' }));
 
 // ---------- Habitaciones ----------

@@ -264,3 +264,20 @@ test('migración: paymentAccounts con Daviplata pasa a Bre-B + Nequi', async () 
   s = await Settings.findOne().lean();
   assert.deepEqual(s.paymentAccounts.map((a) => a.label), ['Otra']);
 });
+
+test('susto al entrar: activo por defecto, migra en legacy y el admin lo apaga', async () => {
+  let r = await api.get('/api/public/config');
+  assert.equal(r.body.jumpscare, true);
+  await Settings.collection.updateOne({ _id: 'main' }, { $unset: { jumpscare: '' } });
+  const { ensureBaseData } = await import('../src/services/bootstrap.js');
+  await ensureBaseData({ adminPassword: '' }, { warn() {} });
+  assert.equal((await Settings.collection.findOne({ _id: 'main' })).jumpscare, true);
+  r = await api.put('/api/admin/settings').set('Authorization', admin).send({ jumpscare: false });
+  assert.equal(r.status, 200);
+  assert.equal(r.body.settings.jumpscare, false);
+  r = await api.get('/api/public/config');
+  assert.equal(r.body.jumpscare, false);
+  // Si el admin lo apagó, la migración no lo vuelve a prender.
+  await ensureBaseData({ adminPassword: '' }, { warn() {} });
+  assert.equal((await api.get('/api/public/config')).body.jumpscare, false);
+});

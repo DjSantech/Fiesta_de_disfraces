@@ -369,6 +369,7 @@ export function adminRouter() {
         notes: optText(300).optional(),
       }).optional(),
       publicCounter: z.boolean().optional(),
+      jumpscare: z.boolean().optional(),
     }),
   }), async (req, res) => res.json({ settings: settingsOut(await updateSettings(req.valid.body)) }));
 

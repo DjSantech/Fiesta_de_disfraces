@@ -126,5 +126,6 @@ export const settingsOut = (s) => ({
   contact: { whatsapp: s.contact.whatsapp, instagram: s.contact.instagram, adminName: s.contact.adminName },
   location: { revealed: !!s.location.revealed, name: s.location.name, mapsUrl: s.location.mapsUrl, notes: s.location.notes },
   publicCounter: !!s.publicCounter,
+  jumpscare: s.jumpscare !== false,
   updatedAt: iso(s.updatedAt),
 });

@@ -95,6 +95,7 @@ export function publicRouter(ctx, limits) {
       transferInstructions: settings.transferInstructions,
       contact: { ...settings.contact },
       mercadoPago: { enabled: ctx.mp.enabled, mock: ctx.mp.mock },
+      jumpscare: settings.jumpscare !== false,
       counter: settings.publicCounter
         ? { capacity: settings.capacity, sold: taken, remaining: Math.max(0, settings.capacity - taken), over: Math.max(0, taken - settings.capacity) }
         : null,

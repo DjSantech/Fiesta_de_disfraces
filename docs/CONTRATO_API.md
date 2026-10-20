@@ -149,6 +149,7 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
   "transferInstructions": "Transfiere el valor exacto y sube el pantallazo del comprobante. Te confirmamos en pocas horas.",
   "contact": { "whatsapp": "573135995612", "instagram": "", "adminName": "DJ Santech" },
   "mercadoPago": { "enabled": true, "mock": true },
+  "jumpscare": true,
   "counter": null
 }
 ```
@@ -156,6 +157,7 @@ En habitaciones: `base` = precio de la habitación, `isGuest: false`, `discountP
 - `rooms[].reserved` (boolean): `true` si el admin la marcó como vendida fuera de la web (su `status` es `booked`). El frontend la oculta de la lista pública de habitaciones pero el mapa la muestra ocupada. No se expone nada más de la reserva.
 - Migración de habitaciones `layoutVersion` 3 (idempotente, en el arranque): a toda habitación con `layoutVersion` < 3 (aplicando antes v2 si venía sin versión: hab. 1 `reserved`, specs de 2 y 3, crea la 4) se le fija SOLO `beds` de la hab. 2 a 'Camarote de cama sencilla y dos camas king' y `layoutVersion = 3`; precios, capacidad, nombre, bloqueos y reservas no cambian. Las bases nuevas nacen en v3.
 - `mercadoPago.enabled`: hay credenciales o está en modo simulado. `mock`: modo simulado activo.
+- `jumpscare` (boolean): susto (screamer) al tocar «Entrar» en la intro de la home. `true` por defecto; el admin lo apaga en Ajustes → Web pública. Las bases que no tenían el campo lo reciben en `true` al arrancar (si el admin lo apagó, se respeta).
 
 ### `POST /api/public/quote`
 Calcula el precio antes de comprar (muestra el descuento de invitado). Rate limit 30/min/IP.
@@ -419,6 +421,7 @@ Medidor de visitas anónimo (ver ARQUITECTURA §11). Sin auth. Rate limit 120/mi
   "contact": { "whatsapp": "573135995612", "instagram": "", "adminName": "DJ Santech" },
   "location": { "revealed": false, "name": "", "mapsUrl": "", "notes": "" },
   "publicCounter": false,
+  "jumpscare": true,
   "updatedAt": "..."
 }
 ```

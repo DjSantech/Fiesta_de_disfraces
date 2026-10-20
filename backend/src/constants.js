@@ -55,6 +55,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   contact: { whatsapp: '573135995612', instagram: '', adminName: 'DJ Santech' },
   location: { revealed: false, name: '', mapsUrl: '', notes: '' },
   publicCounter: false,
+  jumpscare: true, // susto (screamer) al entrar a la web pública
 });
 
 export const ROOM_LAYOUT_VERSION = 3; // 2 = 4 habitaciones (hab. 1 reservada fuera de la web); 3 = hab. 2 con dos camas king

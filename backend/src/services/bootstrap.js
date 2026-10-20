@@ -32,8 +32,8 @@ async function migrateRoomLayout() {
 export async function ensureBaseData(config, logger) {
   await Promise.all(allModels.map((m) => m.init())); // índices únicos listos antes de atender
   await Settings.updateOne({ _id: SETTINGS_ID }, { $setOnInsert: DEFAULT_SETTINGS }, { upsert: true });
-  // Migración: reglas de invitados (reemplazan guestDiscountPercent).
-  for (const k of ['guestPresaleDiscount', 'guestGeneralDiscount']) {
+  // Migración: reglas de invitados (reemplazan guestDiscountPercent) y susto al entrar (nuevo, activo por defecto).
+  for (const k of ['guestPresaleDiscount', 'guestGeneralDiscount', 'jumpscare']) {
     await Settings.updateOne({ _id: SETTINGS_ID, [k]: { $exists: false } }, { $set: { [k]: DEFAULT_SETTINGS[k] } });
   }
   await Settings.collection.updateOne({ _id: SETTINGS_ID }, { $unset: { guestDiscountPercent: '' } });
