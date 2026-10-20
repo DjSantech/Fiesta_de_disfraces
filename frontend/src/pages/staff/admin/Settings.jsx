@@ -253,7 +253,7 @@ export default function Settings() {
         <Section id="web" icon={Ghost} title="Web pública">
           <Switch
             label="Susto al entrar a la web"
-            description="Al tocar «Entrar» en la intro suena un grito y sale una cara. Una vez por visita; nunca al staff ni en compra, entrada o portería. Pruébalo con /?susto=1."
+            description="Al abrir la web, antes de la intro, suena un grito y sale una cara (si el navegador no deja sonar solo, primero pide tocar la pantalla). Una vez por visita; nunca al staff ni en compra, entrada o portería. Pruébalo con /?susto=1."
             checked={form.jumpscare}
             onChange={(v) => set('jumpscare', v)}
           />

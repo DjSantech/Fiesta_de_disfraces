@@ -9,7 +9,7 @@ Web para promocionar y vender la fiesta de disfraces del **sábado 31 de octubre
 
 | Módulo | Quién lo usa | Para qué |
 |---|---|---|
-| Web pública | Asistentes (llegan desde Instagram, en el celular) | Intro (con susto opcional al tocar «Entrar»), info, mapa de la finca, precios, habitaciones, patrocinadores, compra de entrada, ver su QR |
+| Web pública | Asistentes (llegan desde Instagram, en el celular) | Susto opcional al abrir + intro, info, mapa de la finca, precios, habitaciones, patrocinadores, compra de entrada, ver su QR |
 | Admin | DJ Santech (organizador) | Ver compras y personas registradas, aprobar transferencias, lista de invitados, gastos, ajustes, usuarios, finanzas |
 | Portería | Quien recibe gente en la entrada / seguridad | Escanear QR únicos, vender en puerta, registrar vehículos y cascos, ver el aforo |
 | Barra | Quien vende en la barra | Punto de venta de cócteles, licores, Gatorade, agua, Electrolit, perfumes; CRUD de productos; cuentas |

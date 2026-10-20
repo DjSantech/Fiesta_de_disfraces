@@ -6,7 +6,6 @@ import { Embers } from './ui';
 import { Cobweb, Pumpkin } from './decor';
 import { KEYS, session } from './utils/storage';
 import { lockScroll } from './utils/scrollLock';
-import { playScare, prepareScare } from './Jumpscare';
 
 const EASE = [0.16, 1, 0.3, 1];
 const AUTO_EXIT_MS = 6400;
@@ -31,17 +30,13 @@ export function markIntroSeen() {
 /**
  * Intro cinematográfica a pantalla completa (~5 s): negro, grano, neón rojo dañado,
  * "DJ SANTECH PRESENTA", revelado del título, fecha y tagline. Botones Entrar / Saltar.
- * Con `scare` (susto armado) no sale sola: espera el toque, y Entrar o Saltar disparan el grito
- * dentro del clic (el navegador no deja sonar audio sin un gesto del usuario).
+ * Si el susto está activo, la intro sale después de él (ver Jumpscare.jsx y pages/public/Home.jsx).
  */
-export default function Intro({ onDone, scare = false, onScare }) {
+export default function Intro({ onDone }) {
   const doneRef = useRef(false);
   const skipRef = useRef(null);
-  const audioRef = useRef(null);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
-  const onScareRef = useRef(onScare);
-  onScareRef.current = onScare;
 
   const finish = () => {
     if (doneRef.current) return;
@@ -49,35 +44,17 @@ export default function Intro({ onDone, scare = false, onScare }) {
     onDoneRef.current?.();
   };
 
-  const enter = () => {
-    if (doneRef.current) return;
-    if (scare) {
-      playScare(audioRef.current);
-      onScareRef.current?.();
-    }
-    finish();
-  };
-
-  // Con susto armado la intro espera el toque; si no, sale sola.
-  useEffect(() => {
-    if (scare) {
-      if (!audioRef.current) audioRef.current = prepareScare();
-      return undefined;
-    }
-    const timer = setTimeout(finish, AUTO_EXIT_MS);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scare]);
-
   useEffect(() => {
     markIntroSeen();
     const unlock = lockScroll();
     skipRef.current?.focus({ preventScroll: true });
+    const timer = setTimeout(finish, AUTO_EXIT_MS);
     const onKey = (e) => {
       if (e.key === 'Escape') finish();
     };
     document.addEventListener('keydown', onKey);
     return () => {
+      clearTimeout(timer);
       document.removeEventListener('keydown', onKey);
       unlock();
     };
@@ -115,7 +92,7 @@ export default function Intro({ onDone, scare = false, onScare }) {
         <m.button
           ref={skipRef}
           type="button"
-          onClick={enter}
+          onClick={finish}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
@@ -206,18 +183,16 @@ export default function Intro({ onDone, scare = false, onScare }) {
         >
           <button
             type="button"
-            onClick={enter}
+            onClick={finish}
             className="fd-shine group inline-flex h-14 items-center gap-3 rounded-full border border-pumpkin/60 bg-pumpkin/15 px-9 font-display text-lg uppercase tracking-[0.2em] text-bone shadow-[0_0_40px_-8px_rgb(255_106_0/0.9)] transition hover:bg-pumpkin/30"
           >
             Entrar
             <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
           </button>
-          {scare && <p className="mt-4 text-xs font-medium uppercase tracking-[0.22em] text-fog">🎧 Sube el volumen para vivir la experiencia</p>}
         </m.div>
       </m.div>
 
       {/* Barra de progreso sutil hasta la salida automática */}
-      {!scare && (
       <m.div
         aria-hidden="true"
         className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-linear-to-r from-pumpkin-dark via-pumpkin to-ember"
@@ -225,7 +200,6 @@ export default function Intro({ onDone, scare = false, onScare }) {
         animate={{ scaleX: 1 }}
         transition={{ duration: AUTO_EXIT_MS / 1000, ease: 'linear' }}
       />
-      )}
     </m.div>
   );
 }

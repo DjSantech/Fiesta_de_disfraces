@@ -1,20 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { m } from 'motion/react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { Fingerprint } from 'lucide-react';
 import { KEYS, local, session } from './utils/storage';
 import { lockScroll } from './utils/scrollLock';
 
-// Susto (screamer) al tocar "Entrar" en la intro. Créditos de la imagen y el grito: docs/CREDITOS.md.
-// El navegador solo deja sonar audio tras un toque, por eso el grito arranca en el clic de la intro
-// (playScare) y este componente solo pinta: estática → cara → "TE VEMOS EL 31" → mensaje tranquilo.
+// Susto (screamer) al cargar la home, ANTES de la intro. Créditos de la imagen y el grito: docs/CREDITOS.md.
+// 1) Intenta sonar sin toque (algunos navegadores lo permiten) → el susto sale de una.
+// 2) Si el navegador lo bloquea (lo normal en celular / Instagram), pide "pon tu dedo aquí" y el
+//    grito arranca dentro de ese clic. Luego: estática → cara → "TE VEMOS EL 31" → onDone (sigue la intro).
 // Seguridad: un solo destello rojo, nada de parpadeos rápidos y menos de 2 s de imagen.
 
 export const SUSTO = { image: '/susto/cara.jpg', sound: '/susto/grito.mp3' };
 
+const PROBE_MS = 1200; // tiempo máximo esperando a que el navegador deje sonar sin toque
 const STATIC_MS = 110;
 const FACE_END_MS = 1900;
-const TEXT_END_MS = 2600;
+const TEXT_END_MS = 3000;
 
 const param = (name) => {
   try {
@@ -212,39 +213,135 @@ function Face({ calm }) {
   );
 }
 
-export default function Jumpscare({ onDone }) {
+/** Pantalla negra que pide el toque: sin él, el navegador no deja sonar el grito. */
+function Gate({ onTap }) {
+  const btnRef = useRef(null);
+  useEffect(() => btnRef.current?.focus({ preventScroll: true }), []);
+  return (
+    <m.button
+      ref={btnRef}
+      type="button"
+      onClick={onTap}
+      className="absolute inset-0 flex w-full flex-col items-center justify-center bg-[#030304] px-6 text-center focus:outline-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_35%_at_50%_46%,rgb(255_106_0/0.14),transparent_70%)]" />
+      <span className="relative text-[11px] font-semibold uppercase tracking-[0.38em] text-fog">Fiesta de Disfraces · 31·10</span>
+      <span className="relative mt-10 flex h-28 w-28 animate-pulse-glow items-center justify-center rounded-full border border-pumpkin/50 bg-pumpkin/10 text-pumpkin-light">
+        <Fingerprint className="h-14 w-14" strokeWidth={1.25} />
+      </span>
+      <span className="relative mt-8 font-display text-[length:clamp(2.2rem,9vw,3.6rem)] uppercase leading-none tracking-wide text-bone">Pon tu dedo aquí</span>
+      <span className="relative mt-4 text-xs font-medium uppercase tracking-[0.22em] text-fog">🎧 Sube el volumen al máximo</span>
+    </m.button>
+  );
+}
+
+/** `enabled` en false (el admin lo apagó) cierra el susto si aún no arrancó. */
+export default function Jumpscare({ onDone, enabled = true }) {
   const calm = reducedMotion();
-  const [phase, setPhase] = useState(calm ? 'face' : 'static');
+  const [phase, setPhase] = useState('probe'); // probe → gate → static → face → text
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const audioRef = useRef(null);
   const staticRef = useRef(null);
   const grainRef = useRef(null);
-  const closeRef = useRef(null);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+  const waiting = phase === 'probe' || phase === 'gate';
 
   useStatic(staticRef, phase === 'static');
   useStatic(grainRef, phase === 'face' && !calm);
 
+  const start = useCallback(() => setPhase(calm ? 'face' : 'static'), [calm]);
+
+  // Intento sin toque: si el navegador deja sonar, arranca ya; si no (o tarda), pide el toque.
   useEffect(() => {
-    const unlock = lockScroll();
+    const audio = prepareScare();
+    audioRef.current = audio;
+    if (!audio || document.hidden) {
+      setPhase('gate');
+      return undefined;
+    }
+    let done = false;
+    const toGate = () => {
+      if (done) return;
+      done = true;
+      setPhase((p) => (p === 'probe' ? 'gate' : p));
+    };
+    const timer = setTimeout(() => {
+      audio.pause();
+      toGate();
+    }, PROBE_MS);
+    try {
+      audio.volume = 1;
+      audio.play().then(
+        () => {
+          clearTimeout(timer);
+          if (done) {
+            audio.pause(); // llegó tarde: ya se ve la pantalla de toque
+            audio.currentTime = 0;
+            return;
+          }
+          done = true;
+          session.set(KEYS.scareSeen, '1');
+          start();
+        },
+        () => {
+          clearTimeout(timer);
+          toGate();
+        },
+      );
+    } catch {
+      clearTimeout(timer);
+      toGate();
+    }
+    return () => {
+      clearTimeout(timer);
+      if (!done) {
+        done = true;
+        audio.pause();
+      }
+    };
+  }, [start]);
+
+  const tap = () => {
+    if (phaseRef.current !== 'gate') return;
+    playScare(audioRef.current);
+    start();
+  };
+
+  // Línea de tiempo desde que arranca el susto.
+  useEffect(() => {
+    if (waiting) return undefined;
     const timers = [
       !calm && setTimeout(() => setPhase('face'), STATIC_MS),
       setTimeout(() => setPhase('text'), FACE_END_MS),
-      setTimeout(() => setPhase('calm'), TEXT_END_MS),
+      setTimeout(() => onDoneRef.current?.(), TEXT_END_MS),
     ].filter(Boolean);
+    return () => timers.forEach(clearTimeout);
+  }, [waiting, calm]);
+
+  useEffect(() => {
+    if (enabled || !waiting || param('susto') === '1') return;
+    audioRef.current?.pause();
+    onDoneRef.current?.();
+  }, [enabled, waiting]);
+
+  useEffect(() => {
+    const unlock = lockScroll();
     const onKey = (e) => {
-      if (e.key === 'Escape') onDoneRef.current?.();
+      if (e.key !== 'Escape') return;
+      audioRef.current?.pause();
+      onDoneRef.current?.();
     };
     document.addEventListener('keydown', onKey);
     return () => {
-      timers.forEach(clearTimeout);
       document.removeEventListener('keydown', onKey);
       unlock();
     };
-  }, [calm]);
-
-  useEffect(() => {
-    if (phase === 'calm') closeRef.current?.focus({ preventScroll: true });
-  }, [phase]);
+  }, []);
 
   return (
     <m.div
@@ -253,8 +350,10 @@ export default function Jumpscare({ onDone }) {
       aria-label="Susto de bienvenida"
       className="fixed inset-0 z-[90] overflow-hidden bg-black text-bone"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.5 } }}
+      exit={{ opacity: 0, transition: { duration: 0.6 } }}
     >
+      {phase === 'gate' && <Gate onTap={tap} />}
+
       {phase === 'static' && (
         <canvas ref={staticRef} width={200} height={120} aria-hidden="true" className="absolute inset-0 h-full w-full [image-rendering:pixelated]" />
       )}
@@ -286,38 +385,6 @@ export default function Jumpscare({ onDone }) {
             <span className="text-[#ff2a1a]">el 31</span>
           </p>
         </div>
-      )}
-
-      {phase === 'calm' && (
-        <m.div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(60%_50%_at_50%_45%,rgb(120_10_0/0.45),transparent_70%)] px-6 text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        >
-          <p className="text-5xl" aria-hidden="true">😈</p>
-          <h2 className="mt-4 font-display text-[length:clamp(2.6rem,9vw,4.5rem)] uppercase leading-none tracking-wide">¿Te asustaste?</h2>
-          <p className="mt-3 font-serif text-2xl italic text-fog sm:text-3xl">Esto apenas empieza.</p>
-          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.3em] text-pumpkin-light">Sábado 31 de octubre · Pereira</p>
-          <div className="mt-9 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
-            <Link
-              to="/comprar"
-              onClick={() => onDoneRef.current?.()}
-              className="fd-shine group inline-flex h-13 items-center justify-center gap-2 rounded-full bg-pumpkin px-8 font-display text-lg uppercase tracking-[0.16em] text-white shadow-[0_0_40px_-8px_rgb(255_106_0/0.9)] transition hover:bg-pumpkin-light"
-            >
-              Comprar entrada
-              <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-            </Link>
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={() => onDoneRef.current?.()}
-              className="inline-flex h-13 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] px-8 text-sm font-semibold uppercase tracking-[0.2em] text-fog transition hover:border-white/35 hover:text-bone"
-            >
-              Seguir
-            </button>
-          </div>
-        </m.div>
       )}
     </m.div>
   );

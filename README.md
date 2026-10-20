@@ -30,4 +30,4 @@ npm run seed:demo       # (otra terminal, opcional) usuarios puerta/barra, produ
 | Textos, mapa, FAQ | `frontend/src/config/event.js` |
 | Precios, fechas, aforo, cuentas, descuento, ubicación | Panel admin → Ajustes |
 | Lista de invitados | Panel admin → Invitados → "Pegar lista" |
-| Susto al entrar (grito + cara al tocar «Entrar») | Panel admin → Ajustes → Web pública · probar con `/?susto=1` · imagen y sonido en `frontend/public/susto/` (créditos en `docs/CREDITOS.md`) |
+| Susto al entrar (grito + cara antes de la intro) | Panel admin → Ajustes → Web pública · probar con `/?susto=1` · imagen y sonido en `frontend/public/susto/` (créditos en `docs/CREDITOS.md`) |

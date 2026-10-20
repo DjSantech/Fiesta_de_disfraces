@@ -19,8 +19,8 @@ import { dayMonth } from '../../components/public/utils/dates';
 export default function Home() {
   const { config, source } = usePublicConfig({ refreshInterval: 60000 });
   const [introOpen, setIntroOpen] = useState(() => shouldShowIntro());
-  const [scareOpen, setScareOpen] = useState(false);
-  const scareArmed = introOpen && !scareOpen && jumpscareArmed(config.jumpscare);
+  // El susto va primero; al terminar sigue la intro.
+  const [scareOpen, setScareOpen] = useState(() => shouldShowIntro() && jumpscareArmed(config.jumpscare));
   const known = source !== 'fallback';
 
   useEffect(() => {
@@ -36,9 +36,9 @@ export default function Home() {
   return (
     <PublicLayout header="home" footer="full">
       <AnimatePresence>
-        {introOpen && <Intro key="intro" scare={scareArmed} onScare={() => setScareOpen(true)} onDone={() => setIntroOpen(false)} />}
+        {scareOpen && <Jumpscare key="susto" enabled={config.jumpscare !== false} onDone={() => setScareOpen(false)} />}
       </AnimatePresence>
-      <AnimatePresence>{scareOpen && <Jumpscare key="susto" onDone={() => setScareOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{introOpen && !scareOpen && <Intro key="intro" onDone={() => setIntroOpen(false)} />}</AnimatePresence>
       <Hero config={config} ready={!introOpen && !scareOpen} />
       <Highlights />
       <Marquee items={[phaseText, ...MARQUEE]} />
