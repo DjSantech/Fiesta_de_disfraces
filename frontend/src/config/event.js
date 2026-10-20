@@ -67,6 +67,7 @@ export const FALLBACK_CONFIG = {
     'Transfiere el valor exacto y sube el pantallazo del comprobante. Te confirmamos en pocas horas.',
   contact: { whatsapp: '573135995612', instagram: '', adminName: 'DJ Santech' },
   mercadoPago: { enabled: true, mock: false },
+  jumpscare: true,
   counter: null,
 };
 

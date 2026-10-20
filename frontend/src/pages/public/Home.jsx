@@ -3,6 +3,7 @@ import { AnimatePresence } from 'motion/react';
 import { MARQUEE } from '../../config/event';
 import PublicLayout from '../../components/public/PublicLayout';
 import Intro, { shouldShowIntro } from '../../components/public/Intro';
+import Jumpscare, { jumpscareArmed } from '../../components/public/Jumpscare';
 import Hero from '../../components/public/home/Hero';
 import Highlights from '../../components/public/home/Highlights';
 import NightSection from '../../components/public/home/NightSection';
@@ -18,6 +19,8 @@ import { dayMonth } from '../../components/public/utils/dates';
 export default function Home() {
   const { config, source } = usePublicConfig({ refreshInterval: 60000 });
   const [introOpen, setIntroOpen] = useState(() => shouldShowIntro());
+  const [scareOpen, setScareOpen] = useState(false);
+  const scareArmed = introOpen && !scareOpen && jumpscareArmed(config.jumpscare);
   const known = source !== 'fallback';
 
   useEffect(() => {
@@ -32,8 +35,11 @@ export default function Home() {
 
   return (
     <PublicLayout header="home" footer="full">
-      <AnimatePresence>{introOpen && <Intro key="intro" onDone={() => setIntroOpen(false)} />}</AnimatePresence>
-      <Hero config={config} ready={!introOpen} />
+      <AnimatePresence>
+        {introOpen && <Intro key="intro" scare={scareArmed} onScare={() => setScareOpen(true)} onDone={() => setIntroOpen(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>{scareOpen && <Jumpscare key="susto" onDone={() => setScareOpen(false)} />}</AnimatePresence>
+      <Hero config={config} ready={!introOpen && !scareOpen} />
       <Highlights />
       <Marquee items={[phaseText, ...MARQUEE]} />
       <NightSection />
@@ -47,7 +53,7 @@ export default function Home() {
       <FaqSection />
       <SponsorsSection />
       <FinalCta config={config} />
-      {!introOpen && <LastOrderNotice />}
+      {!introOpen && !scareOpen && <LastOrderNotice />}
     </PublicLayout>
   );
 }

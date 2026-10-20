@@ -57,6 +57,7 @@ export const session = createStore('sessionStorage');
 export const KEYS = {
   lastOrder: 'fd_last_order',
   introSeen: 'fd_intro_seen',
+  scareSeen: 'fd_susto_visto',
   celebrated: 'fd_celebrated',
   noticeDismissed: 'fd_notice_dismissed',
   buyDraft: 'fd_buy_draft',

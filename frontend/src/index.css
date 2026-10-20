@@ -159,6 +159,30 @@
     mask-composite: exclude;
     z-index: -1;
   }
+
+  /* Susto al entrar (components/public/Jumpscare.jsx) */
+  .fd-susto-scan {
+    background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.38) 0 2px, transparent 2px 4px);
+  }
+  .fd-susto-eye {
+    animation: susto-eye 0.32s ease-in-out infinite alternate;
+  }
+  @keyframes susto-eye {
+    from { opacity: 0.75; scale: 0.9; }
+    to { opacity: 1; scale: 1.25; }
+  }
+  .fd-susto-text {
+    color: var(--color-bone);
+    text-shadow: -4px 0 rgb(255 30 20 / 0.85), 4px 0 rgb(0 220 255 / 0.55), 0 0 40px rgb(255 20 0 / 0.6);
+    animation: susto-jitter 0.18s steps(2) infinite;
+  }
+  @keyframes susto-jitter {
+    0% { transform: translate(0, 0) skewX(0deg); }
+    25% { transform: translate(-6px, 2px) skewX(-6deg); }
+    50% { transform: translate(5px, -3px) skewX(4deg); }
+    75% { transform: translate(-3px, -1px) skewX(0deg); }
+    100% { transform: translate(4px, 3px) skewX(-3deg); }
+  }
 }
 
 /* Movimiento reducido: apaga animaciones largas */

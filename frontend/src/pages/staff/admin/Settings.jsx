@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarClock, CircleAlert, Contact, CreditCard, MapPin, Plus, Save, Tags, Ticket, Trash2 } from 'lucide-react';
+import { CalendarClock, CircleAlert, Contact, CreditCard, Ghost, MapPin, Plus, Save, Tags, Ticket, Trash2 } from 'lucide-react';
 import { Button, Card, Input, PageSpinner, Switch, Textarea, useToast } from '../../../components/ui';
 import { staffApi } from '../../../lib/api';
 import { useFetch } from '../../../lib/useFetch';
@@ -19,6 +19,7 @@ function toForm(s) {
     salesOpen: Boolean(s.salesOpen),
     capacity: s.capacity ?? null,
     publicCounter: Boolean(s.publicCounter),
+    jumpscare: s.jumpscare !== false,
     prices: {
       preventa: { mujer: s.prices?.preventa?.mujer ?? null, hombre: s.prices?.preventa?.hombre ?? null },
       puerta: { mujer: s.prices?.puerta?.mujer ?? null, hombre: s.prices?.puerta?.hombre ?? null },
@@ -76,7 +77,7 @@ function Section({ id, icon: Icon, title, description, children }) {
 }
 
 const SECTIONS = [
-  ['evento', 'Evento'], ['ventas', 'Ventas'], ['precios', 'Precios'], ['pagos', 'Pagos'], ['contacto', 'Contacto'], ['ubicacion', 'Ubicación'],
+  ['evento', 'Evento'], ['ventas', 'Ventas'], ['precios', 'Precios'], ['pagos', 'Pagos'], ['contacto', 'Contacto'], ['ubicacion', 'Ubicación'], ['web', 'Web'],
 ];
 
 export default function Settings() {
@@ -247,6 +248,15 @@ export default function Settings() {
               onChange={askReveal}
             />
           </div>
+        </Section>
+
+        <Section id="web" icon={Ghost} title="Web pública">
+          <Switch
+            label="Susto al entrar a la web"
+            description="Al tocar «Entrar» en la intro suena un grito y sale una cara. Una vez por visita; nunca al staff ni en compra, entrada o portería. Pruébalo con /?susto=1."
+            checked={form.jumpscare}
+            onChange={(v) => set('jumpscare', v)}
+          />
         </Section>
       </div>
 
