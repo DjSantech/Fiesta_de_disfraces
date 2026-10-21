@@ -3,11 +3,12 @@ import { m } from 'motion/react';
 import { Fingerprint } from 'lucide-react';
 import { KEYS, local, session } from './utils/storage';
 import { lockScroll } from './utils/scrollLock';
+import { unlockPromoVideo } from './PromoVideo';
 
 // Susto (screamer) al cargar la home, ANTES de la intro. Créditos de la imagen y el grito: docs/CREDITOS.md.
 // 1) Intenta sonar sin toque (algunos navegadores lo permiten) → el susto sale de una.
 // 2) Si el navegador lo bloquea (lo normal en celular / Instagram), pide "pon tu dedo aquí" y el
-//    grito arranca dentro de ese clic. Luego: estática → cara → "TE VEMOS EL 31" → onDone (sigue la intro).
+//    grito arranca dentro de ese clic. Luego: estática → cara → "TE VEMOS EL 31" → onDone(true) (sigue el video).
 // Seguridad: un solo destello rojo, nada de parpadeos rápidos y menos de 2 s de imagen.
 
 export const SUSTO = { image: '/susto/cara.jpg', sound: '/susto/grito.mp3' };
@@ -309,6 +310,7 @@ export default function Jumpscare({ onDone, enabled = true }) {
   const tap = () => {
     if (phaseRef.current !== 'gate') return;
     playScare(audioRef.current);
+    unlockPromoVideo();
     start();
   };
 
@@ -318,7 +320,7 @@ export default function Jumpscare({ onDone, enabled = true }) {
     const timers = [
       !calm && setTimeout(() => setPhase('face'), STATIC_MS),
       setTimeout(() => setPhase('text'), FACE_END_MS),
-      setTimeout(() => onDoneRef.current?.(), TEXT_END_MS),
+      setTimeout(() => onDoneRef.current?.(true), TEXT_END_MS), // true = el susto se vio completo
     ].filter(Boolean);
     return () => timers.forEach(clearTimeout);
   }, [waiting, calm]);
