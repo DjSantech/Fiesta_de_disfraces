@@ -3,7 +3,7 @@ import { m } from 'motion/react';
 import { Volume2, X } from 'lucide-react';
 import { lockScroll } from './utils/scrollLock';
 
-// Video de la fiesta (56 s) a pantalla completa justo después del susto.
+// Video de la fiesta (43 s) a pantalla completa justo después del susto.
 // Solo se descarga cuando se muestra. Si el navegador no deja sonar, arranca en silencio con
 // botón "Activar sonido"; si no arranca en 6 s (conexión lenta) o falla, sigue a la web.
 
