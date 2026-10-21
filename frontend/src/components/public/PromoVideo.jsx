@@ -3,12 +3,12 @@ import { m } from 'motion/react';
 import { Volume2, X } from 'lucide-react';
 import { lockScroll } from './utils/scrollLock';
 
-// Video de la fiesta (el de Instagram, 43 s) a pantalla completa justo después del susto.
+// Video de la fiesta (56 s) a pantalla completa justo después del susto.
 // Solo se descarga cuando se muestra. Si el navegador no deja sonar, arranca en silencio con
-// botón "Activar sonido"; si no arranca en 4 s (conexión lenta) o falla, sigue a la web.
+// botón "Activar sonido"; si no arranca en 6 s (conexión lenta) o falla, sigue a la web.
 
 export const PROMO_VIDEO = { src: '/video/fiesta.mp4', poster: '/video/fiesta-poster.jpg' };
-const START_TIMEOUT_MS = 4000;
+const START_TIMEOUT_MS = 6000;
 
 // Un solo <video> para toda la visita: se "desbloquea" dentro del toque del susto (unlockPromoVideo)
 // para que después pueda sonar; en iPhone el permiso es por elemento.
