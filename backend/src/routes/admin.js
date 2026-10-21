@@ -1,7 +1,7 @@
 // Panel de administración (rol admin): /api/admin/*
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { Order, Ticket, Receipt, Guest, Expense, Room, User, DoorEntry, AuditLog } from '../models/index.js';
+import { Order, Ticket, Receipt, Guest, Expense, Room, User, DoorEntry, AuditLog, Promoter } from '../models/index.js';
 import {
   ORDER_STATUSES, ORDER_KINDS, ORDER_PAYMENT_METHODS, MANUAL_METHODS, GENDERS, TICKET_STATUSES, TICKET_KINDS,
   EXPENSE_CATEGORIES, ROLES,
@@ -17,6 +17,7 @@ import {
 import { getSettings, updateSettings, roomStatus } from '../services/core.js';
 import { presentOrder, approveOrder, rejectOrder, createManualOrder } from '../services/orders.js';
 import { visitStats } from '../services/visits.js';
+import { promoterTotals, promoterOut } from '../services/promoters.js';
 import { dashboard, exportCsv, EXPORT_DATASETS, expenseTotals } from '../services/reports.js';
 import { voidEntry } from '../services/ops.js';
 import { orderAdmin, ticketAdmin, guestOut, expenseOut, userOut, settingsOut } from '../services/serializers.js';
@@ -39,6 +40,24 @@ export function adminRouter() {
   r.get('/visits', validate({
     query: z.object({ days: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().min(1).max(90).default(14)) }),
   }), async (req, res) => res.json(await visitStats(req.valid.query.days)));
+
+  // ---------- Promotores ----------
+  r.get('/promoters', async (req, res) => {
+    const list = await Promoter.find().sort({ createdAt: -1 }).lean();
+    const totals = await promoterTotals(list);
+    const items = list.map((p) => ({ ...promoterOut(p), stats: totals.get(String(p._id)) }));
+    items.sort((a, b) => b.stats.sold - a.stats.sold || b.stats.visits - a.stats.visits);
+    res.json({ items });
+  });
+  r.put('/promoters/:id', validate({ params: idParam, body: z.object({ active: z.boolean({ error: 'Indica si queda activo.' }) }) }), async (req, res) => {
+    const { active } = req.valid.body;
+    const update = { $set: { active } };
+    if (!active) update.$inc = { tokenVersion: 1 }; // cierra sus sesiones
+    const p = await Promoter.findByIdAndUpdate(req.valid.params.id, update, { returnDocument: 'after' }).lean();
+    if (!p) throw notFound('No encontramos ese promotor.');
+    const totals = await promoterTotals([p]);
+    res.json({ promoter: { ...promoterOut(p), stats: totals.get(String(p._id)) } });
+  });
 
   // ---------- Órdenes ----------
   r.get('/orders', validate({

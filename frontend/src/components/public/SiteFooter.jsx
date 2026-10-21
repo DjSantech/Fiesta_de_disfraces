@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowUpRight, KeyRound, TicketCheck } from 'lucide-react';
+import { ArrowUpRight, KeyRound, Megaphone, TicketCheck } from 'lucide-react';
 import { EVENT } from '../../config/event';
 import { whatsappLink } from '../../lib/format';
 import { InstagramIcon, WhatsAppIcon } from './icons';
@@ -98,6 +98,12 @@ export default function SiteFooter({ compact = false }) {
                 <Link to="/recuperar" className="inline-flex items-center gap-2 py-1.5 text-bone transition hover:text-pumpkin-light">
                   <KeyRound className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
                   Recuperar mi entrada
+                </Link>
+              </li>
+              <li>
+                <Link to="/promotores" className="inline-flex items-center gap-2 py-1.5 text-bone transition hover:text-pumpkin-light">
+                  <Megaphone className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
+                  Promotores: vende boletas
                 </Link>
               </li>
             </ul>

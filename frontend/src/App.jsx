@@ -4,6 +4,7 @@ import { PageSpinner } from './components/ui';
 import RequireRole from './components/staff/RequireRole';
 import StaffLayout from './components/staff/StaffLayout';
 import useTrackVisit from './components/public/useTrackVisit';
+import { useReferral } from './components/public/referral';
 
 // Web pública
 const Home = lazy(() => import('./pages/public/Home'));
@@ -14,6 +15,8 @@ const OrderStatus = lazy(() => import('./pages/public/OrderStatus'));
 const Ticket = lazy(() => import('./pages/public/Ticket'));
 const Recover = lazy(() => import('./pages/public/Recover'));
 const NotFound = lazy(() => import('./pages/public/NotFound'));
+const Promoters = lazy(() => import('./pages/public/Promoters'));
+const PromoterPanel = lazy(() => import('./pages/public/PromoterPanel'));
 
 // Staff
 const Login = lazy(() => import('./pages/staff/Login'));
@@ -28,6 +31,7 @@ const Settings = lazy(() => import('./pages/staff/admin/Settings'));
 const Users = lazy(() => import('./pages/staff/admin/Users'));
 const Audit = lazy(() => import('./pages/staff/admin/Audit'));
 const Visits = lazy(() => import('./pages/staff/admin/Visits'));
+const AdminPromoters = lazy(() => import('./pages/staff/admin/Promoters'));
 const Door = lazy(() => import('./pages/staff/door/Door'));
 const Bar = lazy(() => import('./pages/staff/bar/Bar'));
 
@@ -46,11 +50,18 @@ function VisitTracker() {
   return null;
 }
 
+// Link de promotores: guarda ?ref=CODIGO (30 días) y registra la visita.
+function ReferralTracker() {
+  useReferral();
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <VisitTracker />
+      <ReferralTracker />
       <Suspense fallback={<PageSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -60,6 +71,8 @@ export default function App() {
           <Route path="/orden/:token" element={<OrderStatus />} />
           <Route path="/entrada/:token" element={<Ticket />} />
           <Route path="/recuperar" element={<Recover />} />
+          <Route path="/promotores" element={<Promoters />} />
+          <Route path="/promotores/panel" element={<PromoterPanel />} />
 
           <Route path="/staff/login" element={<Login />} />
           <Route
@@ -81,6 +94,7 @@ export default function App() {
               <Route path="ajustes" element={<Settings />} />
               <Route path="usuarios" element={<Users />} />
               <Route path="visitas" element={<Visits />} />
+              <Route path="promotores" element={<AdminPromoters />} />
               <Route path="auditoria" element={<Audit />} />
             </Route>
             <Route

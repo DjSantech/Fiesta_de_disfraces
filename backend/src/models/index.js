@@ -83,7 +83,9 @@ const orderSchema = new Schema({
   reviewedAt: { type: Date, default: null },
   ticketsIssued: { type: Boolean, default: false },
   paidAt: { type: Date, default: null },
+  promoterCode: { type: String, default: null }, // código del promotor que trajo la compra (?ref=), si estaba activo
 }, opts);
+orderSchema.index({ promoterCode: 1, status: 1 }, { partialFilterExpression: { promoterCode: { $type: 'string' } } });
 orderSchema.index({ 'buyer.cedula': 1, status: 1 });
 orderSchema.index({ 'buyer.phone': 1 });
 orderSchema.index({ status: 1, expiresAt: 1 });
@@ -267,3 +269,30 @@ visitSchema.index({ day: 1 });
 visitSchema.index({ day: 1, vid: 1 });
 export const Visit = mongoose.model('Visit', visitSchema, 'visits');
 allModels.push(Visit);
+
+// ---------- Promotores (venden boletas con link propio ?ref=CODIGO; ver ARQUITECTURA §12) ----------
+export const Promoter = mongoose.model('Promoter', new Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true, unique: true }, // celular de 10 dígitos = usuario de login
+  passwordHash: { type: String, required: true, select: false },
+  code: { type: String, required: true, unique: true }, // 6 caracteres sin ambiguos
+  active: { type: Boolean, default: true },
+  tokenVersion: { type: Number, default: 0 }, // sube al desactivar → invalida sesiones
+  lastLoginAt: { type: Date, default: null },
+}, opts));
+allModels.push(Promoter);
+
+// Eventos anónimos del link de un promotor: un documento por (promotor, tipo, día, visitante).
+// El índice único deja contar visitantes únicos por día sin guardar IP ni datos personales.
+export const PROMOTER_EVENT_TYPES = ['visit', 'whatsapp'];
+const promoterEventSchema = new Schema({
+  promoterId: { type: ObjectId, required: true },
+  type: { type: String, enum: PROMOTER_EVENT_TYPES, required: true },
+  day: { type: String, required: true }, // YYYY-MM-DD en America/Bogota
+  vid: { type: String, required: true },
+  at: { type: Date, required: true, default: () => new Date() },
+}, { versionKey: false });
+promoterEventSchema.index({ promoterId: 1, type: 1, day: 1, vid: 1 }, { unique: true });
+promoterEventSchema.index({ at: 1 }, { expireAfterSeconds: 180 * 86400 }); // TTL 180 días
+export const PromoterEvent = mongoose.model('PromoterEvent', promoterEventSchema, 'promoterevents');
+allModels.push(PromoterEvent);

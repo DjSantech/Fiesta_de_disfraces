@@ -5,7 +5,7 @@ import { EVENT } from '../../../config/event';
 import { formatCOP, formatTime, whatsappLink } from '../../../lib/format';
 import Countdown from '../Countdown';
 import { Embers } from '../ui';
-import WhatsAppButton from '../WhatsAppButton';
+import WhatsAppButton, { WhatsAppGroupButton } from '../WhatsAppButton';
 import { Bat, Cobweb, Neon, Pumpkin, Skull } from '../decor';
 import { salesState } from '../usePublicConfig';
 import { dayMonth } from '../utils/dates';
@@ -182,7 +182,10 @@ export default function Hero({ config, ready }) {
 
         <div className={clsx('mt-8 w-full', enter(ready, 720).className)} style={enter(ready, 720).style}>
           <HeroCta config={config} />
-          <WhatsAppButton contact={config.contact} className="mt-4 w-full max-w-xl" />
+          <div className="mt-4 grid w-full max-w-xl gap-3 sm:grid-cols-2">
+            <WhatsAppButton contact={config.contact} label="Entrada por WhatsApp" />
+            <WhatsAppGroupButton />
+          </div>
           <a href="#lista" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-pumpkin-light underline-offset-4 hover:underline">
             <Ticket className="h-4 w-4" strokeWidth={1.75} />
             ¿Estás en la lista de invitados?

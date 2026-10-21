@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowRight, Menu, Ticket, X } from 'lucide-react';
+import { ArrowRight, Megaphone, Menu, Ticket, X } from 'lucide-react';
 import { Wordmark } from './ui';
 import { salesState, usePublicConfig } from './usePublicConfig';
 
@@ -107,6 +107,14 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
                 ))}
                 <li>
                   <Link
+                    to="/promotores"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-fog transition hover:bg-white/[0.05] hover:text-bone"
+                  >
+                    Promotores
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     to="/staff/login"
                     className="rounded-lg px-3 py-2 text-sm font-medium text-fog transition hover:bg-white/[0.05] hover:text-bone"
                   >
@@ -193,6 +201,14 @@ export default function SiteHeader({ variant = 'page', right, hideCta = false })
               className="flex h-12 items-center justify-center rounded-xl border border-white/12 text-sm font-semibold text-bone"
             >
               Ver mi entrada
+            </Link>
+            <Link
+              to="/promotores"
+              onClick={() => setOpen(false)}
+              className="flex h-12 items-center justify-center gap-2 rounded-xl border border-pumpkin/35 bg-pumpkin/[0.08] text-sm font-semibold text-bone"
+            >
+              <Megaphone className="h-4 w-4 text-pumpkin-light" strokeWidth={1.75} />
+              Promotores · gana vendiendo boletas
             </Link>
             <Link
               to="/staff/login"

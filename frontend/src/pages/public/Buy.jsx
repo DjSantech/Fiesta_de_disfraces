@@ -15,6 +15,7 @@ import { salesState, usePublicConfig, loadPublicConfig } from '../../components/
 import { describeError } from '../../components/public/utils/errors';
 import { KEYS, rememberOrder, session } from '../../components/public/utils/storage';
 import { dayMonth } from '../../components/public/utils/dates';
+import { currentRef } from '../../components/public/referral';
 import {
   buildOrderPayload,
   isValidCedula,
@@ -184,7 +185,7 @@ export default function Buy() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const payload = buildOrderPayload({ kind, gender, roomNumber, buyer, companions, paymentMethod: method });
+      const payload = { ...buildOrderPayload({ kind, gender, roomNumber, buyer, companions, paymentMethod: method }), ref: currentRef() || undefined };
       const data = await api('/api/public/orders', { method: 'POST', body: payload });
       rememberOrder(data.order.token);
       session.remove(KEYS.buyDraft);

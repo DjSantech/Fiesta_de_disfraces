@@ -4,7 +4,7 @@ import { ArrowRight, DoorOpen, Sparkles, Users } from 'lucide-react';
 import { formatCOP } from '../../../lib/format';
 import { Reveal, SectionHeading } from '../ui';
 import { Cobweb } from '../decor';
-import WhatsAppButton from '../WhatsAppButton';
+import WhatsAppButton, { WhatsAppGroupButton } from '../WhatsAppButton';
 import GuestCheck from '../GuestCheck';
 import { salesState } from '../usePublicConfig';
 import { dayMonth, daysUntil } from '../utils/dates';
@@ -136,8 +136,9 @@ export default function PricesSection({ config }) {
           </p>
         )}
         {canBuy && (
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <WhatsAppButton contact={config.contact} />
+            <WhatsAppGroupButton />
           </div>
         )}
         <GuestCheck className="mt-4" />

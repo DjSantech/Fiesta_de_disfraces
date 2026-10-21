@@ -37,7 +37,8 @@ function randomId() {
   }
 }
 
-function getVid() {
+/** Id anónimo del navegador (también lo usa el link de promotores). */
+export function getVid() {
   const stored = read(VID_KEY);
   if (stored && VID_RE.test(stored)) return stored;
   if (memoryVid) return memoryVid;

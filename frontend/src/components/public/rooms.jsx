@@ -5,6 +5,7 @@ import { ROOMS_COPY, ROOM_PERKS, ROOM_PERKS_KICKER, ROOM_PERKS_TITLE, ROOM_PHOTO
 import { formatCOP, whatsappLink } from '../../lib/format';
 import Modal from '../ui/Modal';
 import { WhatsAppIcon } from './icons';
+import { sendRefEvent, withRefNote } from './referral';
 
 export const ROOM_STATUS = {
   available: { label: 'Disponible', short: 'Libre', tone: 'toxic', color: '#22e584' },
@@ -192,7 +193,8 @@ export function RoomHelpNote({ contact = {}, room, className }) {
     <div className={clsx('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
       <p className="text-sm leading-relaxed text-bone/90">{ROOMS_COPY.help}.</p>
       <a
-        href={whatsappLink(contact.whatsapp, text)}
+        href={whatsappLink(contact.whatsapp, withRefNote(text))}
+        onClick={() => sendRefEvent('whatsapp')}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-toxic/12 px-4 text-sm font-semibold text-toxic ring-1 ring-toxic/35 transition hover:bg-toxic/20"

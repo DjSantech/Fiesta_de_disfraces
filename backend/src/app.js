@@ -10,6 +10,7 @@ import { publicRouter } from './routes/public.js';
 import { authRouter } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
 import { doorRouter, barRouter } from './routes/ops.js';
+import { promotersRouter } from './routes/promoters.js';
 
 const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
@@ -52,6 +53,7 @@ export function createApp(ctx, { rateLimits = true, accessLog = false } = {}) {
   const limits = createLimiters(rateLimits);
   app.use('/api/public', publicRouter(ctx, limits));
   app.use('/api/auth', authRouter(ctx, limits));
+  app.use('/api/promoters', promotersRouter(ctx, limits));
   app.use('/api/admin', requireAuth(ctx), requireRole('admin'), adminRouter(ctx));
   app.use('/api/door', requireAuth(ctx), requireRole('puerta', 'admin'), doorRouter(ctx));
   app.use('/api/bar', requireAuth(ctx), requireRole('barra', 'admin'), barRouter(ctx));

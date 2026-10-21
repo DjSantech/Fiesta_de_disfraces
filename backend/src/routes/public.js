@@ -16,6 +16,7 @@ import { verifyWebhookSignature } from '../services/mercadopago.js';
 import { guestCheck } from '../services/guestcheck.js';
 import { ticketPublic } from '../services/serializers.js';
 import { createTracker } from '../services/visits.js';
+import { recordPromoterEvent } from '../services/promoters.js';
 
 const crossChecks = (v, ctx) => {
   if (v?.kind === 'ticket' && !v.gender) ctx.addIssue({ code: 'custom', path: ['gender'], message: 'Elige mujer u hombre.' });
@@ -40,6 +41,8 @@ const orderBody = z.object({
   paymentMethod: z.enum(PUBLIC_PAYMENT_METHODS, { error: 'Elige Mercado Pago o transferencia.' }),
   acceptTerms: z.literal(true, { error: 'Debes confirmar que eres mayor de edad y aceptar la política de devoluciones.' }),
   acceptData: z.literal(true, { error: 'Debes autorizar el tratamiento de tus datos (Ley 1581 de 2012).' }),
+  // Código de promotor guardado en el navegador; si es inválido se ignora (nunca bloquea la compra).
+  ref: z.unknown().transform((v) => (typeof v === 'string' && v.length <= 20 ? v : null)).optional(),
 }).superRefine((v, ctx) => {
   crossChecks(v, ctx);
   if (v?.kind === 'ticket' && Array.isArray(v.companions) && v.companions.length) {
@@ -61,6 +64,11 @@ const trackBody = z.object({
   utm: z.string().max(40).optional(),
 });
 
+const refBody = z.object({
+  code: z.string().max(20),
+  vid: z.string().regex(/^[A-Za-z0-9_-]{16,40}$/),
+});
+
 export function publicRouter(ctx, limits) {
   const r = express.Router();
   const track = createTracker(ctx);
@@ -77,6 +85,21 @@ export function publicRouter(ctx, limits) {
     }
     res.status(204).end();
   });
+
+  // Link de promotor: visita o clic a WhatsApp. Siempre 204; cuenta una vez por visitante, tipo y día.
+  for (const [path, type] of [['/ref/visit', 'visit'], ['/ref/whatsapp', 'whatsapp']]) {
+    r.post(path, limits.ref, express.text({ type: 'text/plain', limit: '2kb' }), async (req, res) => {
+      try {
+        let body = req.body;
+        if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = null; } }
+        const parsed = refBody.safeParse(body || {});
+        if (parsed.success) await recordPromoterEvent(type, parsed.data, req.get('user-agent'));
+      } catch (err) {
+        ctx.logger.warn?.(`ref ${type}: ${err.message}`);
+      }
+      res.status(204).end();
+    });
+  }
 
   r.get('/config', async (req, res) => {
     const settings = await getSettings();

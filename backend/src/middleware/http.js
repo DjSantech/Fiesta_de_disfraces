@@ -22,7 +22,8 @@ export function requireAuth(ctx) {
     } catch {
       throw unauthorized('Tu sesión venció. Inicia sesión de nuevo.');
     }
-    if (!OBJECT_ID_RE.test(String(payload?.sub))) throw unauthorized();
+    // Los tokens de promotor (typ) nunca dan acceso al staff.
+    if (payload?.typ || !OBJECT_ID_RE.test(String(payload?.sub))) throw unauthorized();
     const user = await User.findById(payload.sub).lean();
     if (!user || !user.active || (user.tokenVersion ?? 0) !== (payload.tv ?? 0)) {
       throw unauthorized('Tu sesión ya no es válida. Inicia sesión de nuevo.');
@@ -56,6 +57,9 @@ export function createLimiters(enabled) {
     read: make(60_000, 120),
     webhook: make(60_000, 300),
     track: make(60_000, 120),
+    ref: make(60_000, 120),
+    promoterLogin: make(15 * 60_000, 10, { skipSuccessfulRequests: true }),
+    promoterRegister: make(60 * 60_000, 5),
     guestCheck: [make(60_000, 8), make(3_600_000, 40)],
   };
 }
@@ -102,6 +106,7 @@ function toResponse(err) {
   }
   if (err?.name === 'CastError') return [404, { error: { code: 'NOT_FOUND', message: 'No encontramos lo que buscas.' } }];
   if (err?.code === 11000) {
+    if (err.keyPattern?.phone) return [409, { error: { code: 'PHONE_TAKEN', message: 'Ese celular ya está registrado.' } }];
     if (err.keyPattern?.username) return [409, { error: { code: 'USERNAME_TAKEN', message: 'Ese usuario ya existe. Elige otro.' } }];
     return [409, { error: { code: 'INVALID_STATE', message: 'Ya existe un registro con esos datos.' } }];
   }

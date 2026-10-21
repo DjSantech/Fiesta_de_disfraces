@@ -357,6 +357,11 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
                     <InstagramLink user={order.buyer?.instagram} className="text-bone" />
                   </DetailItem>
                   <DetailItem label="Correo">{order.buyer?.email}</DetailItem>
+                  {order.promoterCode && (
+                    <DetailItem label="Código promotor" mono>
+                      <span className="font-bold tracking-[0.15em] text-pumpkin-light">{order.promoterCode}</span>
+                    </DetailItem>
+                  )}
                 </DetailGrid>
               </DetailSection>
 

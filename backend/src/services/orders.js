@@ -15,6 +15,7 @@ import {
 } from './core.js';
 import { notifyOrderInReview } from './notify.js';
 import { orderPublic, orderAdmin } from './serializers.js';
+import { activePromoterByCode } from './promoters.js';
 
 const STATUS_LABEL = {
   pending_payment: 'pendiente de pago', in_review: 'en revisión', paid: 'pagada', rejected: 'rechazada',
@@ -136,6 +137,9 @@ export async function createPublicOrder(ctx, input) {
   const expiresAt = room ? addMinutes(now, ROOM_HOLD_MINUTES) : addMinutes(now, TICKET_ORDER_EXPIRY_HOURS * 60);
   if (room && !(await claimRoom(room.number, _id, { until: expiresAt, takeover: older, now }))) throw roomUnavailable();
 
+  // Código del promotor (?ref=): solo si existe y está activo; si no, la compra queda sin atribuir.
+  const promoter = input.ref ? await activePromoterByCode(input.ref) : null;
+
   let order;
   try {
     order = await insertOrder({
@@ -145,6 +149,7 @@ export async function createPublicOrder(ctx, input) {
       buyer: input.buyer, companions: room ? input.companions : [],
       guestId: guest?._id ?? null, guestName: guest?.name ?? null,
       holdExpiresAt: room ? expiresAt : null, expiresAt,
+      promoterCode: promoter?.code ?? null,
     });
   } catch (err) {
     if (room) await releaseRoom(room.number, _id);

@@ -592,3 +592,28 @@ Una sola vez, en la transición `pending_payment` → `in_review` (primer compro
   "paymentMethod": "transferencia", "buyerName": "Laura Gómez", "hasInstagram": true, "isGuest": false,
   "createdAt": "ISO-8601", "adminUrl": "<FRONTEND_URL>/staff/admin/compras?estado=in_review" }
 ```
+
+## Promotores
+
+**Promoter**: `{ "id", "name", "phone", "code": "XQR9NN", "active": true, "createdAt", "lastLoginAt" }` · **PromoterTotals**: `{ "visits", "whatsapp", "orders", "paidOrders", "paidTickets", "sold" }`
+
+### `POST /api/promoters/register`
+`{ "name": "3–80", "phone": "10 dígitos que empiezan por 3 (acepta +57/espacios)", "password": "6–100" }` → `201 { "token", "promoter": Promoter }` · `400 VALIDATION_ERROR` · `409 PHONE_TAKEN`. Rate limit 5/h/IP.
+
+### `POST /api/promoters/login`
+`{ "phone", "password" }` → `200 { "token", "promoter" }` · `401 INVALID_CREDENTIALS` · `403 PROMOTER_INACTIVE`. Rate limit 10/15 min/IP (no cuenta los exitosos).
+
+### `GET /api/promoters/me` (Bearer token de promotor)
+`200 { "promoter": Promoter, "stats": { "totals": PromoterTotals, "days": 14, "byDay": [{ "day": "2026-10-21", "visits", "whatsapp", "orders", "paidOrders", "paidTickets", "sold" }] } }` · `401` (sin token, token de staff, vencido, o promotor desactivado). Solo sus propios datos.
+
+### `POST /api/public/ref/visit` · `POST /api/public/ref/whatsapp`
+`{ "code": "XQR9NN", "vid": "<fd_vid 16–40>" }` (JSON o `text/plain`). **Siempre `204`**. Cuenta una vez por promotor+tipo+día+vid; ignora bots, códigos inválidos y promotores inactivos. Rate limit 120/min/IP.
+
+### `POST /api/public/orders` — campo opcional `ref`
+`"ref": "XQR9NN"`: si corresponde a un promotor activo la orden guarda `promoterCode`; si no, se ignora (nunca da error). `OrderAdmin` incluye `"promoterCode": "XQR9NN" | null`.
+
+### `GET /api/admin/promoters` (admin)
+`200 { "items": [Promoter & { "stats": PromoterTotals }] }` ordenado por vendido.
+
+### `PUT /api/admin/promoters/:id` (admin)
+`{ "active": false }` → `200 { "promoter": Promoter & { "stats" } }` · `404`. Desactivar cierra sus sesiones.

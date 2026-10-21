@@ -49,6 +49,7 @@ export const orderAdmin = (o, tickets = []) => ({
   notes: o.notes || '',
   reviewedBy: o.reviewedBy ? { id: id(o.reviewedBy), name: o.reviewedByName } : null,
   reviewedAt: iso(o.reviewedAt),
+  promoterCode: o.promoterCode ?? null,
   tickets: tickets.map(ticketPublic),
   createdAt: iso(o.createdAt), updatedAt: iso(o.updatedAt), paidAt: iso(o.paidAt),
 });

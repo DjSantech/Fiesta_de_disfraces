@@ -1,5 +1,7 @@
 import clsx from 'clsx';
 import { whatsappLink } from '../../lib/format';
+import { WHATSAPP_GROUP } from '../../config/event';
+import { sendRefEvent, withRefNote } from './referral';
 
 export function WhatsAppIcon({ className }) {
   return (
@@ -18,7 +20,8 @@ export default function WhatsAppButton({ contact, name = '', gender = null, clas
   if (gender) text += `${String(name || '').trim() ? '. ' : ''}Entrada ${gender === 'mujer' ? 'de mujer' : 'de hombre'}.`;
   return (
     <a
-      href={whatsappLink(contact.whatsapp, text.trim())}
+      href={whatsappLink(contact.whatsapp, withRefNote(text.trim()))}
+      onClick={() => sendRefEvent('whatsapp')}
       target="_blank"
       rel="noopener noreferrer"
       className={clsx(
@@ -29,6 +32,41 @@ export default function WhatsAppButton({ contact, name = '', gender = null, clas
     >
       <WhatsAppIcon className="h-5 w-5 shrink-0 text-[#4fd18b]" />
       {label}
+    </a>
+  );
+}
+
+/** Botón al grupo de WhatsApp de la fiesta (mismo estilo que el de comprar). */
+export function WhatsAppGroupButton({ className, size = 'md' }) {
+  return (
+    <a
+      href={WHATSAPP_GROUP.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={clsx(
+        'inline-flex items-center justify-center gap-2.5 rounded-xl border border-pumpkin/50 bg-pumpkin/10 font-semibold text-bone transition hover:bg-pumpkin/20 active:scale-[0.99]',
+        size === 'lg' ? 'h-14 px-6 text-base' : 'h-12 px-5 text-sm',
+        className,
+      )}
+    >
+      <WhatsAppIcon className="h-5 w-5 shrink-0 text-pumpkin-light" />
+      Únete al grupo de WhatsApp
+    </a>
+  );
+}
+
+/** Botón flotante naranja (esquina inferior derecha) para unirse al grupo. */
+export function WhatsAppGroupFab() {
+  return (
+    <a
+      href={WHATSAPP_GROUP.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Únete al grupo de WhatsApp de la fiesta"
+      title="Únete al grupo de WhatsApp"
+      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-pumpkin text-white shadow-[0_6px_28px_-4px_rgb(255_106_0/0.85)] transition hover:scale-105 hover:bg-pumpkin-light active:scale-95 animate-pulse-glow"
+    >
+      <WhatsAppIcon className="h-7 w-7" />
     </a>
   );
 }
