@@ -28,12 +28,14 @@ async function entryForTicket(t) {
   return DoorEntry.findOne({ 'ticket.id': t._id, voided: false }).sort({ createdAt: -1 }).lean();
 }
 
+const amountDueOf = async (t) => (await Order.findById(t.orderId).select('balanceDue').lean())?.balanceDue || 0;
+
 export async function scan(value) {
   const p = parseScanValue(value);
   const t = p.token ? await Ticket.findOne({ token: p.token }).lean() : p.code ? await Ticket.findOne({ code: p.code }).lean() : null;
   if (!t) return { result: 'not_found', ticket: null, entry: null };
   const entry = t.status === 'used' ? await entryForTicket(t) : null;
-  return { result: t.status, ticket: ticketDoor(t), entry: entry ? doorEntryOut(entry) : null };
+  return { result: t.status, ticket: ticketDoor(t, t.status === 'valid' ? await amountDueOf(t) : 0), entry: entry ? doorEntryOut(entry) : null };
 }
 
 /** Parqueadero y casco según ajustes; cortesía = $0. */
@@ -52,6 +54,12 @@ const categoryOf = (t) => (t.kind === 'room' ? 'habitacion' : t.kind === 'cortes
 export async function checkIn(input, user) {
   const settings = await getSettings();
   const now = new Date();
+  // Precio guardado sin pagar: hay que cobrarlo antes de dejarlo entrar.
+  const pending = await Ticket.findById(input.ticketId).select('orderId status').lean();
+  const due = pending?.status === 'valid' ? await amountDueOf(pending) : 0;
+  if (due > 0 && !input.collect) {
+    throw new AppError(409, 'PAYMENT_DUE', `Debe ${due.toLocaleString('es-CO')} pesos: cóbralos antes de dejarlo entrar.`, { amountDue: due });
+  }
   // Un solo uso: solo gana quien encuentre el ticket todavía 'valid'.
   const t = await Ticket.findOneAndUpdate(
     { _id: input.ticketId, status: 'valid' },
@@ -69,16 +77,26 @@ export async function checkIn(input, user) {
   }
   const paymentMethod = input.paymentMethod || 'efectivo';
   const x = extras(settings, { ...input, paymentMethod });
+  // Cobra la deuda una sola vez (en habitaciones la paga el primero que entra).
+  let entryAmount = 0;
+  if (due > 0) {
+    const o = await Order.findOneAndUpdate(
+      { _id: t.orderId, balanceDue: { $gt: 0 } },
+      { $set: { balanceDue: 0, paidAt: now, doorCollected: { amount: due, method: paymentMethod, at: now, byName: user.name } } },
+    ).lean();
+    if (o) entryAmount = o.balanceDue;
+  }
   let entry;
   try {
     entry = await DoorEntry.create({
       source: 'ticket', ticket: { id: t._id, code: t.code, kind: t.kind, roomNumber: t.roomNumber ?? null },
       name: t.holderName, cedula: t.holderCedula, phone: null, category: categoryOf(t), gender: t.gender, guestListMatch: !!t.isGuest,
-      paymentMethod, entryAmount: 0, ...x, totalAmount: x.parkingAmount + x.helmetAmount,
+      paymentMethod, entryAmount, ...x, totalAmount: entryAmount + x.parkingAmount + x.helmetAmount,
       notes: input.notes || '', createdBy: user._id, createdByName: user.name,
     });
   } catch (err) {
     await Ticket.updateOne({ _id: t._id, status: 'used', checkedInAt: now }, { $set: { status: 'valid', checkedInAt: null, checkedInBy: null, checkedInByName: null } });
+    if (entryAmount > 0) await Order.updateOne({ _id: t.orderId, 'doorCollected.at': now }, { $set: { balanceDue: entryAmount, paidAt: null, doorCollected: null } });
     throw err;
   }
   const ticket = await Ticket.findByIdAndUpdate(t._id, { $set: { entryId: entry._id } }, { returnDocument: 'after' }).lean();
@@ -189,8 +207,11 @@ export async function lookup(q) {
     Guest.find({ redeemed: false, $or: [{ name: rx }, { cedula: plain }, { phone: plain }, { instagram: plain }] }).limit(10).lean(),
     DoorEntry.find(entryFilter({ q })).sort({ createdAt: -1 }).limit(10).lean(),
   ]);
+  const dues = new Map(
+    (await Order.find({ _id: { $in: tickets.map((t) => t.orderId) }, balanceDue: { $gt: 0 } }).select('balanceDue').lean()).map((o) => [String(o._id), o.balanceDue]),
+  );
   return {
-    tickets: tickets.map(ticketDoor),
+    tickets: tickets.map((t) => ticketDoor(t, t.status === 'valid' ? dues.get(String(t.orderId)) || 0 : 0)),
     guests: guests.map((g) => ({ id: String(g._id), name: g.name, cedulaLast4: last4(g.cedula), discountPercent: g.discountPercent ?? null })),
     entries: entries.map(doorEntryOut),
   };

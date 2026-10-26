@@ -386,6 +386,7 @@ export async function createManualOrder(input, admin) {
   const guest = !room && !courtesy ? await findGuestMatch(input.buyer) : null;
   const auto = room ? roomBreakdown(settings, room, now) : ticketBreakdown(settings, { gender: input.gender, guest, now });
   const amount = courtesy ? 0 : input.amount ?? auto.total;
+  const payAtDoor = input.manualMethod === 'puerta'; // se le guardó el precio: paga en la entrada
   const discount = Math.max(0, auto.base - amount);
   const breakdown = amount === auto.total
     ? auto
@@ -400,7 +401,8 @@ export async function createManualOrder(input, admin) {
       gender: input.gender ?? null,
       room: room ? { number: room.number, name: room.name, capacity: room.capacity, minPeople: room.minPeople, beds: room.beds, privateBathroom: room.privateBathroom } : null,
       buyer: input.buyer, companions: room ? input.companions : [], guestId: guest?._id ?? null, guestName: guest?.name ?? null,
-      notes: input.notes || '', reviewedBy: admin._id, reviewedByName: admin.name, reviewedAt: now, paidAt: now,
+      notes: input.notes || '', reviewedBy: admin._id, reviewedByName: admin.name, reviewedAt: now, paidAt: payAtDoor ? null : now,
+      balanceDue: payAtDoor ? amount : 0,
     });
   } catch (err) {
     if (room) await Room.updateOne({ number: room.number, orderId: _id }, { $set: { orderId: null, booked: false, holdExpiresAt: null } });

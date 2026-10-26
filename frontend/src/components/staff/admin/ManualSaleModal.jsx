@@ -228,6 +228,9 @@ export default function ManualSaleModal({ onClose, onCreated }) {
   }, [form.kind, form.gender, room, settings, guestQuote]);
 
   const amount = courtesy ? 0 : form.amountEdited ? form.amount : (suggestion?.amount ?? null);
+  const payAtDoor = form.manualMethod === 'puerta';
+  // Terminada la preventa, atajo para guardarle a alguien el precio de preventa.
+  const presalePrice = form.kind === 'ticket' && settings && currentTicketPrice(settings, form.gender).phase !== 'preventa' ? settings.prices?.preventa?.[form.gender] ?? null : null;
   const maxCompanions = form.kind === 'room' && room ? Math.max(0, room.capacity - 1) : 0;
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
@@ -376,7 +379,7 @@ export default function ManualSaleModal({ onClose, onCreated }) {
           </div>
 
           <MoneyInput
-            label="Valor que pagó"
+            label={payAtDoor ? 'Valor a cobrar en la puerta' : 'Valor que pagó'}
             value={amount}
             disabled={courtesy}
             onChange={(n) => {
@@ -389,9 +392,20 @@ export default function ManualSaleModal({ onClose, onCreated }) {
                 ? form.kind === 'ticket'
                   ? 'Cortesía: $0 y la entrada queda como cortesía (cuenta para la meta).'
                   : 'Cortesía: $0.'
-                : suggestion?.text
+                : payAtDoor
+                  ? 'La entrada sale con QR ya; al escanearla en la puerta dirá cuánto debe y se cobra ahí.'
+                  : suggestion?.text
             }
           />
+          {!courtesy && presalePrice != null && amount !== presalePrice && (
+            <button
+              type="button"
+              onClick={() => set({ amount: presalePrice, amountEdited: true })}
+              className="-mt-3 self-start text-xs font-medium text-pumpkin-light underline-offset-2 hover:underline"
+            >
+              Usar precio de preventa ({formatCOP(presalePrice)})
+            </button>
+          )}
           {!courtesy && form.amountEdited && suggestion && form.amount !== suggestion.amount && (
             <button
               type="button"

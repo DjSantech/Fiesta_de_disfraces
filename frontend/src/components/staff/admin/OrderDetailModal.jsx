@@ -170,13 +170,15 @@ function AmountSummary({ order }) {
     <div className="rounded-2xl border border-white/[0.08] bg-tomb/50 p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs text-smoke">{order.status === 'paid' ? 'Pagó' : 'Valor a pagar'}</p>
+          <p className="text-xs text-smoke">{order.balanceDue > 0 ? 'Precio guardado · paga en la puerta' : order.status === 'paid' ? 'Pagó' : 'Valor a pagar'}</p>
           <p className="mt-0.5 text-3xl font-bold leading-none tabular-nums text-bone">{formatCOP(order.amount)}</p>
         </div>
         <div className="flex flex-wrap justify-end gap-1.5">
           {b.phase && !isRoom && <Badge>{PHASE_LABEL[b.phase]}</Badge>}
           {b.isGuest && <Badge tone="orange">Invitado{b.total === 0 ? ' · cortesía' : ''}</Badge>}
           {courtesy && <Badge tone="violet">Cortesía</Badge>}
+          {order.balanceDue > 0 && <Badge tone="amber" dot>Debe {formatCOP(order.balanceDue)}</Badge>}
+          {order.doorCollected && <Badge tone="green">Cobrado en la puerta{order.doorCollected.byName ? ` · ${order.doorCollected.byName}` : ''}</Badge>}
         </div>
       </div>
       {(b.base !== undefined || differs) && (

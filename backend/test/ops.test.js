@@ -160,3 +160,38 @@ test('invitados en lote', async () => {
     .send({ text: 'Ana Ruiz, 1088111222, 3001112233, @anaruiz\nAna Ruiz; 1088111222;;\nX\nBeto\t\t3109998877\t' });
   assert.deepEqual(r.body, { created: 2, skipped: 1, errors: [{ line: 3, message: 'Nombre inválido (2 a 80 caracteres).' }] });
 });
+
+test('precio guardado: paga el día de la fiesta, la puerta lo cobra una vez', async () => {
+  let r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'hombre', roomNumber: null, buyer: buyer({ cedula: '1088555444' }), companions: [], amount: 25000, manualMethod: 'puerta', notes: '' });
+  assert.equal(r.status, 201, JSON.stringify(r.body));
+  const order = r.body.order;
+  assert.equal(order.balanceDue, 25000);
+  const ticket = order.tickets[0];
+  let d = (await api.get('/api/admin/dashboard').set('Authorization', admin)).body;
+  assert.equal(d.income.tickets, 0);
+  assert.equal(d.income.dueAtDoor, 25000);
+  r = await api.post('/api/door/scan').set('Authorization', puerta).send({ value: ticket.token });
+  assert.equal(r.body.result, 'valid');
+  assert.equal(r.body.ticket.amountDue, 25000);
+  const id = r.body.ticket.id;
+  r = await api.post('/api/door/checkin').set('Authorization', puerta).send({ ticketId: id });
+  assert.equal(r.status, 409);
+  assert.equal(r.body.error.code, 'PAYMENT_DUE');
+  r = await api.post('/api/door/checkin').set('Authorization', puerta).send({ ticketId: id, collect: true, paymentMethod: 'nequi' });
+  assert.equal(r.status, 201, JSON.stringify(r.body));
+  assert.equal(r.body.entry.entryAmount, 25000);
+  assert.equal(r.body.entry.paymentMethod, 'nequi');
+  d = (await api.get('/api/admin/dashboard').set('Authorization', admin)).body;
+  assert.equal(d.income.tickets, 0); // cuenta una sola vez: en la portería
+  assert.equal(d.income.door.entries, 25000);
+  assert.equal(d.income.dueAtDoor, 0);
+  const o = (await api.get(`/api/admin/orders/${order.id}`).set('Authorization', admin)).body.order;
+  assert.equal(o.balanceDue, 0);
+  assert.equal(o.doorCollected.amount, 25000);
+  // Una venta manual normal sigue contando de una vez.
+  await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'mujer', roomNumber: null, buyer: buyer({ cedula: '1088555333' }), companions: [], amount: 20000, manualMethod: 'efectivo', notes: '' });
+  d = (await api.get('/api/admin/dashboard').set('Authorization', admin)).body;
+  assert.equal(d.income.tickets, 20000);
+});

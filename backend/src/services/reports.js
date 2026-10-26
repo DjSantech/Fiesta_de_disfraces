@@ -28,7 +28,11 @@ export async function dashboard() {
     Ticket.aggregate([{ $match: { ...active, kind: 'general' } }, { $group: { _id: '$phase', n: { $sum: 1 } } }]),
     Ticket.countDocuments({ ...active, kind: 'general', isGuest: true }),
     Order.aggregate([{ $group: { _id: { s: '$status', k: '$kind' }, n: { $sum: 1 } } }]),
-    Order.aggregate([{ $match: { status: 'paid' } }, { $group: { _id: { k: '$kind', m: '$paymentMethod' }, sum: { $sum: '$amount' } } }]),
+    Order.aggregate([{ $match: { status: 'paid' } }, { $group: {
+      _id: { k: '$kind', m: '$paymentMethod' },
+      sum: { $sum: { $subtract: ['$amount', { $add: [{ $ifNull: ['$balanceDue', 0] }, { $ifNull: ['$doorCollected.amount', 0] }] }] } },
+      due: { $sum: { $ifNull: ['$balanceDue', 0] } },
+    } }]),
     Room.find().lean(),
     doorTotals(),
     Sale.aggregate([{ $match: { voided: false } }, { $group: { _id: null, sum: { $sum: '$total' } } }]),
@@ -64,6 +68,7 @@ export async function dashboard() {
       byMethod: { mercadopago: sumIncome((i) => i.m === 'mercadopago'), transferencia: sumIncome((i) => i.m === 'transferencia'), manual: sumIncome((i) => i.m === 'manual') },
       door: { entries: door.entryMoney, parking: door.parking, helmets: door.helmets, total: door.total },
       bar: barIncome, total,
+      dueAtDoor: income.reduce((a, r) => a + (r.due || 0), 0), // precios guardados que se cobran en la puerta
     },
     expenses: { total: expTotal, paid: expPaid, pending: expPending },
     balance: { net: total - expTotal, coveredPercent: expTotal > 0 ? Math.round(Math.min(100, (total / expTotal) * 100) * 10) / 10 : 100 },

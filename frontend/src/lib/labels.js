@@ -22,6 +22,7 @@ export const MANUAL_METHOD_LABEL = {
   breb: 'Bre-B',
   transferencia: 'Transferencia',
   cortesia: 'Cortesía',
+  puerta: 'Paga el día de la fiesta',
 };
 
 export const ORDER_STATUS_LABEL = {

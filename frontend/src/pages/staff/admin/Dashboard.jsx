@@ -327,6 +327,11 @@ function IncomeCard({ income }) {
     <Card className="flex flex-col gap-5 sm:p-6">
       <SectionTitle icon={Wallet}>Ingresos</SectionTitle>
       <p className="-mt-1 font-display text-5xl leading-none tracking-wide tabular-nums text-bone">{formatCOP(income.total)}</p>
+      {income.dueAtDoor > 0 && (
+        <p className="-mt-2 text-sm text-fog">
+          + <span className="font-semibold tabular-nums text-gold">{formatCOP(income.dueAtDoor)}</span> por cobrar en la puerta (precios guardados)
+        </p>
+      )}
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <p className="mb-3 text-xs font-medium text-fog">Por fuente</p>

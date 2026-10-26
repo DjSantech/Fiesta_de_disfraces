@@ -84,6 +84,9 @@ const orderSchema = new Schema({
   ticketsIssued: { type: Boolean, default: false },
   paidAt: { type: Date, default: null },
   promoterCode: { type: String, default: null }, // código del promotor que trajo la compra (?ref=), si estaba activo
+  // Venta manual "paga el día de la fiesta": la entrada ya tiene QR pero se debe `balanceDue`; en la puerta se cobra.
+  balanceDue: { type: Number, default: 0, min: 0 },
+  doorCollected: { type: new Schema({ amount: Number, method: String, at: Date, byName: String }, { _id: false }), default: null },
 }, opts);
 orderSchema.index({ promoterCode: 1, status: 1 }, { partialFilterExpression: { promoterCode: { $type: 'string' } } });
 orderSchema.index({ 'buyer.cedula': 1, status: 1 });

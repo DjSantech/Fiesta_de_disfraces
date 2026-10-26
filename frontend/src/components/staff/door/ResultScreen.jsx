@@ -126,7 +126,9 @@ export default function ResultScreen({ result, config, initialExtras, initialMet
   const ticket = result.ticket;
 
   const charges = extrasTotal(config, extras);
-  const total = method === 'cortesia' ? 0 : charges;
+  // Precio guardado sin pagar ("paga el día de la fiesta"): se cobra aquí, con el mismo medio de pago.
+  const due = ticket?.amountDue || 0;
+  const total = due + (method === 'cortesia' ? 0 : charges);
 
   const close = useCallback(
     (payload) => {
@@ -149,7 +151,8 @@ export default function ResultScreen({ result, config, initialExtras, initialMet
       const body = { ticketId: ticket.id };
       if (vehicle) body.vehicle = vehicle;
       if (helmet) body.helmet = helmet;
-      if (charges > 0) body.paymentMethod = method;
+      if (charges > 0 || due > 0) body.paymentMethod = method;
+      if (due > 0) body.collect = true;
       try {
         const data = await doorApi.checkin(body);
         feedback('ok');
@@ -162,6 +165,9 @@ export default function ResultScreen({ result, config, initialExtras, initialMet
           setUsedInfo(err.details || {});
           setView('used');
           onChanged?.();
+        } else if (err.code === 'PAYMENT_DUE') {
+          feedback('bad');
+          toast.error(err.message);
         } else if (err.code === 'TICKET_VOID') {
           feedback('bad');
           setView('void');
@@ -204,26 +210,33 @@ export default function ResultScreen({ result, config, initialExtras, initialMet
           )}
         </header>
 
+        {due > 0 && (
+          <div className="mt-4 rounded-3xl border-4 border-ink bg-gold px-4 py-3 text-ink" role="alert">
+            <p className="text-3xl font-extrabold uppercase leading-none">Debe {formatCOP(due)}</p>
+            <p className="mt-1 text-base font-bold leading-snug">Se le guardó el precio: cóbralo antes de dejarlo pasar.</p>
+          </div>
+        )}
+
         <div className="mt-4 flex flex-1 flex-col gap-4 rounded-3xl bg-ink p-4 text-bone shadow-2xl shadow-black/30 sm:p-5">
           <ExtrasFields value={extras} onChange={setExtras} config={config} errors={errors} />
 
-          {charges > 0 && (
+          {(charges > 0 || due > 0) && (
             <div>
-              <p className="mb-2 text-sm font-medium text-bone/90">Pago de parqueadero / casco</p>
+              <p className="mb-2 text-sm font-medium text-bone/90">{due > 0 ? 'Cómo paga' : 'Pago de parqueadero / casco'}</p>
               <PayMethodPicker value={method} onChange={setMethod} />
             </div>
           )}
 
           <div className="mt-auto flex flex-col gap-3 pt-1">
             <div className="flex items-baseline justify-between gap-3 border-t border-white/10 pt-3">
-              <span className="text-sm text-fog">{charges > 0 ? 'A cobrar ahora' : 'Entrada ya pagada'}</span>
+              <span className="text-sm text-fog">{charges > 0 || due > 0 ? 'A cobrar ahora' : 'Entrada ya pagada'}</span>
               <span className="text-2xl font-extrabold tabular-nums">
-                {charges > 0 ? formatCOP(total) : 'Sin cobro'}
+                {charges > 0 || due > 0 ? formatCOP(total) : 'Sin cobro'}
                 {charges > 0 && method === 'cortesia' && <span className="ml-2 text-sm font-semibold text-fog">cortesía</span>}
               </span>
             </div>
             <Button variant="success" size="xl" block loading={busy} onClick={confirm} className="h-[4.5rem] text-xl font-extrabold tracking-wide">
-              CONFIRMAR INGRESO
+              {due > 0 ? `COBRAR ${formatCOP(total)}` : 'CONFIRMAR INGRESO'}
             </Button>
             <Button variant="ghost" size="lg" block onClick={() => close()} disabled={busy}>
               Cancelar

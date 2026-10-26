@@ -44,7 +44,9 @@ Fuente de verdad entre `frontend/` y `backend/`. Si algo no está aquí, no exis
 | `gender` | `mujer`, `hombre` |
 | `orderKind` | `ticket`, `room` |
 | `orderPaymentMethod` | `mercadopago`, `transferencia`, `manual` |
-| `manualMethod` | `efectivo`, `nequi`, `breb`, `transferencia`, `cortesia` |
+| `manualMethod` | `efectivo`, `nequi`, `breb`, `transferencia`, `cortesia`, `puerta` |
+
+`puerta` = se le guardó el precio y paga el día de la fiesta: la orden queda `paid` (QR emitido) con `balanceDue = amount` y `paidAt = null`. `POST /api/door/scan` devuelve `ticket.amountDue`; `POST /api/door/checkin` responde `409 PAYMENT_DUE` si hay deuda y no viene `collect: true`. Con `collect: true` + `paymentMethod`, la deuda se cobra una sola vez (en habitaciones, el primero que entra): `balanceDue → 0`, `doorCollected { amount, method, at, byName }`, y el valor cuenta en `entryAmount` de la portería. El dashboard no cuenta lo que se debe como ingreso de entradas; lo muestra en `income.dueAtDoor`.
 | `orderStatus` | `pending_payment`, `in_review`, `paid`, `rejected`, `expired`, `cancelled`, `conflict` |
 | `ticketKind` | `general`, `room`, `cortesia` |
 | `phase` | `preventa`, `general` |

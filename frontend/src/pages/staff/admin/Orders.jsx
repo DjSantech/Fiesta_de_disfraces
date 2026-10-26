@@ -141,6 +141,7 @@ function OrdersTable({ items, onOpen, selection }) {
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-right">
                 <p className="font-semibold tabular-nums text-bone">{formatCOP(o.amount)}</p>
+                {o.balanceDue > 0 && <p className="text-xs font-semibold text-gold">Debe {formatCOP(o.balanceDue)} · paga en la puerta</p>}
                 {o.breakdown?.isGuest && <p className="text-xs text-ember">Invitado −{formatCOP(o.breakdown.discount)}</p>}
               </td>
               <td className="px-3 py-3 text-fog">
@@ -213,6 +214,7 @@ function OrderCard({ o, onOpen, selection }) {
         </div>
         <div className="shrink-0 text-right">
           <p className="text-lg font-bold tabular-nums leading-none text-bone">{formatCOP(o.amount)}</p>
+          {o.balanceDue > 0 && <p className="mt-1 text-xs font-semibold text-gold">Debe {formatCOP(o.balanceDue)} · paga en la puerta</p>}
           {o.breakdown?.isGuest && <p className="mt-1 text-xs text-ember">Invitado −{formatCOP(o.breakdown.discount)}</p>}
         </div>
       </div>

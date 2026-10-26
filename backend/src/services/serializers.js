@@ -50,6 +50,8 @@ export const orderAdmin = (o, tickets = []) => ({
   reviewedBy: o.reviewedBy ? { id: id(o.reviewedBy), name: o.reviewedByName } : null,
   reviewedAt: iso(o.reviewedAt),
   promoterCode: o.promoterCode ?? null,
+  balanceDue: o.balanceDue || 0,
+  doorCollected: o.doorCollected?.amount ? { amount: o.doorCollected.amount, method: o.doorCollected.method, at: iso(o.doorCollected.at), byName: o.doorCollected.byName || '' } : null,
   tickets: tickets.map(ticketPublic),
   createdAt: iso(o.createdAt), updatedAt: iso(o.updatedAt), paidAt: iso(o.paidAt),
 });
@@ -66,11 +68,13 @@ export const ticketAdmin = (t, order) => ({
   createdAt: iso(t.createdAt),
 });
 
-export const ticketDoor = (t) => ({
+/** `amountDue`: lo que se debe cobrar en la puerta (venta manual "paga el día de la fiesta"). */
+export const ticketDoor = (t, amountDue = 0) => ({
   id: id(t._id), code: t.code, holderName: t.holderName, cedulaLast4: last4(t.holderCedula),
   gender: t.gender ?? null, kind: t.kind, phase: t.phase ?? null, isGuest: !!t.isGuest,
   roomNumber: t.kind === 'room' ? t.roomNumber ?? null : null, buyerName: t.buyerName || '',
   status: t.status, checkedInAt: iso(t.checkedInAt), checkedInByName: t.checkedInByName ?? null,
+  amountDue,
 });
 
 export const doorEntryOut = (e) => ({

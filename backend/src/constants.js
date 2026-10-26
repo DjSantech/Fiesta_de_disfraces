@@ -4,7 +4,7 @@ export const GENDERS = ['mujer', 'hombre'];
 export const ORDER_KINDS = ['ticket', 'room'];
 export const ORDER_PAYMENT_METHODS = ['mercadopago', 'transferencia', 'manual'];
 export const PUBLIC_PAYMENT_METHODS = ['mercadopago', 'transferencia'];
-export const MANUAL_METHODS = ['efectivo', 'nequi', 'breb', 'transferencia', 'cortesia'];
+export const MANUAL_METHODS = ['efectivo', 'nequi', 'breb', 'transferencia', 'cortesia', 'puerta']; // puerta = se le guardó el precio y paga el día de la fiesta
 export const ORDER_STATUSES = ['pending_payment', 'in_review', 'paid', 'rejected', 'expired', 'cancelled', 'conflict'];
 export const TICKET_KINDS = ['general', 'room', 'cortesia'];
 export const PHASES = ['preventa', 'general'];

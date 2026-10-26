@@ -33,7 +33,7 @@ export function doorRouter() {
   r.post('/checkin', validate({
     body: z.object({
       ticketId: objectId, vehicle: vehicle.nullish(), helmet: helmetIn.nullish(),
-      paymentMethod: z.enum(POS_METHODS).optional(), notes: optText(300),
+      paymentMethod: z.enum(POS_METHODS).optional(), notes: optText(300), collect: z.boolean().optional(),
     }),
   }), async (req, res) => res.status(201).json(await checkIn(req.valid.body, req.user)));
 
