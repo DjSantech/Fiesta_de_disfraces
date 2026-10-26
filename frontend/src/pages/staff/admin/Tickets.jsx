@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import clsx from 'clsx';
-import { ChevronRight, SearchX, Ticket } from 'lucide-react';
-import { Badge, Button, EmptyState, PageSpinner, Select, Spinner, Tabs } from '../../../components/ui';
+import { ChevronRight, Plus, QrCode, SearchX, Ticket } from 'lucide-react';
+import { Badge, Button, EmptyState, Modal, PageSpinner, Select, Spinner, Tabs } from '../../../components/ui';
 import { staffApi } from '../../../lib/api';
 import { useFetch } from '../../../lib/useFetch';
 import { formatNumber, formatTime } from '../../../lib/format';
@@ -14,6 +14,8 @@ import ExportMenu from '../../../components/staff/admin/ExportMenu';
 import CopyButton from '../../../components/staff/admin/CopyButton';
 import TicketModal, { ticketKindText } from '../../../components/staff/admin/TicketModal';
 import OrderDetailModal from '../../../components/staff/admin/OrderDetailModal';
+import ManualSaleModal from '../../../components/staff/admin/ManualSaleModal';
+import TicketQrCard from '../../../components/staff/admin/TicketQrCard';
 import { WhatsAppButton } from '../../../components/staff/admin/Contact';
 import { useSearchBox, useUrlFilters } from '../../../components/staff/admin/hooks';
 import { formatPhone, normalizeSearch, ticketUrl, ticketWhatsappText, toQuery } from '../../../components/staff/admin/utils';
@@ -54,7 +56,7 @@ function StatusCell({ t }) {
   );
 }
 
-function TicketsTable({ items, onOpen }) {
+function TicketsTable({ items, onOpen, onQr }) {
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-white/[0.08] bg-crypt/60 lg:block">
       <table className="w-full text-left text-sm">
@@ -99,7 +101,11 @@ function TicketsTable({ items, onOpen }) {
                 <StatusCell t={t} />
               </td>
               <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-1">
+                <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="sm" onClick={() => onQr(t)} aria-label={`Generar QR de ${t.holderName}`}>
+                    <QrCode className="h-4 w-4" />
+                    QR
+                  </Button>
                   <CopyButton iconOnly variant="ghost" text={ticketUrl(t.token)} label="Copiar enlace de la entrada" />
                   <WhatsAppButton iconOnly variant="ghost" phone={t.order?.buyer?.phone} text={ticketWhatsappText(t)} label="Enviar por WhatsApp al comprador" />
                   <span className="flex h-11 w-8 items-center justify-center text-smoke" aria-hidden="true">
@@ -115,7 +121,7 @@ function TicketsTable({ items, onOpen }) {
   );
 }
 
-function TicketCard({ t, onOpen }) {
+function TicketCard({ t, onOpen, onQr }) {
   return (
     <li className="relative rounded-2xl border border-white/[0.08] bg-crypt/80 p-4 transition hover:border-white/15">
       <button
@@ -147,6 +153,10 @@ function TicketCard({ t, onOpen }) {
               : formatPhone(t.order?.buyer?.phone)}
         </p>
         <div className="relative z-10 -my-1 -mr-2 flex shrink-0 items-center">
+          <Button variant="ghost" size="sm" onClick={() => onQr(t)} aria-label={`Generar QR de ${t.holderName}`}>
+            <QrCode className="h-4 w-4" />
+            QR
+          </Button>
           <CopyButton iconOnly variant="ghost" text={ticketUrl(t.token)} label="Copiar enlace de la entrada" />
           <WhatsAppButton iconOnly variant="ghost" phone={t.order?.buyer?.phone} text={ticketWhatsappText(t)} label="Enviar por WhatsApp al comprador" />
         </div>
@@ -165,6 +175,8 @@ export default function Tickets() {
   const [search, setSearch] = useSearchBox(q, (value) => updateParams({ q: value }));
   const [selected, setSelected] = useState(null);
   const [orderId, setOrderId] = useState(null);
+  const [qrTicket, setQrTicket] = useState(null);
+  const [manualOpen, setManualOpen] = useState(false);
 
   const query = toQuery({ status: status === 'all' ? '' : status, kind, q, page, limit: PAGE_SIZE });
   const list = useFetch((signal) => staffApi(`/api/admin/tickets?${query}`, { signal }), [query], { interval: 60000 });
@@ -193,7 +205,15 @@ export default function Tickets() {
       <PageHeader
         title="Entradas"
         description="Cada QR emitido. Renombra acompañantes de habitación, anula o restaura entradas y reenvía los enlaces."
-        actions={<ExportMenu options={[{ dataset: 'tickets', slug: 'entradas', label: 'Entradas' }]} label="Exportar CSV" />}
+        actions={
+          <>
+            <Button onClick={() => setManualOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Crear entrada (precio libre + QR)
+            </Button>
+            <ExportMenu options={[{ dataset: 'tickets', slug: 'entradas', label: 'Entradas' }]} label="Exportar CSV" />
+          </>
+        }
       />
 
       <div className="flex flex-col gap-3">
@@ -252,10 +272,10 @@ export default function Tickets() {
           )
         ) : (
           <div className={clsx('transition-opacity', list.loading && 'opacity-60')}>
-            <TicketsTable items={items} onOpen={setSelected} />
+            <TicketsTable items={items} onOpen={setSelected} onQr={setQrTicket} />
             <ul className="flex flex-col gap-2.5 lg:hidden">
               {items.map((t) => (
-                <TicketCard key={t.id} t={t} onOpen={setSelected} />
+                <TicketCard key={t.id} t={t} onOpen={setSelected} onQr={setQrTicket} />
               ))}
             </ul>
             <Pagination page={page} limit={PAGE_SIZE} total={total} onChange={(p) => updateParams({ pagina: p })} />
@@ -275,6 +295,12 @@ export default function Tickets() {
           }}
         />
       )}
+      {qrTicket && (
+        <Modal open onClose={() => setQrTicket(null)} title={`QR de ${qrTicket.holderName}`} description="Descárgalo o mándalo por WhatsApp." size="sm">
+          <TicketQrCard ticket={qrTicket} buyer={qrTicket.order?.buyer} className="mx-auto w-full max-w-sm" />
+        </Modal>
+      )}
+      {manualOpen && <ManualSaleModal onClose={() => setManualOpen(false)} onCreated={() => list.reload({ silent: true })} />}
       {orderId && <OrderDetailModal orderId={orderId} onClose={() => setOrderId(null)} onChanged={() => list.reload({ silent: true })} />}
     </div>
   );
