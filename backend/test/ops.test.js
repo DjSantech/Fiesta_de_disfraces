@@ -214,3 +214,17 @@ test('editar el valor de una venta manual: queda en auditoría y cuadra el resum
   r = await api.put(`/api/admin/orders/${r.body.order.id}/amount`).set('Authorization', admin).send({ amount: 25000 });
   assert.equal(r.body.order.balanceDue, 25000);
 });
+
+test('precio guardado que ya pagó antes: se marca pagada y la puerta no cobra', async () => {
+  let r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'mujer', roomNumber: null, buyer: buyer({ cedula: '1058932771' }), companions: [], amount: 20000, manualMethod: 'puerta', notes: '' });
+  const { id, tickets } = r.body.order;
+  r = await api.post(`/api/admin/orders/${id}/settle`).set('Authorization', admin).send({ manualMethod: 'nequi' });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.order.balanceDue, 0);
+  assert.equal(r.body.order.manualMethod, 'nequi');
+  assert.equal((await api.get('/api/admin/dashboard').set('Authorization', admin)).body.income.tickets, 20000);
+  r = await api.post('/api/door/scan').set('Authorization', puerta).send({ value: tickets[0].token });
+  assert.equal(r.body.ticket.amountDue, 0);
+  assert.equal((await api.post(`/api/admin/orders/${id}/settle`).set('Authorization', admin).send({ manualMethod: 'nequi' })).status, 409);
+});

@@ -162,6 +162,7 @@ export function toOptions(labelMap) {
 export const AUDIT_ACTION_LABEL = {
   'order.delete': 'Compra eliminada',
   'order.amount': 'Valor corregido',
+  'order.settle': 'Pago anticipado registrado',
   'ticket.void': 'Entrada anulada',
   'ticket.restore': 'Entrada restaurada',
   'guest.delete': 'Invitado eliminado',
@@ -174,6 +175,7 @@ export const AUDIT_ACTION_LABEL = {
 export const AUDIT_ACTION_TONE = {
   'order.delete': 'red',
   'order.amount': 'amber',
+  'order.settle': 'green',
   'ticket.void': 'amber',
   'ticket.restore': 'green',
   'guest.delete': 'red',

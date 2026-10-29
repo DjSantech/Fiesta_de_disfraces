@@ -159,6 +159,38 @@ function Line({ label, value, className }) {
   );
 }
 
+/** "Paga el día de la fiesta" pero ya pagó: se marca pagada y la puerta no le cobra. */
+function SettleDue({ order, onSaved }) {
+  const toast = useToast();
+  const [busy, setBusy] = useState(null);
+  if (!(order.balanceDue > 0)) return null;
+  const settle = async (manualMethod) => {
+    setBusy(manualMethod);
+    try {
+      const res = await staffApi(`/api/admin/orders/${order.id}/settle`, { method: 'POST', body: { manualMethod } });
+      toast.success('Marcada como pagada: en la puerta ya no le cobran.');
+      onSaved?.(res.order);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <div className="mt-3 rounded-xl border border-gold/30 bg-gold/10 p-3">
+      <p className="text-sm font-semibold text-gold">¿Ya te pagó? Márcala como pagada:</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {[['efectivo', 'Efectivo'], ['nequi', 'Nequi'], ['breb', 'Bre-B'], ['transferencia', 'Transferencia']].map(([m, label]) => (
+          <Button key={m} size="sm" variant="secondary" loading={busy === m} disabled={!!busy} onClick={() => settle(m)}>
+            <Check className="h-4 w-4" />
+            {label}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Corregir el valor de una venta manual (queda en auditoría). */
 function EditAmount({ order, onSaved }) {
   const toast = useToast();
@@ -234,6 +266,7 @@ function AmountSummary({ order, onSaved }) {
           {differs && <Line label={courtesy ? 'Cortesía (sin cobro)' : 'Valor registrado a mano'} value={formatCOP(order.amount)} />}
         </dl>
       )}
+      <SettleDue order={order} onSaved={onSaved} />
       <EditAmount key={order.amount} order={order} onSaved={onSaved} />
     </div>
   );

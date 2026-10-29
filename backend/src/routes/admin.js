@@ -160,6 +160,20 @@ export function adminRouter() {
     res.json({ order: await presentOrder(o._id, 'admin') });
   });
 
+  // Le guardaste el precio y ya te pagó antes de la fiesta: deja de deber y la puerta no le cobra.
+  r.post('/orders/:id/settle', validate({ params: idParam, body: z.object({ manualMethod: z.enum(['efectivo', 'nequi', 'breb', 'transferencia']) }) }), async (req, res) => {
+    const o = await Order.findById(req.valid.params.id).lean();
+    if (!o) throw notFound('Esa compra no existe.');
+    if (!(o.balanceDue > 0)) throw new AppError(409, 'INVALID_STATE', 'Esta compra no tiene nada pendiente por pagar.');
+    await logAudit(req.user, {
+      action: 'order.settle', target: { type: 'order', id: o._id, summary: { buyerName: o.buyer?.name ?? '', amount: o.balanceDue } },
+      meta: { amount: o.balanceDue, method: req.valid.body.manualMethod },
+    });
+    const r2 = await Order.updateOne({ _id: o._id, balanceDue: { $gt: 0 } }, { $set: { balanceDue: 0, manualMethod: req.valid.body.manualMethod, paidAt: new Date() } });
+    if (!r2.modifiedCount) throw new AppError(409, 'INVALID_STATE', 'Ya se había cobrado.');
+    res.json({ order: await presentOrder(o._id, 'admin') });
+  });
+
   r.post('/orders/:id/approve', validate({ params: idParam, body: z.object({ notes: optText(500) }) }), async (req, res) => {
     const id = await approveOrder(req.valid.params.id, req.user, req.valid.body.notes);
     res.json({ order: await presentOrder(id, 'admin') });
