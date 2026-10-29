@@ -137,6 +137,29 @@ export function adminRouter() {
     res.json({ deleted, audit: { id: auditId } });
   });
 
+  // Corregir el valor de una venta manual (p. ej. se registró a $30.000 y era a $25.000). Queda en auditoría.
+  r.put('/orders/:id/amount', validate({ params: idParam, body: z.object({ amount: money, reason: optText(200) }) }), async (req, res) => {
+    const o = await Order.findById(req.valid.params.id).lean();
+    if (!o) throw notFound('Esa compra no existe.');
+    if (o.paymentMethod !== 'manual' || o.status !== 'paid') throw new AppError(409, 'INVALID_STATE', 'Solo se puede editar el valor de una venta manual pagada.');
+    if (o.manualMethod === 'cortesia') throw new AppError(409, 'INVALID_STATE', 'Una cortesía no tiene valor que editar.');
+    if (o.doorCollected?.amount) throw new AppError(409, 'INVALID_STATE', 'Ya se cobró en la puerta: corrígelo en la caja de portería.');
+    const { amount } = req.valid.body;
+    const base = o.breakdown?.base ?? amount;
+    const discount = Math.max(0, base - amount);
+    const set = {
+      amount,
+      'breakdown.total': amount, 'breakdown.discount': discount, 'breakdown.discountPercent': base > 0 ? Math.round((discount * 100) / base) : 0,
+    };
+    if (o.balanceDue > 0) set.balanceDue = amount; // "paga el día de la fiesta": lo que se cobra en la puerta
+    await logAudit(req.user, {
+      action: 'order.amount', target: { type: 'order', id: o._id, summary: { buyerName: o.buyer?.name ?? '', from: o.amount, to: amount } },
+      reason: req.valid.body.reason || null, meta: { from: o.amount, to: amount },
+    });
+    await Order.updateOne({ _id: o._id }, { $set: set });
+    res.json({ order: await presentOrder(o._id, 'admin') });
+  });
+
   r.post('/orders/:id/approve', validate({ params: idParam, body: z.object({ notes: optText(500) }) }), async (req, res) => {
     const id = await approveOrder(req.valid.params.id, req.user, req.valid.body.notes);
     res.json({ order: await presentOrder(id, 'admin') });

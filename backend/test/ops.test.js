@@ -195,3 +195,22 @@ test('precio guardado: paga el día de la fiesta, la puerta lo cobra una vez', a
   d = (await api.get('/api/admin/dashboard').set('Authorization', admin)).body;
   assert.equal(d.income.tickets, 20000);
 });
+
+test('editar el valor de una venta manual: queda en auditoría y cuadra el resumen', async () => {
+  let r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'hombre', roomNumber: null, buyer: buyer({ cedula: '1088666111' }), companions: [], amount: 30000, manualMethod: 'efectivo', notes: '' });
+  const id = r.body.order.id;
+  r = await api.put(`/api/admin/orders/${id}/amount`).set('Authorization', admin).send({ amount: 25000 });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.order.amount, 25000);
+  assert.equal(r.body.order.breakdown.total, 25000);
+  assert.equal((await api.get('/api/admin/dashboard').set('Authorization', admin)).body.income.tickets, 25000);
+  const audit = (await api.get('/api/admin/audit').set('Authorization', admin)).body.items.find((a) => a.action === 'order.amount');
+  assert.deepEqual(audit.meta, { from: 30000, to: 25000 });
+  assert.equal((await api.put(`/api/admin/orders/${id}/amount`).set('Authorization', puerta).send({ amount: 1 })).status, 403);
+  // Precio guardado: también cambia lo que se cobra en la puerta.
+  r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'hombre', roomNumber: null, buyer: buyer({ cedula: '1088666222' }), companions: [], amount: 30000, manualMethod: 'puerta', notes: '' });
+  r = await api.put(`/api/admin/orders/${r.body.order.id}/amount`).set('Authorization', admin).send({ amount: 25000 });
+  assert.equal(r.body.order.balanceDue, 25000);
+});

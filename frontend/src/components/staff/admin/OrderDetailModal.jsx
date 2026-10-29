@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import {
   Ban,
   Check,
+  Pencil,
   QrCode,
   CircleCheck,
   CircleX,
@@ -40,6 +41,7 @@ import CopyButton from './CopyButton';
 import ErrorState from './ErrorState';
 import ReceiptImage from './ReceiptImage';
 import TicketQrCard from './TicketQrCard';
+import { MoneyInput } from './NumberInput';
 import { DetailGrid, DetailItem, DetailSection } from './Detail';
 import { InstagramLink, PhoneLink, WhatsAppButton } from './Contact';
 import { orderUrl, orderWhatsappText, plural, ticketUrl } from './utils';
@@ -157,7 +159,46 @@ function Line({ label, value, className }) {
   );
 }
 
-function AmountSummary({ order }) {
+/** Corregir el valor de una venta manual (queda en auditoría). */
+function EditAmount({ order, onSaved }) {
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(order.amount);
+  const [busy, setBusy] = useState(false);
+  const editable = order.paymentMethod === 'manual' && order.status === 'paid' && order.manualMethod !== 'cortesia' && !order.doorCollected;
+  if (!editable) return null;
+  if (!open) {
+    return (
+      <Button variant="ghost" size="sm" onClick={() => { setValue(order.amount); setOpen(true); }} className="mt-3">
+        <Pencil className="h-4 w-4" />
+        Editar valor
+      </Button>
+    );
+  }
+  const save = async () => {
+    if (value === null || value === undefined) return;
+    setBusy(true);
+    try {
+      const res = await staffApi(`/api/admin/orders/${order.id}/amount`, { method: 'PUT', body: { amount: value } });
+      toast.success(`Valor corregido a ${formatCOP(res.order.amount)}.`);
+      setOpen(false);
+      onSaved?.(res.order);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-white/[0.06] pt-3">
+      <MoneyInput label={order.balanceDue > 0 ? 'Nuevo valor a cobrar en la puerta' : 'Nuevo valor'} value={value} onChange={setValue} className="min-w-40 flex-1" autoFocus />
+      <Button onClick={save} loading={busy} disabled={value === null || value === order.amount}>Guardar</Button>
+      <Button variant="ghost" onClick={() => setOpen(false)} disabled={busy}>Cancelar</Button>
+    </div>
+  );
+}
+
+function AmountSummary({ order, onSaved }) {
   const b = order.breakdown || {};
   const isRoom = order.kind === 'room';
   const baseLabel = isRoom
@@ -193,6 +234,7 @@ function AmountSummary({ order }) {
           {differs && <Line label={courtesy ? 'Cortesía (sin cobro)' : 'Valor registrado a mano'} value={formatCOP(order.amount)} />}
         </dl>
       )}
+      <EditAmount key={order.amount} order={order} onSaved={onSaved} />
     </div>
   );
 }
@@ -319,7 +361,13 @@ export default function OrderDetailModal({ orderId, initialOrder = null, onClose
                 {loading && <span className="text-xs text-smoke">Actualizando…</span>}
               </div>
               <StatusBanner order={order} />
-              <AmountSummary order={order} />
+              <AmountSummary
+                order={order}
+                onSaved={(o) => {
+                  setData({ order: o });
+                  onChanged?.(o);
+                }}
+              />
             </div>
 
             {hasReceipt && (

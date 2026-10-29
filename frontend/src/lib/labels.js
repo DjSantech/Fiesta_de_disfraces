@@ -161,6 +161,7 @@ export function toOptions(labelMap) {
 
 export const AUDIT_ACTION_LABEL = {
   'order.delete': 'Compra eliminada',
+  'order.amount': 'Valor corregido',
   'ticket.void': 'Entrada anulada',
   'ticket.restore': 'Entrada restaurada',
   'guest.delete': 'Invitado eliminado',
@@ -172,6 +173,7 @@ export const AUDIT_ACTION_LABEL = {
 /** Tono de Badge por acción de auditoría */
 export const AUDIT_ACTION_TONE = {
   'order.delete': 'red',
+  'order.amount': 'amber',
   'ticket.void': 'amber',
   'ticket.restore': 'green',
   'guest.delete': 'red',
