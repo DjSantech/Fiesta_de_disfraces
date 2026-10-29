@@ -157,8 +157,10 @@ function VisitorsCard() {
 }
 
 function CapacityCard({ t }) {
-  const left = Math.max(0, t.capacity - t.sold);
-  const over = Math.max(0, t.sold - t.capacity);
+  // Número grande y meta: solo las que dieron plata. Cortesías, invitados gratis y precios guardados sin pagar van aparte.
+  const paid = t.paid ?? t.sold;
+  const left = Math.max(0, t.capacity - paid);
+  const over = Math.max(0, paid - t.capacity);
   return (
     <Card className="flex flex-col gap-5 sm:p-6">
       <SectionTitle icon={Ticket} action={<span className="text-xs text-fog">Meta: <strong className="text-bone">{formatNumber(t.capacity)}</strong> · no limita ventas</span>}>
@@ -166,7 +168,7 @@ function CapacityCard({ t }) {
       </SectionTitle>
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
         <p className="font-display text-6xl leading-none tracking-wide tabular-nums text-bone sm:text-7xl">
-          {formatNumber(t.sold)}
+          {formatNumber(paid)}
           <span className="text-3xl text-smoke sm:text-4xl"> / {formatNumber(t.capacity)}</span>
         </p>
         <div className="pb-1 text-right text-sm text-fog">
@@ -180,9 +182,10 @@ function CapacityCard({ t }) {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <ProgressBar value={t.sold} max={t.capacity} size="lg" tone={over > 0 ? 'green' : 'red'} markers glow label="Entradas vendidas frente a la meta" />
+        <ProgressBar value={paid} max={t.capacity} size="lg" tone={over > 0 ? 'green' : 'red'} markers glow label="Entradas vendidas frente a la meta" />
         <p className="text-xs text-smoke">
-          Generales y cortesías (válidas o ya usadas).
+          Solo entradas pagadas (con plata). En total hay <strong className="text-bone">{formatNumber(t.sold)}</strong> personas con entrada
+          {t.free > 0 && ` (${formatNumber(t.free)} sin pago: cortesías, invitados gratis o que pagan en la puerta)`}.
           {t.pendingReview > 0 && ` Hay ${t.pendingReview} en revisión.`} Las habitaciones van aparte. La meta no limita ventas ni ingresos.
         </p>
       </div>

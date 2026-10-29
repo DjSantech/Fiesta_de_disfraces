@@ -228,3 +228,15 @@ test('precio guardado que ya pagó antes: se marca pagada y la puerta no cobra',
   assert.equal(r.body.ticket.amountDue, 0);
   assert.equal((await api.post(`/api/admin/orders/${id}/settle`).set('Authorization', admin).send({ manualMethod: 'nequi' })).status, 409);
 });
+
+test('resumen: el número grande cuenta solo entradas que dieron plata', async () => {
+  const sale = (cedula, manualMethod, amount, gender = 'mujer') => api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender, roomNumber: null, buyer: buyer({ cedula }), companions: [], amount, manualMethod, notes: '' });
+  await sale('1088100001', 'efectivo', 20000);
+  await sale('1088100002', 'cortesia', 0);
+  await sale('1088100003', 'puerta', 30000, 'hombre');
+  const t = (await api.get('/api/admin/dashboard').set('Authorization', admin)).body.tickets;
+  assert.equal(t.paid, 1);
+  assert.equal(t.sold, 3);
+  assert.equal(t.free, 2);
+});

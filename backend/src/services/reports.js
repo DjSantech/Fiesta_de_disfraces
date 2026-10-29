@@ -22,7 +22,7 @@ async function doorTotals() {
 export async function dashboard() {
   const settings = await getSettings();
   const active = { status: { $in: ['valid', 'used'] } };
-  const [byKind, byGender, byPhase, guests, orderCounts, income, rooms, door, bar, exp] = await Promise.all([
+  const [byKind, byGender, byPhase, guests, orderCounts, income, rooms, door, bar, exp, paidRows] = await Promise.all([
     Ticket.aggregate([{ $match: active }, { $group: { _id: '$kind', n: { $sum: 1 } } }]),
     Ticket.aggregate([{ $match: { ...active, kind: 'general' } }, { $group: { _id: '$gender', n: { $sum: 1 } } }]),
     Ticket.aggregate([{ $match: { ...active, kind: 'general' } }, { $group: { _id: '$phase', n: { $sum: 1 } } }]),
@@ -37,7 +37,16 @@ export async function dashboard() {
     doorTotals(),
     Sale.aggregate([{ $match: { voided: false } }, { $group: { _id: null, sum: { $sum: '$total' } } }]),
     Expense.aggregate([{ $group: { _id: '$paid', sum: { $sum: '$amount' } } }]),
+    // Entradas que ya dieron plata: generales de compras con valor > 0 y sin deuda pendiente (sin cortesías ni invitados gratis).
+    Ticket.aggregate([
+      { $match: { ...active, kind: 'general' } },
+      { $lookup: { from: 'orders', localField: 'orderId', foreignField: '_id', as: 'o', pipeline: [{ $project: { amount: 1, balanceDue: 1 } }] } },
+      { $unwind: '$o' },
+      { $match: { 'o.amount': { $gt: 0 }, $or: [{ 'o.balanceDue': { $exists: false } }, { 'o.balanceDue': { $lte: 0 } }] } },
+      { $count: 'n' },
+    ]),
   ]);
+  const paidTickets = paidRows[0]?.n || 0;
   const kinds = countBy(byKind);
   const oc = (s, k) => orderCounts.filter((r) => r._id.s === s && (!k || r._id.k === k)).reduce((a, r) => a + r.n, 0);
   const sumIncome = (pred) => income.filter((r) => pred(r._id)).reduce((a, r) => a + r.sum, 0);
@@ -54,7 +63,8 @@ export async function dashboard() {
   return {
     tickets: {
       sold: (kinds.general || 0) + (kinds.cortesia || 0), capacity: settings.capacity,
-      goalReached: (kinds.general || 0) + (kinds.cortesia || 0) >= settings.capacity,
+      paid: paidTickets, free: (kinds.general || 0) + (kinds.cortesia || 0) - paidTickets, // paid = las que dieron plata (número grande)
+      goalReached: paidTickets >= settings.capacity,
       byGender: { mujer: g.mujer || 0, hombre: g.hombre || 0 }, byPhase: { preventa: p.preventa || 0, general: p.general || 0 },
       guests, courtesy: kinds.cortesia || 0, pendingReview: oc('in_review', 'ticket'), pendingPayment: oc('pending_payment', 'ticket'),
     },
