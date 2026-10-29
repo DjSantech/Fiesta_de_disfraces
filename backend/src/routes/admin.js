@@ -174,6 +174,23 @@ export function adminRouter() {
     res.json({ order: await presentOrder(o._id, 'admin') });
   });
 
+  // Se marcó pagada por error: vuelve a "paga el día de la fiesta" y la puerta la cobra.
+  r.post('/orders/:id/unsettle', validate({ params: idParam }), async (req, res) => {
+    const o = await Order.findById(req.valid.params.id).lean();
+    if (!o) throw notFound('Esa compra no existe.');
+    if (o.paymentMethod !== 'manual' || o.status !== 'paid' || o.manualMethod === 'cortesia' || o.amount <= 0) {
+      throw new AppError(409, 'INVALID_STATE', 'Solo se puede pasar a "paga en la puerta" una venta manual pagada.');
+    }
+    if (o.balanceDue > 0) throw new AppError(409, 'INVALID_STATE', 'Esta compra ya está como pendiente de pago.');
+    if (o.doorCollected?.amount) throw new AppError(409, 'INVALID_STATE', 'Ya se cobró en la puerta: no se puede volver a dejar pendiente.');
+    await logAudit(req.user, {
+      action: 'order.unsettle', target: { type: 'order', id: o._id, summary: { buyerName: o.buyer?.name ?? '', amount: o.amount } },
+      meta: { amount: o.amount, previousMethod: o.manualMethod ?? null },
+    });
+    await Order.updateOne({ _id: o._id, balanceDue: { $in: [0, null] } }, { $set: { balanceDue: o.amount, manualMethod: 'puerta', paidAt: null } });
+    res.json({ order: await presentOrder(o._id, 'admin') });
+  });
+
   r.post('/orders/:id/approve', validate({ params: idParam, body: z.object({ notes: optText(500) }) }), async (req, res) => {
     const id = await approveOrder(req.valid.params.id, req.user, req.valid.body.notes);
     res.json({ order: await presentOrder(id, 'admin') });

@@ -4,6 +4,7 @@ import {
   Ban,
   Check,
   Pencil,
+  Undo2,
   QrCode,
   CircleCheck,
   CircleX,
@@ -191,6 +192,47 @@ function SettleDue({ order, onSaved }) {
   );
 }
 
+/** Se marcó pagada por error: vuelve a deber y la puerta la cobra. */
+function Unsettle({ order, onSaved }) {
+  const toast = useToast();
+  const [ask, setAsk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const can = order.paymentMethod === 'manual' && order.status === 'paid' && order.manualMethod !== 'cortesia' && order.amount > 0 && !(order.balanceDue > 0) && !order.doorCollected;
+  if (!can) return null;
+  const run = async () => {
+    setBusy(true);
+    try {
+      const res = await staffApi(`/api/admin/orders/${order.id}/unsettle`, { method: 'POST', body: {} });
+      toast.success(`Listo: debe ${formatCOP(res.order.balanceDue)} y se cobra en la puerta.`);
+      setAsk(false);
+      onSaved?.(res.order);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (!ask) {
+    return (
+      <Button variant="ghost" size="sm" onClick={() => setAsk(true)} className="mt-3">
+        <Undo2 className="h-4 w-4" />
+        No ha pagado · cobrar en la puerta
+      </Button>
+    );
+  }
+  return (
+    <div className="mt-3 rounded-xl border border-gold/30 bg-gold/10 p-3">
+      <p className="text-sm text-bone">
+        Quedará debiendo <strong>{formatCOP(order.amount)}</strong> y en la puerta se le cobra. El QR sigue siendo el mismo.
+      </p>
+      <div className="mt-2 flex gap-2">
+        <Button size="sm" loading={busy} onClick={run}>Sí, no ha pagado</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={() => setAsk(false)}>Cancelar</Button>
+      </div>
+    </div>
+  );
+}
+
 /** Corregir el valor de una venta manual (queda en auditoría). */
 function EditAmount({ order, onSaved }) {
   const toast = useToast();
@@ -267,6 +309,7 @@ function AmountSummary({ order, onSaved }) {
         </dl>
       )}
       <SettleDue order={order} onSaved={onSaved} />
+      <Unsettle order={order} onSaved={onSaved} />
       <EditAmount key={order.amount} order={order} onSaved={onSaved} />
     </div>
   );

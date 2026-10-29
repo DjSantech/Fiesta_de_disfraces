@@ -240,3 +240,17 @@ test('resumen: el número grande cuenta solo entradas que dieron plata', async (
   assert.equal(t.sold, 3);
   assert.equal(t.free, 2);
 });
+
+test('marcada pagada por error: vuelve a pagar en la puerta', async () => {
+  let r = await api.post('/api/admin/orders/manual').set('Authorization', admin)
+    .send({ kind: 'ticket', gender: 'hombre', roomNumber: null, buyer: buyer({ cedula: '1088200001' }), companions: [], amount: 30000, manualMethod: 'efectivo', notes: '' });
+  const { id, tickets } = r.body.order;
+  r = await api.post(`/api/admin/orders/${id}/unsettle`).set('Authorization', admin).send({});
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.order.balanceDue, 30000);
+  assert.equal(r.body.order.manualMethod, 'puerta');
+  assert.equal((await api.get('/api/admin/dashboard').set('Authorization', admin)).body.income.dueAtDoor, 30000);
+  r = await api.post('/api/door/scan').set('Authorization', puerta).send({ value: tickets[0].token });
+  assert.equal(r.body.ticket.amountDue, 30000);
+  assert.equal((await api.post(`/api/admin/orders/${id}/unsettle`).set('Authorization', admin).send({})).status, 409);
+});
